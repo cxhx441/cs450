@@ -1003,21 +1003,33 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
-		case 'o':
-		case 'O':
-			NowProjection = ORTHO;
-			break;
-
 		case 'p':
 		case 'P':
-			NowProjection = PERSP;
-			break;
+          if (NowProjection == ORTHO) { NowProjection = PERSP; }
+          else { NowProjection = ORTHO; }
+          break;
 
 		case 'q':
 		case 'Q':
 		case ESCAPE:
-			DoMainMenu( QUIT );	// will not return here
-			break;				// happy compiler
+          DoMainMenu( QUIT );	// will not return here
+          break;				// happy compiler
+
+		case 'a':
+		case 'A':
+          AxesOn ^= 1; // CJH bit flipping with XOR
+          break;
+
+		case 'd':
+		case 'D':
+          DepthCueOn ^= 1; // CJH bit flipping with XOR
+          break;
+
+		case 'r':
+		case 'R':
+          DoMainMenu( RESET ); 
+          break;
+
 
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
