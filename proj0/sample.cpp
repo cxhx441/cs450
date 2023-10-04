@@ -828,7 +828,7 @@ InitLists( )
     colored_sphere_list = glGenLists( 1 );
 	glNewList( colored_sphere_list, GL_COMPILE );
       int NUMSEGS = 100;
-      float RADIUS = .3; 
+      float RADIUS = .28; 
       int ROTATIONS = 8;
       float drotation = 360. / ROTATIONS;
       float dang;
@@ -892,7 +892,7 @@ InitLists( )
 
     small_red_sphere_list = glGenLists( 1 );
     glNewList( small_red_sphere_list, GL_COMPILE );
-      RADIUS = .2; 
+      RADIUS = .18; 
 
       for( int i = 0; i < ROTATIONS/2; i++ )
       {
@@ -1132,7 +1132,7 @@ void
 Reset( )
 {
 	ActiveButton = 0;
-	AxesOn = 1;
+	AxesOn = 0;
 	DebugOn = 0;
 	DepthBufferOn = 1;
 	DepthFightingOn = 0;
@@ -1140,7 +1140,7 @@ Reset( )
 	Scale  = 1.0;
 	ShadowsOn = 0;
 	NowColor = YELLOW;
-	NowProjection = PERSP;
+	NowProjection = ORTHO;
 	Xrot = Yrot = 0.;
 }
 
