@@ -835,8 +835,10 @@ InitLists( )
       float drotation = 360. / ROTATIONS;
       float dang;
       float ang;
-
-      cjh_line_sphere(RADIUS, NUMSEGS, ROTATIONS); 
+      float colors[9] = {1.0, 1.0, 0.0, 
+                         1.0, 0.0, 1.0,
+                         0.0, 1.0, 1.0}; 
+      cjh_line_sphere(RADIUS, NUMSEGS, ROTATIONS, colors); 
       //cjh_line_sphere(radius=.28, num_circle_segs=100, num_rotations=8);
 	glEndList( );
 

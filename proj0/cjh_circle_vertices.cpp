@@ -13,8 +13,9 @@
 #endif
 
 void
-cjh_circle_vertices( float radius, int numsegs, char normal)
+cjh_circle_vertices( float radius, int numsegs, char normal, float color[3])
 {
+  glColor3f( color[0], color[1], color[2]);
   float dang = 2. * M_PI / (float)( numsegs - 1 ); 
   float ang = 0.;
   for( int j = 0; j < numsegs; j++ )
