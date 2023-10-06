@@ -272,6 +272,8 @@ MulArray3(float factor, float a, float b, float c )
 //#include "loadobjfile.cpp"
 //#include "keytime.cpp"
 //#include "glslprogram.cpp"
+#include "cjh_line_sphere.cpp"
+// #include "cjh_circle_vertices.cpp"
 
 
 // main program:
@@ -834,60 +836,8 @@ InitLists( )
       float dang;
       float ang;
 
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 0.1, 1, 1 ); 
-        glRotatef(drotation, 0, 1, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( 0, RADIUS*cos(ang), RADIUS*sin(ang) ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, .1, 1 ); 
-        glRotatef(drotation, 1, 0, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), RADIUS*sin(ang), 0 ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 1, .1 ); 
-        glRotatef(drotation, 0, 0, 1);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), 0, RADIUS*sin(ang)); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
+      cjh_line_sphere(RADIUS, NUMSEGS, ROTATIONS); 
+      //cjh_line_sphere(radius=.28, num_circle_segs=100, num_rotations=8);
 	glEndList( );
 
     small_red_sphere_list = glGenLists( 1 );
