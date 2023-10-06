@@ -169,8 +169,8 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 GLuint  colored_sphere_list;
-GLuint  small_red_sphere_list;
-GLuint  atom_list;
+GLuint  red_sphere_list;
+GLuint  orbits_list;
 int		AxesOn;					// != 0 means to draw the axes
 GLuint	BoxList;				// object display list
 int		DebugOn;				// != 0 means to print debugging info
@@ -444,13 +444,13 @@ Display( )
 
 	glCallList( BoxList );
     glCallList( colored_sphere_list );
-    glCallList( atom_list );
+    glCallList( orbits_list );
     glTranslatef(1, 0, 0);
-    glCallList( small_red_sphere_list );
+    glCallList( red_sphere_list );
     glTranslatef(-1, 1, 0);
-    glCallList( small_red_sphere_list );
+    glCallList( red_sphere_list );
     glTranslatef(0, -1, 1);
-    glCallList( small_red_sphere_list );
+    glCallList( red_sphere_list );
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
@@ -828,108 +828,91 @@ InitLists( )
 	// create the object:
     // SMALL COLORED BALL
     colored_sphere_list = glGenLists( 1 );
-	glNewList( colored_sphere_list, GL_COMPILE );
-      int NUMSEGS = 100;
-      float RADIUS = .28; 
-      int ROTATIONS = 8;
-      float drotation = 360. / ROTATIONS;
-      float dang;
-      float ang;
-      float colors[9] = {1.0, 1.0, 0.0, 
-                         1.0, 0.0, 1.0,
-                         0.0, 1.0, 1.0}; 
-      cjh_line_sphere(RADIUS, NUMSEGS, ROTATIONS, colors); 
-      //cjh_line_sphere(radius=.28, num_circle_segs=100, num_rotations=8);
+      glNewList( colored_sphere_list, GL_COMPILE );
+        float colors[9] = {1.0, 1.0, 0.0, 
+                           1.0, 0.0, 1.0,
+                           0.0, 1.0, 1.0}; 
+        //cjh_line_sphere(RADIUS, NUMSEGS, ROTATIONS, colors); 
+        cjh_line_sphere(.28, 100, 8, colors); 
+      glEndList( );
+
+    red_sphere_list = glGenLists( 1 );
+      glNewList( red_sphere_list, GL_COMPILE );
+        float red_colors[9] = {1.0, 0.0, 0.0, 
+                               1.0, 0.0, 0.0,
+                               1.0, 0.0, 0.0}; 
+        //cjh_line_sphere(RADIUS, NUMSEGS, ROTATIONS, colors); 
+        cjh_line_sphere(.18, 100, 8, red_colors); 
+
+      // for( int i = 0; i < ROTATIONS/2; i++ )
+      // {
+      //   glColor3f( 1, 0, 0 ); 
+      //   glRotatef(drotation, 0, 1, 0);
+      //   if (i == 1){
+      //     continue;
+      //   }
+      //   glBegin( GL_LINE_STRIP );
+      //     dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
+      //     ang = 0.;
+      //     for( int j = 0; j < NUMSEGS; j++ )
+      //     { 
+      //       glVertex3f( 0, RADIUS*cos(ang), RADIUS*sin(ang) ); 
+      //       ang += dang; 
+      //     }
+      //   glEnd( ); 
+      // }
+
+      // for( int i = 0; i < ROTATIONS/2; i++ )
+      // {
+      //   glColor3f( 1, 0, 0 ); 
+      //   glRotatef(drotation, 1, 0, 0);
+      //   if (i == 1){
+      //     continue;
+      //   }
+      //   glBegin( GL_LINE_STRIP );
+      //     dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
+      //     ang = 0.;
+      //     for( int j = 0; j < NUMSEGS; j++ )
+      //     { 
+      //       glVertex3f( RADIUS*cos(ang), RADIUS*sin(ang), 0 ); 
+      //       ang += dang; 
+      //     }
+      //   glEnd( ); 
+      // }
+
+      // for( int i = 0; i < ROTATIONS/2; i++ )
+      // {
+      //   glColor3f( 1, 0, 0 ); 
+      //   glRotatef(drotation, 0, 0, 1);
+      //   if (i == 1){
+      //     continue;
+      //   }
+      //   glBegin( GL_LINE_STRIP );
+      //     dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
+      //     ang = 0.;
+      //     for( int j = 0; j < NUMSEGS; j++ )
+      //     { 
+      //       glVertex3f( RADIUS*cos(ang), 0, RADIUS*sin(ang)); 
+      //       ang += dang; 
+      //     }
+      //   glEnd( ); 
+      // }
 	glEndList( );
 
-    small_red_sphere_list = glGenLists( 1 );
-    glNewList( small_red_sphere_list, GL_COMPILE );
-      RADIUS = .18; 
 
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 0, 0 ); 
-        glRotatef(drotation, 0, 1, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( 0, RADIUS*cos(ang), RADIUS*sin(ang) ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 0, 0 ); 
-        glRotatef(drotation, 1, 0, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), RADIUS*sin(ang), 0 ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 0, 0 ); 
-        glRotatef(drotation, 0, 0, 1);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), 0, RADIUS*sin(ang)); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-	glEndList( );
-
-
-	atom_list = glGenLists( 1 );
-	glNewList( atom_list, GL_COMPILE );
-      RADIUS = 1;
-      glColor3f( 1, 1, 1 ); 
-      glLineWidth( 1. );
-
+	orbits_list = glGenLists( 1 );
+	glNewList( orbits_list, GL_COMPILE );
+        float white_color[3] = {1.0, 1.0, 1.0};
+        glLineWidth( 1. );
+        //cjh_circle_vertices(float radius, int numsegs, char normal, float *color)
       glBegin( GL_LINE_STRIP );
-        dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-        ang = 0.;
-        for( int j = 0; j < NUMSEGS; j++ )
-        { 
-          glVertex3f( 0, RADIUS*cos(ang), RADIUS*sin(ang)); 
-          ang += dang; 
-        }
+        cjh_circle_vertices(1, 100, 'x', white_color); 
       glEnd( ); 
       glBegin( GL_LINE_STRIP );
-        for( int j = 0; j < NUMSEGS; j++ )
-        { 
-          glVertex3f( RADIUS*cos(ang), 0, RADIUS*sin(ang)); 
-          ang += dang; 
-        }
+        cjh_circle_vertices(1, 100, 'y', white_color); 
       glEnd( ); 
       glBegin( GL_LINE_STRIP );
-        for( int j = 0; j < NUMSEGS; j++ )
-        { 
-          glVertex3f( RADIUS*cos(ang), RADIUS*sin(ang), 0); 
-          ang += dang; 
-        }
+        cjh_circle_vertices(1, 100, 'z', white_color); 
       glEnd( ); 
     glEndList( );
 
