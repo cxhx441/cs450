@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
-#include <ctype.h>
-
 #include <OpenGL/gl.h>
 
 #ifndef F_PI
@@ -16,7 +11,7 @@ void
 cjh_circle_vertices( float radius, int numsegs, char normal, float color[3])
 {
   glColor3f( color[0], color[1], color[2]);
-  float dang = 2. * M_PI / (float)( numsegs - 1 ); 
+  float dang = F_2_PI / (float)( numsegs - 1 ); 
   float ang = 0.;
   for( int j = 0; j < numsegs; j++ )
   { 

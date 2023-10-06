@@ -1,17 +1,5 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
-
 #include <OpenGL/gl.h>
 #include "cjh_circle_vertices.cpp"
-
-#ifndef F_PI
-#define F_PI		((float)(M_PI))
-#define F_2_PI		((float)(2.f*F_PI))
-#define F_PI_2		((float)(F_PI/2.f))
-#endif
 
 void
 cjh_line_sphere( float radius, int num_circle_segs, int num_rotations, float colors[9])
