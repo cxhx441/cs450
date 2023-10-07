@@ -54,10 +54,6 @@ const int ESCAPE = 0x1b;
 
 const int INIT_WINDOW_SIZE = 600;
 
-// size of the 3d box to be drawn:
-
-const float BOXSIZE = 2.f;
-
 // multiplication factors for input interaction:
 //  (these are known from previous experience)
 
@@ -441,7 +437,7 @@ Display( )
 	glEnable( GL_NORMALIZE );
 
 
-	// draw the box object by calling up its display list:
+	// draw the Atom object by calling up its display list:
 
     glRotatef((GLfloat) -35, (GLfloat) 0.0, (GLfloat) 1.0, (GLfloat) 0.0);
     glRotatef((GLfloat) 45, (GLfloat) 1.0, (GLfloat) 0.0, (GLfloat) 0.0);
@@ -468,7 +464,6 @@ Display( )
 	{
 		glPushMatrix( );
 			glRotatef( 90.f,   0.f, 1.f, 0.f );
-			glCallList( BoxList );
 		glPopMatrix( );
 	}
 #endif
