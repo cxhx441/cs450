@@ -54,6 +54,10 @@ const int ESCAPE = 0x1b;
 
 const int INIT_WINDOW_SIZE = 600;
 
+// size of the 3d box to be drawn:
+
+const float BOXSIZE = 2.f;
+
 // multiplication factors for input interaction:
 //  (these are known from previous experience)
 
@@ -168,10 +172,10 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
+int		AxesOn;					// != 0 means to draw the axes
 GLuint  colored_sphere_list;
 GLuint  red_sphere_list;
 GLuint  orbits_list;
-int		AxesOn;					// != 0 means to draw the axes
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -217,6 +221,7 @@ void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 float			Unit(float [3]);
+
 
 // utility to create an array from 3 separate values:
 
@@ -272,7 +277,6 @@ MulArray3(float factor, float a, float b, float c )
 //#include "keytime.cpp"
 //#include "glslprogram.cpp"
 #include "cjh_line_sphere.cpp"
-// #include "cjh_circle_vertices.cpp"
 
 
 // main program:
@@ -435,26 +439,36 @@ Display( )
 	// since we are using glScalef( ), be sure the normals get unitized:
 
 	glEnable( GL_NORMALIZE );
-    // bilinear? 
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 
 	// draw the box object by calling up its display list:
 
+    glRotatef((GLfloat) -35, (GLfloat) 0.0, (GLfloat) 1.0, (GLfloat) 0.0);
+    glRotatef((GLfloat) 45, (GLfloat) 1.0, (GLfloat) 0.0, (GLfloat) 0.0);
     glCallList( colored_sphere_list );
     glCallList( orbits_list );
+
+    glPushMatrix();
     glTranslatef(1, 0, 0);
     glCallList( red_sphere_list );
-    glTranslatef(-1, 1, 0);
+    glPopMatrix();
+
+    glPushMatrix(); 
+    glTranslatef(0, 1, 0);
     glCallList( red_sphere_list );
-    glTranslatef(0, -1, 1);
+    glPopMatrix(); 
+
+    glPushMatrix();
+    glTranslatef(0, 0, 1);
     glCallList( red_sphere_list );
+    glPopMatrix();
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
 	{
 		glPushMatrix( );
 			glRotatef( 90.f,   0.f, 1.f, 0.f );
+			glCallList( BoxList );
 		glPopMatrix( );
 	}
 #endif
@@ -858,14 +872,13 @@ InitLists( )
       glEnd( ); 
     glEndList( );
 
-
 	// create the axes:
+
 	AxesList = glGenLists( 1 );
 	glNewList( AxesList, GL_COMPILE );
-      glColor3f( 0, 1, 0 ); 
-      glLineWidth( AXES_WIDTH );
-        Axes( 1.5 );
-      glLineWidth( 1. );
+		glLineWidth( AXES_WIDTH );
+			Axes( 1.5 );
+		glLineWidth( 1. );
 	glEndList( );
 }
 
@@ -880,17 +893,21 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+		case 'o':
+		case 'O':
+			NowProjection = ORTHO;
+			break;
+
 		case 'p':
 		case 'P':
-          if (NowProjection == ORTHO) { NowProjection = PERSP; }
-          else { NowProjection = ORTHO; }
-          break;
+			NowProjection = PERSP;
+			break;
 
 		case 'q':
 		case 'Q':
 		case ESCAPE:
-          DoMainMenu( QUIT );	// will not return here
-          break;				// happy compiler
+			DoMainMenu( QUIT );	// will not return here
+			break;				// happy compiler
 
 		case 'a':
 		case 'A':
@@ -906,7 +923,6 @@ Keyboard( unsigned char c, int x, int y )
 		case 'R':
           DoMainMenu( RESET ); 
           break;
-
 
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
@@ -1299,4 +1315,3 @@ Unit( float v[3] )
 	}
 	return dist;
 }
-
