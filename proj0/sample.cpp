@@ -172,7 +172,6 @@ GLuint  colored_sphere_list;
 GLuint  red_sphere_list;
 GLuint  orbits_list;
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	BoxList;				// object display list
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -442,7 +441,6 @@ Display( )
 
 	// draw the box object by calling up its display list:
 
-	glCallList( BoxList );
     glCallList( colored_sphere_list );
     glCallList( orbits_list );
     glTranslatef(1, 0, 0);
@@ -457,7 +455,6 @@ Display( )
 	{
 		glPushMatrix( );
 			glRotatef( 90.f,   0.f, 1.f, 0.f );
-			glCallList( BoxList );
 		glPopMatrix( );
 	}
 #endif
