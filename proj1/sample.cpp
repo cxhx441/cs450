@@ -189,6 +189,8 @@ float	Xrot, Yrot;				// rotation angles in degrees
 // function prototypes:
 
 void	Animate( );
+void    cjh_line_sphere( float , int , int , float []);
+void    cjh_circle_vertices( float , int , char , float []);
 void	Display( );
 void	DoAxesMenu( int );
 void	DoColorMenu( int );
@@ -272,7 +274,6 @@ MulArray3(float factor, float a, float b, float c )
 //#include "loadobjfile.cpp"
 //#include "keytime.cpp"
 //#include "glslprogram.cpp"
-#include "cjh_line_sphere.cpp"
 
 
 // main program:
@@ -1311,3 +1312,66 @@ Unit( float v[3] )
 	}
 	return dist;
 }
+
+void
+cjh_circle_vertices( float radius, int numsegs, char normal, float color[3])
+{
+  glColor3f( color[0], color[1], color[2]);
+  float dang = F_2_PI / (float)( numsegs - 1 ); 
+  float ang = 0.;
+  for( int j = 0; j < numsegs; j++ )
+  { 
+    switch (normal) 
+    {
+      case 'x':
+        glVertex3f( 0, radius*cos(ang), radius*sin(ang) ); 
+        break;
+      case 'y':
+        glVertex3f( radius*cos(ang), 0, radius*sin(ang) ); 
+        break;
+      case 'z':
+        glVertex3f( radius*cos(ang), radius*sin(ang), 0 ); 
+        break;
+    }
+    ang += dang; 
+  }
+}
+
+void
+cjh_line_sphere( float radius, int num_circle_segs, int num_rotations, float colors[9])
+{
+  float drotation = 360. / num_rotations;
+
+  for( int i = 0; i < num_rotations/2; i++ )
+  {
+
+    float color[3] = {colors[0], colors[1], colors[2]};
+    glRotatef(drotation, 1, 0, 0);
+    if (i == 1){ continue; }
+    glBegin( GL_LINE_STRIP );
+      cjh_circle_vertices(radius, num_circle_segs, 'z', color);
+    glEnd( ); 
+  }
+
+  for( int i = 0; i < num_rotations/2; i++ )
+  {
+    float color[3] = {colors[3], colors[4], colors[5]};
+    glRotatef(drotation, 0, 1, 0);
+    if (i == 1){ continue; }
+    glBegin( GL_LINE_STRIP );
+      cjh_circle_vertices(radius, num_circle_segs, 'x', color);
+    glEnd( ); 
+  }
+
+  for( int i = 0; i < num_rotations/2; i++ )
+  {
+    float color[3] = {colors[6], colors[7], colors[8]};
+    glRotatef(drotation, 0, 0, 1);
+    if (i == 1){ continue; }
+    glBegin( GL_LINE_STRIP );
+      cjh_circle_vertices(radius, num_circle_segs, 'y', color);
+    glEnd( ); 
+  }
+}
+
+
