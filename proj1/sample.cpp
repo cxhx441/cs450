@@ -168,11 +168,10 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
-GLuint  colored_sphere_list;
-GLuint  small_red_sphere_list;
-GLuint  atom_list;
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	BoxList;				// object display list
+GLuint  colored_sphere_list;
+GLuint  red_sphere_list;
+GLuint  orbits_list;
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -218,6 +217,7 @@ void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 float			Unit(float [3]);
+
 
 // utility to create an array from 3 separate values:
 
@@ -272,6 +272,7 @@ MulArray3(float factor, float a, float b, float c )
 //#include "loadobjfile.cpp"
 //#include "keytime.cpp"
 //#include "glslprogram.cpp"
+#include "cjh_line_sphere.cpp"
 
 
 // main program:
@@ -434,28 +435,36 @@ Display( )
 	// since we are using glScalef( ), be sure the normals get unitized:
 
 	glEnable( GL_NORMALIZE );
-    // bilinear? 
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// draw the box object by calling up its display list:
 
-	glCallList( BoxList );
+	// draw the Atom object by calling up its display list:
+
+    glRotatef((GLfloat) -35, (GLfloat) 0.0, (GLfloat) 1.0, (GLfloat) 0.0);
+    glRotatef((GLfloat) 45, (GLfloat) 1.0, (GLfloat) 0.0, (GLfloat) 0.0);
     glCallList( colored_sphere_list );
-    glCallList( atom_list );
+    glCallList( orbits_list );
+
+    glPushMatrix();
     glTranslatef(1, 0, 0);
-    glCallList( small_red_sphere_list );
-    glTranslatef(-1, 1, 0);
-    glCallList( small_red_sphere_list );
-    glTranslatef(0, -1, 1);
-    glCallList( small_red_sphere_list );
+    glCallList( red_sphere_list );
+    glPopMatrix();
+
+    glPushMatrix(); 
+    glTranslatef(0, 1, 0);
+    glCallList( red_sphere_list );
+    glPopMatrix(); 
+
+    glPushMatrix();
+    glTranslatef(0, 0, 1);
+    glCallList( red_sphere_list );
+    glPopMatrix();
+
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
 	{
 		glPushMatrix( );
 			glRotatef( 90.f,   0.f, 1.f, 0.f );
-			glCallList( BoxList );
 		glPopMatrix( );
 	}
 #endif
@@ -826,166 +835,43 @@ InitLists( )
 	// create the object:
     // SMALL COLORED BALL
     colored_sphere_list = glGenLists( 1 );
-	glNewList( colored_sphere_list, GL_COMPILE );
-      int NUMSEGS = 100;
-      float RADIUS = .28; 
-      int ROTATIONS = 8;
-      float drotation = 360. / ROTATIONS;
-      float dang;
-      float ang;
+      glNewList( colored_sphere_list, GL_COMPILE );
+        float colors[9] = {1.0, 1.0, 0.0, 
+                           1.0, 0.0, 1.0,
+                           0.0, 1.0, 1.0}; 
+        cjh_line_sphere(.28, 100, 8, colors); 
+      glEndList( );
 
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 0.1, 1, 1 ); 
-        glRotatef(drotation, 0, 1, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( 0, RADIUS*cos(ang), RADIUS*sin(ang) ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, .1, 1 ); 
-        glRotatef(drotation, 1, 0, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), RADIUS*sin(ang), 0 ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 1, .1 ); 
-        glRotatef(drotation, 0, 0, 1);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), 0, RADIUS*sin(ang)); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-	glEndList( );
-
-    small_red_sphere_list = glGenLists( 1 );
-    glNewList( small_red_sphere_list, GL_COMPILE );
-      RADIUS = .18; 
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 0, 0 ); 
-        glRotatef(drotation, 0, 1, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( 0, RADIUS*cos(ang), RADIUS*sin(ang) ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 0, 0 ); 
-        glRotatef(drotation, 1, 0, 0);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), RADIUS*sin(ang), 0 ); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-
-      for( int i = 0; i < ROTATIONS/2; i++ )
-      {
-        glColor3f( 1, 0, 0 ); 
-        glRotatef(drotation, 0, 0, 1);
-        if (i == 1){
-          continue;
-        }
-        glBegin( GL_LINE_STRIP );
-          dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-          ang = 0.;
-          for( int j = 0; j < NUMSEGS; j++ )
-          { 
-            glVertex3f( RADIUS*cos(ang), 0, RADIUS*sin(ang)); 
-            ang += dang; 
-          }
-        glEnd( ); 
-      }
-	glEndList( );
+    red_sphere_list = glGenLists( 1 );
+      glNewList( red_sphere_list, GL_COMPILE );
+        float red_colors[9] = {1.0, 0.0, 0.0, 
+                               1.0, 0.0, 0.0,
+                               1.0, 0.0, 0.0}; 
+        cjh_line_sphere(.18, 100, 8, red_colors); 
+      glEndList( );
 
 
-	atom_list = glGenLists( 1 );
-	glNewList( atom_list, GL_COMPILE );
-      RADIUS = 1;
-      glColor3f( 1, 1, 1 ); 
+    // create orbits
+	orbits_list = glGenLists( 1 );
+	glNewList( orbits_list, GL_COMPILE );
+      float white_color[3] = {1.0, 1.0, 1.0};
       glLineWidth( 1. );
-
+      //cjh_circle_vertices(float radius, int numsegs, char normal, float *color)
       glBegin( GL_LINE_STRIP );
-        dang = 2. * M_PI / (float)( NUMSEGS - 1 ); 
-        ang = 0.;
-        for( int j = 0; j < NUMSEGS; j++ )
-        { 
-          glVertex3f( 0, RADIUS*cos(ang), RADIUS*sin(ang)); 
-          ang += dang; 
-        }
+        cjh_circle_vertices(1, 100, 'x', white_color); 
       glEnd( ); 
       glBegin( GL_LINE_STRIP );
-        for( int j = 0; j < NUMSEGS; j++ )
-        { 
-          glVertex3f( RADIUS*cos(ang), 0, RADIUS*sin(ang)); 
-          ang += dang; 
-        }
+        cjh_circle_vertices(1, 100, 'y', white_color); 
       glEnd( ); 
       glBegin( GL_LINE_STRIP );
-        for( int j = 0; j < NUMSEGS; j++ )
-        { 
-          glVertex3f( RADIUS*cos(ang), RADIUS*sin(ang), 0); 
-          ang += dang; 
-        }
+        cjh_circle_vertices(1, 100, 'z', white_color); 
       glEnd( ); 
     glEndList( );
 
-
 	// create the axes:
+
 	AxesList = glGenLists( 1 );
 	glNewList( AxesList, GL_COMPILE );
-        glColor3f( 0, 1, 0 ); 
 		glLineWidth( AXES_WIDTH );
 			Axes( 1.5 );
 		glLineWidth( 1. );
@@ -1003,17 +889,21 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+		case 'o':
+		case 'O':
+			NowProjection = ORTHO;
+			break;
+
 		case 'p':
 		case 'P':
-          if (NowProjection == ORTHO) { NowProjection = PERSP; }
-          else { NowProjection = ORTHO; }
-          break;
+			NowProjection = PERSP;
+			break;
 
 		case 'q':
 		case 'Q':
 		case ESCAPE:
-          DoMainMenu( QUIT );	// will not return here
-          break;				// happy compiler
+			DoMainMenu( QUIT );	// will not return here
+			break;				// happy compiler
 
 		case 'a':
 		case 'A':
@@ -1029,7 +919,6 @@ Keyboard( unsigned char c, int x, int y )
 		case 'R':
           DoMainMenu( RESET ); 
           break;
-
 
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
@@ -1422,4 +1311,3 @@ Unit( float v[3] )
 	}
 	return dist;
 }
-
