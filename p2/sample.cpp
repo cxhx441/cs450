@@ -169,6 +169,7 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 GLuint  CircleList; 
+GLuint  PonyList; 
 int		AxesOn;					// != 0 means to draw the axes
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
@@ -210,7 +211,7 @@ void	Resize( int, int );
 void	Visibility( int );
 
 void			Axes( float );
-void            cjh_circle_vertices( float radius, int numsegs, char normal, float color[3]);
+void            cjh_circle_vertices( float radius, int numsegs ); 
 void			HsvRgb( float[3], float [3] );
 void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
@@ -434,8 +435,14 @@ Display( )
 
 	glEnable( GL_NORMALIZE );
 
-
-	glCallList( CircleList );
+    glPushMatrix();
+      //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
+      glColor3f(1.0, 0, 0);
+      glCallList( CircleList );
+      glColor3f(1.0, 1.0, 1.0);
+      glLineWidth(3.0);
+      glCallList( PonyList );
+    glPopMatrix();
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
@@ -815,9 +822,30 @@ InitLists( )
 	glNewList( CircleList, GL_COMPILE );
       glBegin( GL_LINE_STRIP );
         float color[3] = {1.0, 0., 0.};
-        cjh_circle_vertices(2.0, 100, 'y', color); 
+        //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
+        cjh_circle_vertices(2.0, 100 ); 
       glEnd( );
 	glEndList( );
+
+    PonyList = glGenLists( 1 ); 
+    glNewList( PonyList, GL_COMPILE ); 
+      // TEMPORARY
+      //body
+      glBegin( GL_LINE_STRIP );
+        glVertex3f(.1, -.1, 0);
+        glVertex3f(.05, 0, 0);
+        glVertex3f(0, 0, 0);
+        glVertex3f(-.05, 0, 0);
+        glVertex3f(-.1, -.1, 0);
+      glEnd( );
+
+      // head
+      glBegin( GL_LINE_STRIP );
+        glVertex3f(.05, 0, 0);
+        glVertex3f(.15, .1, 0);
+        glVertex3f(.2, .05, 0);
+      glEnd( );
+    glEndList();
 
 
 	// create the axes:
@@ -1250,25 +1278,13 @@ Unit( float v[3] )
 }
 
 void
-cjh_circle_vertices( float radius, int numsegs, char normal, float color[3])
+cjh_circle_vertices( float radius, int numsegs )
 {
-  glColor3f( color[0], color[1], color[2]);
   float dang = F_2_PI / (float)( numsegs - 1 ); 
   float ang = 0.;
   for( int j = 0; j < numsegs; j++ )
   { 
-    switch (normal) 
-    {
-      case 'x':
-        glVertex3f( 0, radius*cos(ang), radius*sin(ang) ); 
-        break;
-      case 'y':
-        glVertex3f( radius*cos(ang), 0, radius*sin(ang) ); 
-        break;
-      case 'z':
-        glVertex3f( radius*cos(ang), radius*sin(ang), 0 ); 
-        break;
-    }
+    glVertex3f( radius*cos(ang), 0, radius*sin(ang) ); 
     ang += dang; 
   }
 }
