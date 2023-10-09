@@ -333,6 +333,7 @@ Animate( )
 
 	// for example, if you wanted to spin an object in Display( ), you might call: glRotatef( 360.f*Time,   0., 1., 0. );
 
+
 	// force a call to Display( ) next time it is convenient:
 
 	glutSetWindow( MainWindow );
@@ -394,7 +395,8 @@ Display( )
 
 	// set the eye position, look-at position, and up-vector:
 
-	gluLookAt( 0.f, 0.f, 3.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	// gluLookAt( 0.f, 0.f, 3.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	gluLookAt( 1.f, 1.f, 3.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
 
 	// rotate the scene:
 
@@ -441,7 +443,16 @@ Display( )
       glCallList( CircleList );
       glColor3f(1.0, 1.0, 1.0);
       glLineWidth(3.0);
-      glCallList( PonyList );
+      glPushMatrix();
+        float pitch = -30*sin(6*Time*F_2_PI);
+        float up_down = 0.25 * sin(3*Time*F_2_PI);
+        float rotation = 360.f*Time + 90;
+         glTranslatef(2 * cos(-Time*F_2_PI), 0, 2 * sin(-Time*F_2_PI)); // lap location
+         glTranslatef(0, up_down , 0);
+         glRotatef( rotation,   0., 1., 0. );
+         glRotatef( pitch,   0., 0., 1. );
+        glCallList( PonyList );
+      glPopMatrix();
     glPopMatrix();
 
 #ifdef DEMO_Z_FIGHTING
