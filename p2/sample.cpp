@@ -34,11 +34,11 @@
 //		6. The transformations to be reset
 //		7. The program to quit
 //
-//	Author:			Craig Harris
+//	Author:			Joe Graphics
 
 // title of these windows:
 
-const char *WINDOWTITLE = "OpenGL / GLUT Sample -- Craig Harris";
+const char *WINDOWTITLE = "OpenGL / GLUT Sample -- Joe Graphics";
 const char *GLUITITLE   = "User Interface Window";
 
 // what the glui package defines as true and false:
@@ -289,7 +289,7 @@ main( int argc, char *argv[ ] )
 
 	// setup all the graphics stuff:
 
-	InitGraphics( ); // CJH: This is for stuff that only happens once.
+	InitGraphics( );
 
 	// create the display lists that **will not change**:
 
@@ -298,22 +298,22 @@ main( int argc, char *argv[ ] )
 	// init all the global variables used by Display( ):
 	// this will also post a redisplay
 
-	Reset( ); // CJH reset all default vals.
+	Reset( );
 
 	// setup all the user interface stuff:
 
-	InitMenus( ); 
+	InitMenus( );
 
 	// draw the scene once and wait for some interaction:
 	// (this will never return)
 
 	glutSetWindow( MainWindow );
-	glutMainLoop( ); // CJH infinite loop
+	glutMainLoop( );
 
 	// glutMainLoop( ) never actually returns
 	// the following line is here to make the compiler happy:
 
-	return 0; // CJH this never actually gets excecuted
+	return 0;
 }
 
 
@@ -648,7 +648,7 @@ InitMenus( )
 {
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting InitMenus.\n");
-    
+
 	glutSetWindow( MainWindow );
 
 	int numColors = sizeof( Colors ) / ( 3*sizeof(float) );
@@ -728,7 +728,7 @@ InitGraphics( )
 
 	// open the window and set its title:
 
-	MainWindow = glutCreateWindow( WINDOWTITLE ); // CJH can't put opengl calls above this, nothing will have effect
+	MainWindow = glutCreateWindow( WINDOWTITLE );
 	glutSetWindowTitle( WINDOWTITLE );
 
 	// set the framebuffer clear values:
@@ -782,7 +782,7 @@ InitGraphics( )
 	// we don't need to do this for this program, and really should set the argument to NULL
 	// but, this sets us up nicely for doing animation
 
-	glutIdleFunc( Animate ); // CJH: whenever glut main loop has nothing to do, runs animate
+	glutIdleFunc( Animate );
 
 	// init the glew package (a window must be open to do this):
 
@@ -884,7 +884,7 @@ InitLists( )
 
 
 // the keyboard callback:
-// CJH: Mapping features to keys 
+
 void
 Keyboard( unsigned char c, int x, int y )
 {
