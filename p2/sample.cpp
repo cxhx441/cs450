@@ -439,20 +439,30 @@ Display( )
 
     glPushMatrix();
       //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
-      glColor3f(1.0, 0, 0);
-      glCallList( CircleList );
-      glColor3f(1.0, 1.0, 1.0);
-      glLineWidth(3.0);
+    float num_horses = 2; 
+    glColor3f(1.0, 0, 0);
+    glCallList( CircleList );
+    glColor3f(1.0, 1.0, 1.0);
+    glLineWidth(3.0);
+    for (int h = 0; h < num_horses; h++)
+    {
+      float h_factor = (h+1) / num_horses;
+      float T = Time - h_factor ;
+	//Time = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
+      float pitch = -30 * sin(6*T*F_2_PI);
+      float up_down = 0.25 * sin(3*T*F_2_PI);
+      float rotation = 360.f*T + 90;
+      float x = 2 * cos(-T*F_2_PI);
+      float z = 2 * sin(-T*F_2_PI);
+
       glPushMatrix();
-        float pitch = -30*sin(6*Time*F_2_PI);
-        float up_down = 0.25 * sin(3*Time*F_2_PI);
-        float rotation = 360.f*Time + 90;
-         glTranslatef(2 * cos(-Time*F_2_PI), 0, 2 * sin(-Time*F_2_PI)); // lap location
-         glTranslatef(0, up_down , 0);
-         glRotatef( rotation,   0., 1., 0. );
-         glRotatef( pitch,   0., 0., 1. );
+        // glTranslatef(x, 0, z); // lap location
+        glTranslatef(0, up_down , 0);
+        // glRotatef( rotation,   0., 1., 0. );
+        glRotatef( pitch,   0., 0., 1. );
         glCallList( PonyList );
       glPopMatrix();
+    }
     glPopMatrix();
 
 #ifdef DEMO_Z_FIGHTING
