@@ -210,7 +210,7 @@ void	Resize( int, int );
 void	Visibility( int );
 
 void			Axes( float );
-void            cjh_circle( float radius, int numsegs ); 
+void            cjh_circle_vertices( float radius, int numsegs, char normal, float color[3]);
 void			HsvRgb( float[3], float [3] );
 void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
@@ -814,7 +814,8 @@ InitLists( )
 	CircleList = glGenLists( 1 );
 	glNewList( CircleList, GL_COMPILE );
       glBegin( GL_LINE_STRIP );
-        cjh_circle( 2.0 , 100 );
+        float color[3] = {1.0, 0., 0.};
+        cjh_circle_vertices(2.0, 100, 'y', color); 
       glEnd( );
 	glEndList( );
 
@@ -1249,16 +1250,25 @@ Unit( float v[3] )
 }
 
 void
-cjh_circle( float radius, int numsegs )
+cjh_circle_vertices( float radius, int numsegs, char normal, float color[3])
 {
-  float dang = F_2_PI / (float) (numsegs-1); 
-  float ang = 0;
-  for (int i = 0; i < numsegs; i++)
-  {
-    float x = radius * cos(ang);
-    float y = radius * sin(ang);
-    glVertex3f(x, y, 0);
-    ang += dang;
+  glColor3f( color[0], color[1], color[2]);
+  float dang = F_2_PI / (float)( numsegs - 1 ); 
+  float ang = 0.;
+  for( int j = 0; j < numsegs; j++ )
+  { 
+    switch (normal) 
+    {
+      case 'x':
+        glVertex3f( 0, radius*cos(ang), radius*sin(ang) ); 
+        break;
+      case 'y':
+        glVertex3f( radius*cos(ang), 0, radius*sin(ang) ); 
+        break;
+      case 'z':
+        glVertex3f( radius*cos(ang), radius*sin(ang), 0 ); 
+        break;
+    }
+    ang += dang; 
   }
 }
-
