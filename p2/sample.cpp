@@ -34,11 +34,11 @@
 //		6. The transformations to be reset
 //		7. The program to quit
 //
-//	Author:			Joe Graphics
+//	Author:			Craig Harris
 
 // title of these windows:
 
-const char *WINDOWTITLE = "OpenGL / GLUT Sample -- Joe Graphics";
+const char *WINDOWTITLE = "OpenGL / GLUT Sample -- Craig Harris";
 const char *GLUITITLE   = "User Interface Window";
 
 // what the glui package defines as true and false:
@@ -53,10 +53,6 @@ const int ESCAPE = 0x1b;
 // initial window size:
 
 const int INIT_WINDOW_SIZE = 600;
-
-// size of the 3d box to be drawn:
-
-const float BOXSIZE = 2.f;
 
 // multiplication factors for input interaction:
 //  (these are known from previous experience)
@@ -172,8 +168,8 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
+GLuint  CircleList; 
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	BoxList;				// object display list
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -214,6 +210,7 @@ void	Resize( int, int );
 void	Visibility( int );
 
 void			Axes( float );
+void            cjh_circle( float radius, int numsegs ); 
 void			HsvRgb( float[3], float [3] );
 void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
@@ -438,16 +435,13 @@ Display( )
 	glEnable( GL_NORMALIZE );
 
 
-	// draw the box object by calling up its display list:
-
-	glCallList( BoxList );
+	glCallList( CircleList );
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
 	{
 		glPushMatrix( );
 			glRotatef( 90.f,   0.f, 1.f, 0.f );
-			glCallList( BoxList );
 		glPopMatrix( );
 	}
 #endif
@@ -813,62 +807,15 @@ InitLists( )
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting InitLists.\n");
 
-	float dx = BOXSIZE / 2.f;
-	float dy = BOXSIZE / 2.f;
-	float dz = BOXSIZE / 2.f;
 	glutSetWindow( MainWindow );
 
 	// create the object:
 
-	BoxList = glGenLists( 1 );
-	glNewList( BoxList, GL_COMPILE );
-
-		glBegin( GL_QUADS );
-
-			glColor3f( 1., 0., 0. );
-
-				glNormal3f( 1., 0., 0. );
-					glVertex3f(  dx, -dy,  dz );
-					glVertex3f(  dx, -dy, -dz );
-					glVertex3f(  dx,  dy, -dz );
-					glVertex3f(  dx,  dy,  dz );
-
-				glNormal3f(-1., 0., 0.);
-					glVertex3f( -dx, -dy,  dz);
-					glVertex3f( -dx,  dy,  dz );
-					glVertex3f( -dx,  dy, -dz );
-					glVertex3f( -dx, -dy, -dz );
-
-			glColor3f( 0., 1., 0. );
-
-				glNormal3f(0., 1., 0.);
-					glVertex3f( -dx,  dy,  dz );
-					glVertex3f(  dx,  dy,  dz );
-					glVertex3f(  dx,  dy, -dz );
-					glVertex3f( -dx,  dy, -dz );
-
-				glNormal3f(0., -1., 0.);
-					glVertex3f( -dx, -dy,  dz);
-					glVertex3f( -dx, -dy, -dz );
-					glVertex3f(  dx, -dy, -dz );
-					glVertex3f(  dx, -dy,  dz );
-
-			glColor3f(0., 0., 1.);
-
-				glNormal3f(0., 0., 1.);
-					glVertex3f(-dx, -dy, dz);
-					glVertex3f( dx, -dy, dz);
-					glVertex3f( dx,  dy, dz);
-					glVertex3f(-dx,  dy, dz);
-
-				glNormal3f(0., 0., -1.);
-					glVertex3f(-dx, -dy, -dz);
-					glVertex3f(-dx,  dy, -dz);
-					glVertex3f( dx,  dy, -dz);
-					glVertex3f( dx, -dy, -dz);
-
-		glEnd( );
-
+	CircleList = glGenLists( 1 );
+	glNewList( CircleList, GL_COMPILE );
+      glBegin( GL_LINE_STRIP );
+        cjh_circle( 2.0 , 100 );
+      glEnd( );
 	glEndList( );
 
 
@@ -1300,3 +1247,18 @@ Unit( float v[3] )
 	}
 	return dist;
 }
+
+void
+cjh_circle( float radius, int numsegs )
+{
+  float dang = F_2_PI / (float) (numsegs-1); 
+  float ang = 0;
+  for (int i = 0; i < numsegs; i++)
+  {
+    float x = radius * cos(ang);
+    float y = radius * sin(ang);
+    glVertex3f(x, y, 0);
+    ang += dang;
+  }
+}
+
