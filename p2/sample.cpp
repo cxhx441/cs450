@@ -442,7 +442,7 @@ Display( )
 
     glPushMatrix();
       //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
-    float num_horses = 1; 
+    float num_horses = 20; 
     glColor3f(1.0, 0, 0);
     glCallList( CircleList );
     for (int h = 1; h <= num_horses; h++)
