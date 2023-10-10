@@ -170,6 +170,8 @@ int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 GLuint  CircleList; 
 GLuint  PonyList; 
+GLuint  WireHorseList; 
+GLuint  HorseList; 
 int		AxesOn;					// != 0 means to draw the axes
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
@@ -272,6 +274,7 @@ MulArray3(float factor, float a, float b, float c )
 //#include "loadobjfile.cpp"
 //#include "keytime.cpp"
 //#include "glslprogram.cpp"
+#include "CarouselHorse0.10.550"
 
 
 // main program:
@@ -439,11 +442,9 @@ Display( )
 
     glPushMatrix();
       //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
-    float num_horses = 40; 
+    float num_horses = 20; 
     glColor3f(1.0, 0, 0);
     glCallList( CircleList );
-    glColor3f(1.0, 1.0, 1.0);
-    glLineWidth(3.0);
     for (int h = 1; h <= num_horses; h++)
     {
       float h_factor = h / (float) num_horses;
@@ -460,7 +461,9 @@ Display( )
         glTranslatef(0, up_down , 0);
         glRotatef( rotation,   0., 1., 0. );
         glRotatef( pitch,   0., 0., 1. );
-        glCallList( PonyList );
+        // glCallList( PonyList );
+        glCallList( WireHorseList );
+        glCallList( HorseList );
       glPopMatrix();
     }
     glPopMatrix();
@@ -840,33 +843,92 @@ InitLists( )
 	// create the object:
 
 	CircleList = glGenLists( 1 );
-	glNewList( CircleList, GL_COMPILE );
-      glBegin( GL_LINE_STRIP );
-        float color[3] = {1.0, 0., 0.};
-        //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
-        cjh_circle_vertices(2.0, 100 ); 
-      glEnd( );
-	glEndList( );
+      glNewList( CircleList, GL_COMPILE );
+        glBegin( GL_LINE_STRIP );
+          float color[3] = {1.0, 0., 0.};
+          //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
+          cjh_circle_vertices(2.0, 100 ); 
+        glEnd( );
+      glEndList( );
 
     PonyList = glGenLists( 1 ); 
-    glNewList( PonyList, GL_COMPILE ); 
-      // TEMPORARY
-      //body
-      glBegin( GL_LINE_STRIP );
-        glVertex3f(.1, -.1, 0);
-        glVertex3f(.05, 0, 0);
-        glVertex3f(0, 0, 0);
-        glVertex3f(-.05, 0, 0);
-        glVertex3f(-.1, -.1, 0);
-      glEnd( );
+      glNewList( PonyList, GL_COMPILE ); 
+        // TEMPORARY
+        //body
+        glPushMatrix();
+          glColor3f(1.0, 1.0, 1.0);
+          glLineWidth(3.0);
+          glBegin( GL_LINE_STRIP );
+            glVertex3f(.1, -.1, 0);
+            glVertex3f(.05, 0, 0);
+            glVertex3f(0, 0, 0);
+            glVertex3f(-.05, 0, 0);
+            glVertex3f(-.1, -.1, 0);
+          glEnd( );
 
-      // head
-      glBegin( GL_LINE_STRIP );
-        glVertex3f(.05, 0, 0);
-        glVertex3f(.15, .1, 0);
-        glVertex3f(.2, .05, 0);
-      glEnd( );
-    glEndList();
+          // head
+          glBegin( GL_LINE_STRIP );
+            glVertex3f(.05, 0, 0);
+            glVertex3f(.15, .1, 0);
+            glVertex3f(.2, .05, 0);
+          glEnd( );
+        glPopMatrix();
+      glEndList();
+
+	WireHorseList = glGenLists( 1 );
+      glNewList( WireHorseList, GL_COMPILE );
+        glPushMatrix( );
+          glRotatef(90.f, 0., 1., 0.);
+          glTranslatef( 0., -0.15f, 0.f);
+          glColor3f( 1.f, 1.f, 0.f);	// yellow
+          glScalef( 0.25f, 0.25f, 0.25f); // scale down by 4
+          glBegin( GL_LINES );
+            for( int i=0; i < HORSEnedges; i++ )
+            {
+              struct point p0 = HORSEpoints[ HORSEedges[i].p0 ];
+              struct point p1 = HORSEpoints[ HORSEedges[i].p1 ];
+              glVertex3f( p0.x, p0.y, p0.z );
+              glVertex3f( p1.x, p1.y, p1.z );
+            }
+          glEnd( );
+        glPopMatrix( );
+      glEndList( );
+
+    HorseList = glGenLists( 1 );
+      glNewList( HorseList, GL_COMPILE );
+        glPushMatrix( );
+          glRotatef(90.f, 0., 1., 0.);
+          glTranslatef( 0., -0.15f, 0.f);
+          glScalef( 0.25f, 0.25f, 0.25f); // scale down by 4
+          glBegin( GL_TRIANGLES );
+            for( int i = 0; i < HORSEntris; i++ )
+            {
+              struct point p0 = HORSEpoints[ HORSEtris[i].p0 ];
+              struct point p1 = HORSEpoints[ HORSEtris[i].p1 ];
+              struct point p2 = HORSEpoints[ HORSEtris[i].p2 ];
+
+              // fake "lighting" from above:
+
+              float p01[3], p02[3], n[3];
+              p01[0] = p1.x - p0.x;
+              p01[1] = p1.y - p0.y;
+              p01[2] = p1.z - p0.z;
+              p02[0] = p2.x - p0.x;
+              p02[1] = p2.y - p0.y;
+              p02[2] = p2.z - p0.z;
+              Cross( p01, p02, n );
+              Unit( n, n );
+              n[1] = (float)fabs( n[1] );
+              // simulating a glColor3f( 1., 1., 0. ) = yellow:
+              glColor3f( 1.f*n[1], 1.f*n[1], 0.f*n[1]);
+
+              glVertex3f( p0.x, p0.y, p0.z );
+              glVertex3f( p1.x, p1.y, p1.z );
+              glVertex3f( p2.x, p2.y, p2.z );
+            }
+          glEnd( );
+        glPopMatrix( );
+      glEndList( );
 
 
 	// create the axes:
