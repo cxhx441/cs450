@@ -185,6 +185,14 @@ int		ShadowsOn;				// != 0 means to turn shadows on
 float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
+float   num_horses;
+float   pitch_freq;
+float   pitch_amp;
+float   up_down_freq;
+float   up_down_amp;
+float   rotation_freq;
+float   rotation_amp; 
+
 
 
 // function prototypes:
@@ -442,7 +450,18 @@ Display( )
 
     glPushMatrix();
       //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
-    float num_horses = 20; 
+    // float num_horses = 20; 
+
+    // float pitch_freq    = 6.f;
+    // float pitch_amp     = -30.f; 
+
+    // float up_down_freq  = 5.f;
+    // float up_down_amp   = 0.25f;
+
+    // float rotation_freq = 1;
+    // float rotation_amp  = 2.f; 
+
+
     glColor3f(1.0, 0, 0);
     glCallList( CircleList );
     for (int h = 1; h <= num_horses; h++)
@@ -450,20 +469,20 @@ Display( )
       float h_factor = h / (float) num_horses;
       float T = Time + h_factor ;
 	//Time = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
-      float pitch = -30 * sin(6*T*F_2_PI);
-      float up_down = 0.25 * sin(5*T*F_2_PI);
-      float rotation = 360.f*T + 90;
-      float x = 2 * cos(-T*F_2_PI);
-      float z = 2 * sin(-T*F_2_PI);
+      float pitch =   pitch_amp    * sin( F_2_PI * pitch_freq * T );
+      float up_down = up_down_amp  * sin( F_2_PI * up_down_freq * T );
+      float x =       rotation_amp * cos(-F_2_PI * rotation_freq * T );
+      float z =       rotation_amp * sin(-F_2_PI * rotation_freq * T );
+      float rotation =                    360.f  * rotation_freq * T + 90;
 
       glPushMatrix();
         glTranslatef(x, 0, z); // lap location
         glTranslatef(0, up_down , 0);
         glRotatef( rotation,   0., 1., 0. );
         glRotatef( pitch,   0., 0., 1. );
-        // glCallList( PonyList );
-        glCallList( WireHorseList );
-        glCallList( HorseList );
+        glCallList( PonyList );
+        //glCallList( WireHorseList );
+        //glCallList( HorseList );
       glPopMatrix();
     }
     glPopMatrix();
@@ -952,6 +971,11 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+		case 'r':
+		case 'R':
+			Reset();
+			break;
+
 		case 'o':
 		case 'O':
 			NowProjection = ORTHO;
@@ -967,6 +991,66 @@ Keyboard( unsigned char c, int x, int y )
 		case ESCAPE:
 			DoMainMenu( QUIT );	// will not return here
 			break;				// happy compiler
+                                //
+		case '-':
+          num_horses -= 1;
+          fprintf( stderr, "num_horses -= x\n");
+          break;				// happy compiler
+		case '=':
+          num_horses += 1;
+          fprintf( stderr, "num_horses += x\n");
+          break;				// happy compiler
+                                //
+		case '[':
+          pitch_freq -= 0.1;
+          fprintf( stderr, "pitch_freq -= x\n");
+          break;				// happy compiler
+		case ']':
+          pitch_freq += 0.1;
+          fprintf( stderr, "pitch_freq += x\n");
+          break;				// happy compiler
+		case '{':
+          pitch_amp -= 1.;
+          fprintf( stderr, "pitch_amp -= x\n");
+          break;				// happy compiler
+		case '}':
+          pitch_amp += 1.;
+          fprintf( stderr, "pitch_amp += x\n");
+          break;				// happy compiler
+                                //
+		case ';':
+          up_down_freq -= 0.1;
+          fprintf( stderr, "up_down_freq -= x\n");
+          break;				// happy compiler
+		case '\'':
+          up_down_freq += 0.1;
+          fprintf( stderr, "up_down_freq += x\n");
+          break;				// happy compiler
+		case ':':
+          up_down_amp -= 0.1;
+          fprintf( stderr, "up_down_amp -= x\n");
+          break;				// happy compiler
+		case '"':
+          up_down_amp += 0.1;
+          fprintf( stderr, "up_down_amp += x\n");
+          break;				// happy compiler
+                                //
+		case '.':
+          rotation_freq -= 0.1;
+          fprintf( stderr, "rotat_freq -= x\n");
+          break;				// happy compiler
+		case '/':
+          rotation_freq += 0.1;
+          fprintf( stderr, "rotat_freq += x\n");
+          break;				// happy compiler
+		case '>':
+          rotation_amp -= 0.1;
+          fprintf( stderr, "rotate_amp += x\n");
+          break;				// happy compiler
+		case '?':
+          rotation_amp += 0.1;
+          fprintf( stderr, "rotate_amp += x\n");
+          break;				// happy compiler
 
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
@@ -1091,6 +1175,15 @@ Reset( )
 	NowColor = YELLOW;
 	NowProjection = PERSP;
 	Xrot = Yrot = 0.;
+
+    num_horses    = 1; 
+    pitch_freq    = 6.f;
+    pitch_amp     = -30.f; 
+    up_down_freq  = 5.f;
+    up_down_amp   = 0.25f;
+    rotation_freq = 1.f;
+    rotation_amp  = 2.f; 
+
 }
 
 
