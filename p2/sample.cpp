@@ -189,11 +189,7 @@ float	Xrot, Yrot;				// rotation angles in degrees
 int   num_horses;
 float   rotations_per_cycle;
 float   rotation_amp; 
-float   pitch_freq;
-float   pitch_freq_per_rotation;
 float   pitch_amp;
-float   up_down_freq;
-float   up_down_freq_per_rotation;
 float   up_down_amp;
 float   gallops_per_rotation;  
 float   gallops_freq; 
@@ -456,10 +452,8 @@ Display( )
       //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
     // float num_horses = 20; 
 
-    // float pitch_freq    = 6.f;
     // float pitch_amp     = -30.f; 
 
-    // float up_down_freq  = 5.f;
     // float up_down_amp   = 0.25f;
 
     // float rotations_per_cycle = 1;
@@ -1179,11 +1173,7 @@ Reset( )
     num_horses    = 1; 
     rotations_per_cycle = 1.f;
     rotation_amp  = 2.f; 
-    // pitch_freq_per_rotation    = 4.f;
-    // pitch_freq    = pitch_freq_per_rotation * rotations_per_cycle; 
     pitch_amp     = 30.f; 
-    // up_down_freq_per_rotation  = 4.f;
-    // up_down_freq    = up_down_freq_per_rotation * rotations_per_cycle; 
     up_down_amp   = 0.25f;
     gallops_per_rotation       = 4.f; 
     gallops_freq = gallops_per_rotation * rotations_per_cycle;
