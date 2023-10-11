@@ -477,9 +477,9 @@ Display( )
         glRotatef( rotation,   0., 1., 0. );
         glTranslatef(0, up_down , 0);
         glRotatef( pitch,   0., 0., 1. );
-        glCallList( PonyList );
-        //glCallList( WireHorseList );
-        //glCallList( HorseList );
+        // glCallList( PonyList );
+        glCallList( WireHorseList );
+        glCallList( HorseList );
       glPopMatrix();
     }
     glPopMatrix();
