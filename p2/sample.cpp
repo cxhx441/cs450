@@ -154,7 +154,7 @@ const float	WHITE[ ] = { 1.,1.,1.,1. };
 
 // for animation:
 
-const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
+const int MS_PER_CYCLE = 12000;		// 10000 milliseconds = 10 seconds
 
 
 // what options should we compile-in?
