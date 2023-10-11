@@ -185,7 +185,7 @@ int		ShadowsOn;				// != 0 means to turn shadows on
 float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
-float   num_horses;
+int   num_horses;
 float   pitch_freq;
 float   pitch_amp;
 float   up_down_freq;
@@ -994,62 +994,62 @@ Keyboard( unsigned char c, int x, int y )
                                 //
 		case '-':
           num_horses -= 1;
-          fprintf( stderr, "num_horses -= x\n");
+          fprintf( stderr, "num_horses = %i\n", num_horses);
           break;				// happy compiler
 		case '=':
           num_horses += 1;
-          fprintf( stderr, "num_horses += x\n");
+          fprintf( stderr, "num_horses = %i\n", num_horses); 
           break;				// happy compiler
                                 //
 		case '[':
           pitch_freq -= 0.1;
-          fprintf( stderr, "pitch_freq -= x\n");
+          fprintf( stderr, "pitch_freq = %f\n", pitch_freq); 
           break;				// happy compiler
 		case ']':
           pitch_freq += 0.1;
-          fprintf( stderr, "pitch_freq += x\n");
+          fprintf( stderr, "pitch_freq = %f\n", pitch_freq); 
           break;				// happy compiler
 		case '{':
           pitch_amp -= 1.;
-          fprintf( stderr, "pitch_amp -= x\n");
+          fprintf( stderr, "pitch_amp = %f\n", pitch_amp); 
           break;				// happy compiler
 		case '}':
           pitch_amp += 1.;
-          fprintf( stderr, "pitch_amp += x\n");
+          fprintf( stderr, "pitch_amp = %f\n", pitch_amp); 
           break;				// happy compiler
                                 //
 		case ';':
           up_down_freq -= 0.1;
-          fprintf( stderr, "up_down_freq -= x\n");
+          fprintf( stderr, "up_down_freq = %f\n", up_down_freq); 
           break;				// happy compiler
 		case '\'':
           up_down_freq += 0.1;
-          fprintf( stderr, "up_down_freq += x\n");
+          fprintf( stderr, "up_down_freq = %f\n", up_down_freq); 
           break;				// happy compiler
 		case ':':
           up_down_amp -= 0.1;
-          fprintf( stderr, "up_down_amp -= x\n");
+          fprintf( stderr, "up_down_amp = %f\n", up_down_amp); 
           break;				// happy compiler
 		case '"':
           up_down_amp += 0.1;
-          fprintf( stderr, "up_down_amp += x\n");
+          fprintf( stderr, "up_down_amp = %f\n", up_down_amp); 
           break;				// happy compiler
                                 //
 		case '.':
           rotation_freq -= 0.1;
-          fprintf( stderr, "rotat_freq -= x\n");
+          fprintf( stderr, "rotat_freq = %f\n", rotation_freq); 
           break;				// happy compiler
 		case '/':
           rotation_freq += 0.1;
-          fprintf( stderr, "rotat_freq += x\n");
+          fprintf( stderr, "rotat_freq = %f\n", rotation_freq); 
           break;				// happy compiler
 		case '>':
           rotation_amp -= 0.1;
-          fprintf( stderr, "rotate_amp += x\n");
+          fprintf( stderr, "rotate_amp = %f\n", rotation_amp); 
           break;				// happy compiler
 		case '?':
           rotation_amp += 0.1;
-          fprintf( stderr, "rotate_amp += x\n");
+          fprintf( stderr, "rotate_amp = %f\n", rotation_amp); 
           break;				// happy compiler
 
 		default:
