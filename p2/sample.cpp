@@ -187,7 +187,7 @@ int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
 int   num_horses;
-float   rotations_per_cycle;
+float   rotation_freq;
 float   rotation_amp; 
 float   pitch_amp;
 float   up_down_amp;
@@ -456,7 +456,7 @@ Display( )
 
     // float up_down_amp   = 0.25f;
 
-    // float rotations_per_cycle = 1;
+    // float rotation_freq = 1;
     // float rotation_amp  = 2.f; 
 
     glColor3f(1.0, 0, 0);
@@ -468,9 +468,9 @@ Display( )
 	//Time = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
       float pitch =   pitch_amp    * sin( F_2_PI * gallops_freq * T - F_PI/2);
       float up_down = up_down_amp  * sin( F_2_PI * gallops_freq * T );
-      float x =       rotation_amp * cos(-F_2_PI * rotations_per_cycle * T );
-      float z =       rotation_amp * sin(-F_2_PI * rotations_per_cycle * T );
-      float rotation =                    360.f  * rotations_per_cycle * T + 90;
+      float x =       rotation_amp * cos(-F_2_PI * rotation_freq * T );
+      float z =       rotation_amp * sin(-F_2_PI * rotation_freq * T );
+      float rotation =                    360.f  * rotation_freq * T + 90;
 
       glPushMatrix();
         glTranslatef(x, 0, z); // lap location
@@ -1018,24 +1018,24 @@ Keyboard( unsigned char c, int x, int y )
                                 //
 		case ';':
           gallops_per_rotation -= 1;
-          gallops_freq = gallops_per_rotation * rotations_per_cycle;
+          gallops_freq = gallops_per_rotation * rotation_freq;
           fprintf( stderr, "gallops_per_rotation = %f\n", gallops_per_rotation); 
           break;				// happy compiler
 		case '\'':
           gallops_per_rotation += 1;
-          gallops_freq = gallops_per_rotation * rotations_per_cycle;
+          gallops_freq = gallops_per_rotation * rotation_freq;
           fprintf( stderr, "gallops_per_rotation = %f\n", gallops_per_rotation); 
           break;				// happy compiler
                                 //
 		case '.':
-          rotations_per_cycle -= 0.1;
-          gallops_freq = gallops_per_rotation * rotations_per_cycle;
-          fprintf( stderr, "rotat_freq = %f\n", rotations_per_cycle); 
+          rotation_freq -= .1;
+          gallops_freq = gallops_per_rotation * rotation_freq;
+          fprintf( stderr, "rotation_freq = %f\n", rotation_freq); 
           break;				// happy compiler
 		case '/':
-          rotations_per_cycle += 0.1;
-          gallops_freq = gallops_per_rotation * rotations_per_cycle;
-          fprintf( stderr, "rotat_freq = %f\n", rotations_per_cycle); 
+          rotation_freq += .1;
+          gallops_freq = gallops_per_rotation * rotation_freq;
+          fprintf( stderr, "rotation_freq = %f\n", rotation_freq); 
           break;				// happy compiler
 		case '>':
           rotation_amp -= 0.1;
@@ -1171,12 +1171,12 @@ Reset( )
 	Xrot = Yrot = 0.;
 
     num_horses    = 1; 
-    rotations_per_cycle = 1.f;
+    rotation_freq = 1.f;
     rotation_amp  = 2.f; 
     pitch_amp     = 30.f; 
     up_down_amp   = 0.25f;
     gallops_per_rotation       = 4.f; 
-    gallops_freq = gallops_per_rotation * rotations_per_cycle;
+    gallops_freq = gallops_per_rotation * rotation_freq;
 
 }
 
