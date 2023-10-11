@@ -1008,11 +1008,11 @@ Keyboard( unsigned char c, int x, int y )
           break;				// happy compiler
                                 //
 		case '{':
-          up_down_amp -= 0.1;
+          up_down_amp -= 0.01;
           fprintf( stderr, "up_down_amp = %f\n", up_down_amp); 
           break;				// happy compiler
 		case '}':
-          up_down_amp += 0.1;
+          up_down_amp += 0.01;
           fprintf( stderr, "up_down_amp = %f\n", up_down_amp); 
           break;				// happy compiler
                                 //
