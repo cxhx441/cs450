@@ -87,6 +87,12 @@ enum Projections
 	PERSP
 };
 
+enum LookAts
+{
+	OUTSIDE,
+	INSIDE
+};
+
 // which button:
 
 enum ButtonVals
@@ -180,13 +186,13 @@ int		DepthFightingOn;		// != 0 means to force the creation of z-fighting
 int		MainWindow;				// window id for main graphics window
 int		NowColor;				// index into Colors[ ]
 int		NowProjection;		// ORTHO or PERSP
+int		NowLookAt;		
 float	Scale;					// scaling factor
 int		ShadowsOn;				// != 0 means to turn shadows on
 float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
-int     LOOKAT; 
 bool    DEBUG = false; 
 int     num_horses;
 float   rotation_amp; 
@@ -397,7 +403,7 @@ Display( )
 
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity( );
-	if( NowProjection == ORTHO )
+	if( NowProjection == ORTHO and NowLookAt == OUTSIDE)
 		glOrtho( -2.f, 2.f,     -2.f, 2.f,     0.1f, 1000.f );
 	else
 		gluPerspective( 70.f, 1.f,	0.1f, 1000.f );
@@ -410,25 +416,25 @@ Display( )
 	// set the eye position, look-at position, and up-vector:
 
 	// gluLookAt( 0.f, 0.f, 3.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
-    if (LOOKAT == 1)
+    if (NowLookAt == OUTSIDE)
     {
       gluLookAt( 1.f, 1.f, 3.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+      // rotate the scene:
+
+      glRotatef( (GLfloat)Yrot, 0.f, 1.f, 0.f );
+      glRotatef( (GLfloat)Xrot, 1.f, 0.f, 0.f );
+
+      // uniformly scale the scene:
+
+      if( Scale < MINSCALE )
+          Scale = MINSCALE;
+      glScalef( (GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale );
     }
     else
     {
       gluLookAt( 0.f, 0.f, 0.f,     0.f, 0.f, 1.f,     0.f, 1.f, 0.f );
     }
 
-	// rotate the scene:
-
-	glRotatef( (GLfloat)Yrot, 0.f, 1.f, 0.f );
-	glRotatef( (GLfloat)Xrot, 1.f, 0.f, 0.f );
-
-	// uniformly scale the scene:
-
-	if( Scale < MINSCALE )
-		Scale = MINSCALE;
-	glScalef( (GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale );
 
 	// set the fog parameters:
 
@@ -992,7 +998,14 @@ Keyboard( unsigned char c, int x, int y )
                                 //
         case 'l':
         case 'L':
-          LOOKAT ^= 1;
+          if (NowLookAt == OUTSIDE)
+          {
+            NowLookAt = INSIDE;
+          }
+          else
+          {
+            NowLookAt = OUTSIDE;
+          }
           debug_horse();
           break;
 
@@ -1143,6 +1156,8 @@ MouseButton( int button, int state, int x, int y )
 void
 MouseMotion( int x, int y )
 {
+  if (NowLookAt == OUTSIDE)
+  {
 	int dx = x - Xmouse;		// change in mouse coords
 	int dy = y - Ymouse;
 
@@ -1167,6 +1182,7 @@ MouseMotion( int x, int y )
 
 	glutSetWindow( MainWindow );
 	glutPostRedisplay( );
+  }
 }
 
 
@@ -1187,9 +1203,9 @@ Reset( )
 	ShadowsOn = 0;
 	NowColor = YELLOW;
 	NowProjection = PERSP;
+    NowLookAt = OUTSIDE;
 	Xrot = Yrot = 0.;
 
-    LOOKAT = 1; 
     num_horses    = 1; 
     rotation_per_cycle = 1.f;
     rotation_amp  = 2.f; 
