@@ -187,6 +187,7 @@ int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
 int     LOOKAT; 
+bool    DEBUG = false; 
 int     num_horses;
 float   rotation_amp; 
 float   pitch_amp;
@@ -468,7 +469,6 @@ Display( )
         float pitch    = pitch_amp * sin( F_2_PI * gallops_per_cycle * T - F_PI/2);
         float up_down  = up_down_amp * sin( F_2_PI * gallops_per_cycle * T );
         float rotation = 360.f * rotation_per_cycle * T;
-        fprintf(stderr, "h = %d, rotation = %f, T = %f\n", h, rotation, T); 
 
         glPushMatrix();
           glRotatef( rotation,   0., 1., 0. );
@@ -1043,13 +1043,13 @@ Keyboard( unsigned char c, int x, int y )
           break;				// happy compiler
                                 //
 		case '.':
-          rotation_per_cycle -= 1.f;
+          rotation_per_cycle -= 0.1f;
           gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
           fprintf( stderr, "rotation_per_cycle = %f\n", rotation_per_cycle); 
           debug_horse();
           break;				// happy compiler
 		case '/':
-          rotation_per_cycle += 1.f;
+          rotation_per_cycle += 0.1f;
           gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
           fprintf( stderr, "rotation_per_cycle = %f\n", rotation_per_cycle); 
           debug_horse();
@@ -1190,8 +1190,8 @@ Reset( )
 	Xrot = Yrot = 0.;
 
     LOOKAT = 1; 
-    num_horses    = 2; 
-    rotation_per_cycle = 2.f;
+    num_horses    = 1; 
+    rotation_per_cycle = 1.f;
     rotation_amp  = 2.f; 
     pitch_amp     = 30.f; 
     up_down_amp   = 0.25f;
@@ -1482,10 +1482,13 @@ cjh_circle_vertices( float radius, int numsegs )
 void
 debug_horse()
 {
-  fprintf(stderr, "num_horses %d\n", num_horses);
-  fprintf(stderr, "rotation_per_cycle %f\n", rotation_per_cycle);
-  fprintf(stderr, "gallops_per_cycle %f\n", gallops_per_cycle);
-  fprintf(stderr, "gallops_per_rotation %f\n", gallops_per_rotation);
-  fprintf(stderr, "pitch_amp %f\n", pitch_amp);
-  fprintf(stderr, "up_down_amp %f\n", up_down_amp);
+  if (DEBUG == true)
+  {
+    fprintf(stderr, "num_horses %d\n", num_horses);
+    fprintf(stderr, "rotation_per_cycle %f\n", rotation_per_cycle);
+    fprintf(stderr, "gallops_per_cycle %f\n", gallops_per_cycle);
+    fprintf(stderr, "gallops_per_rotation %f\n", gallops_per_rotation);
+    fprintf(stderr, "pitch_amp %f\n", pitch_amp);
+    fprintf(stderr, "up_down_amp %f\n", up_down_amp);
+  }
 }
