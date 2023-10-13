@@ -1055,26 +1055,16 @@ Keyboard( unsigned char c, int x, int y )
           debug_horse();
           break;				// happy compiler
                                 //
-		case '.':
+		case ':':
           rotation_per_cycle -= 0.1f;
           gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
           fprintf( stderr, "rotation_per_cycle = %f\n", rotation_per_cycle); 
           debug_horse();
           break;				// happy compiler
-		case '/':
+		case '"':
           rotation_per_cycle += 0.1f;
           gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
           fprintf( stderr, "rotation_per_cycle = %f\n", rotation_per_cycle); 
-          debug_horse();
-          break;				// happy compiler
-		case '>':
-          rotation_amp -= 0.1;
-          fprintf( stderr, "rotate_amp = %f\n", rotation_amp); 
-          debug_horse();
-          break;				// happy compiler
-		case '?':
-          rotation_amp += 0.1;
-          fprintf( stderr, "rotate_amp = %f\n", rotation_amp); 
           debug_horse();
           break;				// happy compiler
 
@@ -1211,7 +1201,7 @@ Reset( )
     rotation_amp  = 2.f; 
     pitch_amp     = 30.f; 
     up_down_amp   = 0.25f;
-    gallops_per_rotation       = 4.f; 
+    gallops_per_rotation       = 5.f; 
     gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
 
 }
