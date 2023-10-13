@@ -154,7 +154,7 @@ const float	WHITE[ ] = { 1.,1.,1.,1. };
 
 // for animation:
 
-const int MS_PER_CYCLE = 12000;		// 10000 milliseconds = 10 seconds
+const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 
 
 // what options should we compile-in?
@@ -186,13 +186,14 @@ float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
-int   num_horses;
-float   rotation_freq;
+int     LOOKAT; 
+int     num_horses;
 float   rotation_amp; 
 float   pitch_amp;
 float   up_down_amp;
+float   rotation_per_cycle;
+float   gallops_per_cycle; 
 float   gallops_per_rotation;  
-float   gallops_freq; 
 
 
 // function prototypes:
@@ -227,6 +228,7 @@ void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 float			Unit(float [3]);
+void            debug_horse(); 
 
 
 // utility to create an array from 3 separate values:
@@ -407,7 +409,14 @@ Display( )
 	// set the eye position, look-at position, and up-vector:
 
 	// gluLookAt( 0.f, 0.f, 3.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
-	gluLookAt( 1.f, 1.f, 3.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+    if (LOOKAT == 1)
+    {
+      gluLookAt( 1.f, 1.f, 3.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+    }
+    else
+    {
+      gluLookAt( 0.f, 0.f, 0.f,     0.f, 0.f, 1.f,     0.f, 1.f, 0.f );
+    }
 
 	// rotate the scene:
 
@@ -449,39 +458,28 @@ Display( )
 	glEnable( GL_NORMALIZE );
 
     glPushMatrix();
-      //glRotatef((GLfloat) -90, (GLfloat) 1, (GLfloat) 0, (GLfloat) 0);
-    // float num_horses = 20; 
+      glColor3f(1.0, 0, 0);
+      glCallList( CircleList );
 
-    // float pitch_amp     = -30.f; 
+      for (int h = 1; h <= num_horses; h++)
+      {
+        float h_factor = h / (float) num_horses;
+        float T        = Time + (h_factor/rotation_per_cycle) ;
+        float pitch    = pitch_amp * sin( F_2_PI * gallops_per_cycle * T - F_PI/2);
+        float up_down  = up_down_amp * sin( F_2_PI * gallops_per_cycle * T );
+        float rotation = 360.f * rotation_per_cycle * T;
+        fprintf(stderr, "h = %d, rotation = %f, T = %f\n", h, rotation, T); 
 
-    // float up_down_amp   = 0.25f;
-
-    // float rotation_freq = 1;
-    // float rotation_amp  = 2.f; 
-
-    glColor3f(1.0, 0, 0);
-    glCallList( CircleList );
-    for (int h = 1; h <= num_horses; h++)
-    {
-      float h_factor = h / (float) num_horses;
-      float T = Time + h_factor ;
-	//Time = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
-      float pitch =   pitch_amp    * sin( F_2_PI * gallops_freq * T - F_PI/2);
-      float up_down = up_down_amp  * sin( F_2_PI * gallops_freq * T );
-      float x =       rotation_amp * cos(-F_2_PI * rotation_freq * T );
-      float z =       rotation_amp * sin(-F_2_PI * rotation_freq * T );
-      float rotation =                    360.f  * rotation_freq * T + 90;
-
-      glPushMatrix();
-        glTranslatef(x, 0, z); // lap location
-        glRotatef( rotation,   0., 1., 0. );
-        glTranslatef(0, up_down , 0);
-        glRotatef( pitch,   0., 0., 1. );
-        // glCallList( PonyList );
-        glCallList( WireHorseList );
-        glCallList( HorseList );
-      glPopMatrix();
-    }
+        glPushMatrix();
+          glRotatef( rotation,   0., 1., 0. );
+          glTranslatef(0, 0, 2); // lap location
+          glTranslatef(0, up_down , 0);
+          glRotatef( pitch,   0., 0., 1. );
+          // glCallList( PonyList );
+          // glCallList( WireHorseList );
+          glCallList( HorseList );
+        glPopMatrix();
+      }
     glPopMatrix();
 
 #ifdef DEMO_Z_FIGHTING
@@ -970,80 +968,101 @@ Keyboard( unsigned char c, int x, int y )
 	{
 		case 'r':
 		case 'R':
-			Reset();
-			break;
+          Reset();
+          debug_horse();
+          break;
 
 		case 'o':
 		case 'O':
-			NowProjection = ORTHO;
-			break;
+          NowProjection = ORTHO;
+          debug_horse();
+          break;
 
 		case 'p':
 		case 'P':
-			NowProjection = PERSP;
-			break;
+          NowProjection = PERSP;
+          debug_horse();
+          break;
 
 		case 'q':
 		case 'Q':
 		case ESCAPE:
-			DoMainMenu( QUIT );	// will not return here
-			break;				// happy compiler
+          DoMainMenu( QUIT );	// will not return here
+          break;				// happy compiler
                                 //
+        case 'l':
+        case 'L':
+          LOOKAT ^= 1;
+          debug_horse();
+          break;
+
 		case '-':
           num_horses -= 1;
           fprintf( stderr, "num_horses = %i\n", num_horses);
+          debug_horse();
           break;				// happy compiler
 		case '=':
           num_horses += 1;
           fprintf( stderr, "num_horses = %i\n", num_horses); 
+          debug_horse();
           break;				// happy compiler
                                 //
 		case '[':
           pitch_amp -= 1.;
           fprintf( stderr, "pitch_amp = %f\n", pitch_amp); 
+          debug_horse();
           break;				// happy compiler
 		case ']':
           pitch_amp += 1.;
           fprintf( stderr, "pitch_amp = %f\n", pitch_amp); 
+          debug_horse();
           break;				// happy compiler
                                 //
 		case '{':
           up_down_amp -= 0.01;
           fprintf( stderr, "up_down_amp = %f\n", up_down_amp); 
+          debug_horse();
           break;				// happy compiler
 		case '}':
           up_down_amp += 0.01;
           fprintf( stderr, "up_down_amp = %f\n", up_down_amp); 
+          debug_horse();
           break;				// happy compiler
                                 //
 		case ';':
           gallops_per_rotation -= 1;
-          gallops_freq = gallops_per_rotation * rotation_freq;
+          gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
           fprintf( stderr, "gallops_per_rotation = %f\n", gallops_per_rotation); 
+          debug_horse();
           break;				// happy compiler
 		case '\'':
           gallops_per_rotation += 1;
-          gallops_freq = gallops_per_rotation * rotation_freq;
+          gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
           fprintf( stderr, "gallops_per_rotation = %f\n", gallops_per_rotation); 
+          debug_horse();
           break;				// happy compiler
                                 //
 		case '.':
-          rotation_freq -= .1;
-          gallops_freq = gallops_per_rotation * rotation_freq;
-          fprintf( stderr, "rotation_freq = %f\n", rotation_freq); 
+          rotation_per_cycle -= 1.f;
+          gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
+          fprintf( stderr, "rotation_per_cycle = %f\n", rotation_per_cycle); 
+          debug_horse();
           break;				// happy compiler
 		case '/':
-          rotation_freq += .1;
-          gallops_freq = gallops_per_rotation * rotation_freq;
-          fprintf( stderr, "rotation_freq = %f\n", rotation_freq); 
+          rotation_per_cycle += 1.f;
+          gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
+          fprintf( stderr, "rotation_per_cycle = %f\n", rotation_per_cycle); 
+          debug_horse();
           break;				// happy compiler
 		case '>':
           rotation_amp -= 0.1;
           fprintf( stderr, "rotate_amp = %f\n", rotation_amp); 
+          debug_horse();
           break;				// happy compiler
 		case '?':
           rotation_amp += 0.1;
           fprintf( stderr, "rotate_amp = %f\n", rotation_amp); 
+          debug_horse();
           break;				// happy compiler
 
 		default:
@@ -1170,13 +1189,14 @@ Reset( )
 	NowProjection = PERSP;
 	Xrot = Yrot = 0.;
 
-    num_horses    = 1; 
-    rotation_freq = 1.f;
+    LOOKAT = 1; 
+    num_horses    = 2; 
+    rotation_per_cycle = 2.f;
     rotation_amp  = 2.f; 
     pitch_amp     = 30.f; 
     up_down_amp   = 0.25f;
     gallops_per_rotation       = 4.f; 
-    gallops_freq = gallops_per_rotation * rotation_freq;
+    gallops_per_cycle = gallops_per_rotation * rotation_per_cycle;
 
 }
 
@@ -1457,4 +1477,15 @@ cjh_circle_vertices( float radius, int numsegs )
     glVertex3f( radius*cos(ang), 0, radius*sin(ang) ); 
     ang += dang; 
   }
+}
+
+void
+debug_horse()
+{
+  fprintf(stderr, "num_horses %d\n", num_horses);
+  fprintf(stderr, "rotation_per_cycle %f\n", rotation_per_cycle);
+  fprintf(stderr, "gallops_per_cycle %f\n", gallops_per_cycle);
+  fprintf(stderr, "gallops_per_rotation %f\n", gallops_per_rotation);
+  fprintf(stderr, "pitch_amp %f\n", pitch_amp);
+  fprintf(stderr, "up_down_amp %f\n", up_down_amp);
 }
