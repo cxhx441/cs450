@@ -998,14 +998,7 @@ Keyboard( unsigned char c, int x, int y )
                                 //
         case 'l':
         case 'L':
-          if (NowLookAt == OUTSIDE)
-          {
-            NowLookAt = INSIDE;
-          }
-          else
-          {
-            NowLookAt = OUTSIDE;
-          }
+          NowLookAt ^= 1; 
           debug_horse();
           break;
 
