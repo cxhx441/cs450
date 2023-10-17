@@ -17,6 +17,9 @@
 #pragma warning(disable:4996)
 #endif
 
+
+#include "glew.h"
+
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -25,7 +28,6 @@
 #include <GL/glu.h>
 #endif
 
-#include "glew.h"
 #include "glut.h"
 
 

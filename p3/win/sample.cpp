@@ -17,6 +17,8 @@
 #pragma warning(disable:4996)
 #endif
 
+#include "glew.h"
+
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -25,7 +27,6 @@
 #include <GL/glu.h>
 #endif
 
-#include "glew.h"
 #include "glut.h"
 
 
@@ -465,7 +466,7 @@ Display( )
 
 	// draw the box object by calling up its display list:
 
-	glCallList( BoxList );
+	glCallList( GridDL );
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
