@@ -11,13 +11,12 @@
 #define F_PI_2		((float)(F_PI/2.f))
 #endif
 
+#include "glew.h"
 
 #ifdef WIN32
 #include <windows.h>
 #pragma warning(disable:4996)
 #endif
-
-#include "glew.h"
 
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
@@ -30,16 +29,16 @@
 #include "glut.h"
 
 
-#define XSIDE	5			 		// length of the x side of the grid
+#define XSIDE	10			 		// length of the x side of the grid
 #define X0      (-XSIDE/2.)			// where one side starts
-#define NX	    100					// how many points in x
+#define NX	    2000					// how many points in x
 #define DX	    ( XSIDE/(float)NX )	// change in x between the points
 
 #define YGRID	0.f
 
-#define ZSIDE	5					// length of the z side of the grid
+#define ZSIDE	10					// length of the z side of the grid
 #define Z0      (-ZSIDE/2.)			// where one side starts
-#define NZ	    100			        // how many points in z
+#define NZ	    2000    	        // how many points in z
 #define DZ	    ( ZSIDE/(float)NZ )	// change in z between the points
 
 
@@ -116,6 +115,12 @@ enum Projections
 	PERSP
 };
 
+enum LightTypes
+{
+	SPOTLIGHT,
+	POINTLIGHT
+};
+
 // which button:
 
 enum ButtonVals
@@ -143,7 +148,8 @@ enum Colors
 	GREEN,
 	CYAN,
 	BLUE,
-	MAGENTA
+	MAGENTA,
+	WHITE_COL
 };
 
 char * ColorNames[ ] =
@@ -153,7 +159,8 @@ char * ColorNames[ ] =
 	(char*)"Green",
 	(char*)"Cyan",
 	(char*)"Blue",
-	(char*)"Magenta"
+	(char*)"Magenta",
+	(char*)"White_col"
 };
 
 // the color definitions:
@@ -167,6 +174,18 @@ const GLfloat Colors[ ][3] =
 	{ 0., 1., 1. },		// cyan
 	{ 0., 0., 1. },		// blue
 	{ 1., 0., 1. },		// magenta
+	{ 1., 1., 1. },		// white
+};
+
+float float_Colors[ ][3] =
+{
+	{ 1., 0., 0. },		// red
+	{ 1., 1., 0. },		// yellow
+	{ 0., 1., 0. },		// green
+	{ 0., 1., 1. },		// cyan
+	{ 0., 0., 1. },		// blue
+	{ 1., 0., 1. },		// magenta
+	{ 1., 1., 1. },		// white
 };
 
 // fog parameters:
@@ -198,14 +217,19 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	GridDL;				// object display list
+GLuint	GridDL;					// object display list
+GLuint	LightBulbDL;			// object display list
+GLuint	SphereDL;				// object display list
+GLuint	ConeDL;					// object display list
+GLuint	TorusDL;				// object display list
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
 int		DepthFightingOn;		// != 0 means to force the creation of z-fighting
 int		MainWindow;				// window id for main graphics window
 int		NowColor;				// index into Colors[ ]
-int		NowProjection;		// ORTHO or PERSP
+int		NowProjection;			// ORTHO or PERSP
+int		NowLightType;			// ORTHO or PERSP
 float	Scale;					// scaling factor
 int		ShadowsOn;				// != 0 means to turn shadows on
 float	Time;					// used for animation, this has a value between 0. and 1.
@@ -291,11 +315,11 @@ MulArray3(float factor, float a, float b, float c )
 
 // these are here for when you need them -- just uncomment the ones you need:
 
-//#include "setmaterial.cpp"
-//#include "setlight.cpp"
-//#include "osusphere.cpp"
-//#include "osucone.cpp"
-//#include "osutorus.cpp"
+#include "setmaterial.cpp"
+#include "setlight.cpp"
+#include "osusphere.cpp"
+#include "osucone.cpp"
+#include "osutorus.cpp"
 //#include "bmptotexture.cpp"
 //#include "loadobjfile.cpp"
 //#include "keytime.cpp"
@@ -420,9 +444,10 @@ Display( )
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity( );
 
+
 	// set the eye position, look-at position, and up-vector:
 
-	gluLookAt( 0.f, 0.f, 3.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	gluLookAt( 4.f, 6.f, 5.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
 
 	// rotate the scene:
 
@@ -451,23 +476,70 @@ Display( )
 		glDisable( GL_FOG );
 	}
 
+
 	// possibly draw the axes:
 
+	glPushMatrix();
 	if( AxesOn != 0 )
 	{
 		glColor3fv( &Colors[NowColor][0] );
 		glCallList( AxesList );
 	}
+	glPopMatrix();
+
+	glShadeModel(GL_SMOOTH);
+	//glShadeModel(GL_FLAT);
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, MulArray3(0.3f, 1.f, 1.f, 1.f));
+	//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE); 
+
 
 	// since we are using glScalef( ), be sure the normals get unitized:
-
 	glEnable( GL_NORMALIZE );
 
 
-	// draw the box object by calling up its display list:
+	// draw the scence objects by calling up display list:
+	glPushMatrix();
+		//float col[3] = {1.f, 1.f, 1.f}; 
+		glRotatef(360 * Time * 2, 0, 1, 0);
+		glTranslatef(2.5, 2.5, 0);
 
-	glCallList( GridDL );
+		glDisable(GL_LIGHTING);
+		glColor3fv(&Colors[NowColor][0]);
+		glCallList( LightBulbDL );
 
+		glEnable(GL_LIGHTING);
+		if (NowLightType == POINTLIGHT)
+			SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+		else
+			SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+	glPopMatrix();
+
+	glPushMatrix();
+		SetMaterial(0.5, 0.5, 0.5, 5);
+		glCallList( GridDL );
+	glPopMatrix();
+
+	glPushMatrix();
+		SetMaterial(1, 0., 0., 0.1);
+		glTranslatef(2, 1, 0);
+		glCallList( SphereDL );
+	glPopMatrix();
+
+	glPushMatrix();
+		SetMaterial(0., 1, 0., 0.1);
+		glRotatef(120, 0, 1, 0);
+		glTranslatef(2, 1, 0);
+		glCallList( ConeDL );
+	glPopMatrix();
+
+	glPushMatrix();
+		SetMaterial(0., 0., 1, 0.1);
+		glRotatef(-120, 0, 1, 0);
+		glTranslatef(2, 1, 0);
+		glCallList( TorusDL );
+	glPopMatrix();
+
+	glDisable(GL_LIGHTING); 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
 	{
@@ -839,32 +911,57 @@ InitLists( )
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting InitLists.\n");
 
-	float dx = BOXSIZE / 2.f;
-	float dy = BOXSIZE / 2.f;
-	float dz = BOXSIZE / 2.f;
 	glutSetWindow( MainWindow );
 
 	// create the object:
 
 	GridDL = glGenLists( 1 );
 	glNewList( GridDL, GL_COMPILE );
-		SetMaterial( 0.6f, 0.6f, 0.6f, 30.f );
-		glNormal3f( 0., 1., 0. );
-		for( int i = 0; i < NZ; i++ )
-		{
-			glBegin( GL_QUAD_STRIP );
-				for( int j = 0; j < NX; j++ )
-				{
-					glVertex3f( X0 + DX*(float)j, YGRID, Z0 + DZ*(float)(i+0) );
-					glVertex3f( X0 + DX*(float)j, YGRID, Z0 + DZ*(float)(i+1) );
-				}
-			glEnd( );
-		}
+		glPushMatrix();
+			SetMaterial( 0.6f, 0.6f, 0.6f, 30.f );
+			glNormal3f( 0., 1., 0. );
+			for( int i = 0; i < NZ; i++ )
+			{
+				glBegin( GL_QUAD_STRIP );
+					for( int j = 0; j < NX; j++ )
+					{
+						glVertex3f( X0 + DX*(float)j, YGRID, Z0 + DZ*(float)(i+0) );
+						glVertex3f( X0 + DX*(float)j, YGRID, Z0 + DZ*(float)(i+1) );
+					}
+				glEnd( );
+			}
+		glPopMatrix();
 	glEndList( );
 
+	LightBulbDL = glGenLists( 1 );
+	glNewList( LightBulbDL, GL_COMPILE );
+		glPushMatrix();
+			OsuSphere(.1, 10, 10);
+		glPopMatrix();
+	glEndList( );
+
+	SphereDL = glGenLists( 1 );
+	glNewList( SphereDL, GL_COMPILE );
+		glPushMatrix();
+			OsuSphere(.5, 500, 500);
+		glPopMatrix();
+	glEndList( );
+
+	ConeDL = glGenLists( 1 );
+	glNewList( ConeDL, GL_COMPILE );
+		glPushMatrix();
+			OsuCone(0.5, 0.01, 0.75, 500, 500);
+		glPopMatrix();
+	glEndList( );
+
+	TorusDL = glGenLists( 1 );
+	glNewList( TorusDL, GL_COMPILE );
+		glPushMatrix();
+			OsuTorus(.5, 1, 500, 500);
+		glPopMatrix();
+	glEndList( );
 
 	// create the axes:
-
 	AxesList = glGenLists( 1 );
 	glNewList( AxesList, GL_COMPILE );
 		glLineWidth( AXES_WIDTH );
@@ -884,6 +981,10 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+		case '`':
+			Reset();
+			break;
+
 		case 'f':
 		case 'F':
 			Frozen = !Frozen;
@@ -895,18 +996,47 @@ Keyboard( unsigned char c, int x, int y )
 
 		case 'o':
 		case 'O':
-			NowProjection = ORTHO;
-			break;
-
-		case 'p':
-		case 'P':
-			NowProjection = PERSP;
+			NowProjection ^= 1;
 			break;
 
 		case 'q':
 		case 'Q':
 		case ESCAPE:
 			DoMainMenu( QUIT );	// will not return here
+			break;				// happy compiler
+
+		case 'w':
+		case 'W':
+			NowColor = WHITE_COL;
+			break;				// happy compiler
+
+		case 'r':
+		case 'R':
+			NowColor = RED;
+			break;				// happy compiler
+
+		case 'g':
+		case 'G':
+			NowColor = GREEN;
+			break;				// happy compiler
+
+		case 'b':
+		case 'B':
+			NowColor = BLUE;
+			break;				// happy compiler
+		case 'y':
+		case 'Y':
+			NowColor = YELLOW;
+			break;				// happy compiler
+
+		case 'p':
+		case 'P':
+			NowLightType = POINTLIGHT;
+			break;				// happy compiler
+
+		case 's':
+		case 'S':
+			NowLightType = SPOTLIGHT;
 			break;				// happy compiler
 
 		default:
@@ -1030,8 +1160,9 @@ Reset( )
 	Frozen = false;
 	Scale  = 1.0;
 	ShadowsOn = 0;
-	NowColor = YELLOW;
+	NowColor = WHITE_COL;
 	NowProjection = PERSP;
+	NowLightType = POINTLIGHT;
 	Xrot = Yrot = 0.;
 }
 
