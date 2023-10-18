@@ -4,7 +4,11 @@
 #include <math.h>
 #include <ctype.h>
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 
 #ifndef F_PI
