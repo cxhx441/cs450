@@ -78,10 +78,6 @@ const int ESCAPE = 0x1b;
 
 const int INIT_WINDOW_SIZE = 600;
 
-// size of the 3d box to be drawn:
-
-const float BOXSIZE = 2.f;
-
 // multiplication factors for input interaction:
 //  (these are known from previous experience)
 
@@ -219,9 +215,9 @@ GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
 GLuint	GridDL;					// object display list
 GLuint	LightBulbDL;			// object display list
-GLuint	SphereDL;				// object display list
-GLuint	ConeDL;					// object display list
-GLuint	TorusDL;				// object display list
+GLuint	StrawberryDL;				// object display list
+GLuint	WormDL;					// object display list
+GLuint	PenguinDL;				// object display list
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -236,7 +232,7 @@ float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 bool    Frozen;					// whether the animation is frozen or not
-
+float   LightRadius;
 
 // function prototypes:
 
@@ -321,7 +317,7 @@ MulArray3(float factor, float a, float b, float c )
 #include "osucone.cpp"
 #include "osutorus.cpp"
 //#include "bmptotexture.cpp"
-//#include "loadobjfile.cpp"
+#include "loadobjfile.cpp"
 //#include "keytime.cpp"
 //#include "glslprogram.cpp"
 
@@ -447,7 +443,7 @@ Display( )
 
 	// set the eye position, look-at position, and up-vector:
 
-	gluLookAt( 4.f, 6.f, 5.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	gluLookAt( 3.f, 3.f, 4.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
 
 	// rotate the scene:
 
@@ -501,7 +497,7 @@ Display( )
 	glPushMatrix();
 		//float col[3] = {1.f, 1.f, 1.f}; 
 		glRotatef(360 * Time * 2, 0, 1, 0);
-		glTranslatef(2.5, 2.5, 0);
+		glTranslatef(LightRadius, 2.5, 0);
 
 		glDisable(GL_LIGHTING);
 		glColor3fv(&Colors[NowColor][0]);
@@ -515,28 +511,31 @@ Display( )
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(0.5, 0.5, 0.5, 5);
+		SetMaterial(0.5, 0.5, 0.5, 64);
 		glCallList( GridDL );
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(1, 0., 0., 0.1);
-		glTranslatef(2, 1, 0);
-		glCallList( SphereDL );
+		SetMaterial(1, 0., 0., 128);
+		glTranslatef(0, 0, 2);
+		glScalef(0.3, 0.3, 0.3);
+		glCallList( StrawberryDL );
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(0., 1, 0., 0.1);
+		SetMaterial(0., 1, 0., 128);
 		glRotatef(120, 0, 1, 0);
-		glTranslatef(2, 1, 0);
-		glCallList( ConeDL );
+		glTranslatef(0, 0, 2);
+        glScalef(0.01, 0.01, 0.01);
+		glCallList( WormDL );
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(0., 0., 1, 0.1);
+		SetMaterial(0., 0., 1, 0);
 		glRotatef(-120, 0, 1, 0);
-		glTranslatef(2, 1, 0);
-		glCallList( TorusDL );
+		glTranslatef(0, 0, 2);
+		glScalef(1.5, 1.5, 1.5);
+		glCallList( PenguinDL );
 	glPopMatrix();
 
 	glDisable(GL_LIGHTING); 
@@ -940,24 +939,25 @@ InitLists( )
 		glPopMatrix();
 	glEndList( );
 
-	SphereDL = glGenLists( 1 );
-	glNewList( SphereDL, GL_COMPILE );
+	StrawberryDL = glGenLists( 1 );
+	glNewList( StrawberryDL, GL_COMPILE );
 		glPushMatrix();
-			OsuSphere(.5, 500, 500);
+			//OsuSphere(.5, 500, 500);
+            LoadObjFile( (char *) "strawberry_10p.obj"); 
 		glPopMatrix();
 	glEndList( );
 
-	ConeDL = glGenLists( 1 );
-	glNewList( ConeDL, GL_COMPILE );
+	WormDL = glGenLists( 1 );
+	glNewList( WormDL, GL_COMPILE );
 		glPushMatrix();
-			OsuCone(0.5, 0.01, 0.75, 500, 500);
+            LoadObjFile( (char *) "worm.obj"); 
 		glPopMatrix();
 	glEndList( );
 
-	TorusDL = glGenLists( 1 );
-	glNewList( TorusDL, GL_COMPILE );
+	PenguinDL = glGenLists( 1 );
+	glNewList( PenguinDL, GL_COMPILE );
 		glPushMatrix();
-			OsuTorus(.5, 1, 500, 500);
+            LoadObjFile( (char *) "penguin.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -984,6 +984,13 @@ Keyboard( unsigned char c, int x, int y )
 		case '`':
 			Reset();
 			break;
+
+		case '-':
+            LightRadius -= .1;
+            break;
+		case '=':
+            LightRadius += .1;
+            break;
 
 		case 'f':
 		case 'F':
@@ -1158,6 +1165,7 @@ Reset( )
 	DepthFightingOn = 0;
 	DepthCueOn = 0;
 	Frozen = false;
+    LightRadius = 2.5;
 	Scale  = 1.0;
 	ShadowsOn = 0;
 	NowColor = WHITE_COL;
