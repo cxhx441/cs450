@@ -74,6 +74,8 @@ LoadObjFile( char *name )
 		fprintf( stderr, "Cannot open .obj file '%s'\n", name );
 		return 1;
 	}
+    fprintf( stderr, "loading '%s'\n", name );
+    
 
 
 	float xmin = 1.e+37f;
