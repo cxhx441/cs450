@@ -76,7 +76,7 @@ const int ESCAPE = 0x1b;
 
 // initial window size:
 
-const int INIT_WINDOW_SIZE = 600;
+const int INIT_WINDOW_SIZE = 1200;
 
 // multiplication factors for input interaction:
 //  (these are known from previous experience)
@@ -198,7 +198,7 @@ const float	WHITE[ ] = { 1.,1.,1.,1. };
 
 // for animation:
 
-const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
+const int MS_PER_CYCLE = 5000;		// 10000 milliseconds = 10 seconds
 
 
 // what options should we compile-in?
@@ -218,6 +218,9 @@ GLuint	LightBulbDL;			// object display list
 GLuint	StrawberryDL;				// object display list
 GLuint	WormDL;					// object display list
 GLuint	PenguinDL;				// object display list
+GLuint  SphereDL; 
+GLuint  ConeDL; 
+GLuint  TorusDL; 
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -232,7 +235,8 @@ float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 bool    Frozen;					// whether the animation is frozen or not
-float   LightRadius;
+float   Light_Z;
+int		shininess;				// for use on object shine
 
 // function prototypes:
 
@@ -443,7 +447,7 @@ Display( )
 
 	// set the eye position, look-at position, and up-vector:
 
-	gluLookAt( 3.f, 3.f, 4.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	gluLookAt( 0.f, 3.f, 5.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
 
 	// rotate the scene:
 
@@ -495,50 +499,116 @@ Display( )
 
 	// draw the scence objects by calling up display list:
 	glPushMatrix();
-		//float col[3] = {1.f, 1.f, 1.f}; 
-		glRotatef(360 * Time * 2, 0, 1, 0);
-		glTranslatef(LightRadius, 2.5, 0);
+		//glRotatef(360 * Time * 2, 0, 1, 0);
+		//glTranslatef(Light_Z, 1.5, 0);
+		// A * sin(2pi*f + phase)
+		//float z = ZSIDE/2 - (ZSIDE) * Time;
+		if (Time < 0.5)
+		{
+			glTranslatef(-XSIDE / 2, 1.5, Light_Z);
+			glTranslatef(XSIDE * Time * 2, 0, 0);
+		}
+		else
+		{
+			glTranslatef(XSIDE*1.5, 1.5, Light_Z);
+			glTranslatef(-XSIDE * Time * 2, 0, 0);
+		}
 
 		glDisable(GL_LIGHTING);
 		glColor3fv(&Colors[NowColor][0]);
 		glCallList( LightBulbDL );
-
 		glEnable(GL_LIGHTING);
+
 		if (NowLightType == POINTLIGHT)
+			//SetPointLight( int ilight, float x, float y, float z,  float r, float g, float b )
 			SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 		else
+			//SetSpotLight( int ilight, float x, float y, float z,  float xdir, float ydir, float zdir, float r, float g, float b )
 			SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(0.5, 0.5, 0.5, 64);
+		SetMaterial(0.5, 0.5, 0.5, 1000);
 		glCallList( GridDL );
 	glPopMatrix();
 
+	//OBJs
 	glPushMatrix();
-		SetMaterial(1, 0., 0., 128);
-		glTranslatef(0, 0, 2);
-		glScalef(0.3, 0.3, 0.3);
-		glCallList( StrawberryDL );
+		glTranslatef(-5, 0, -4);
+		shininess = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			SetMaterial(1, 0., 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( StrawberryDL );
+			shininess += 16;
+		}
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(0., 1, 0., 128);
-		glRotatef(120, 0, 1, 0);
-		glTranslatef(0, 0, 2);
-        glScalef(0.01, 0.01, 0.01);
-		glCallList( WormDL );
+		glTranslatef(-5, 0, -2);
+		//glRotatef(-30, 0, 1, 0);
+		shininess = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			SetMaterial(0., 1, 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( WormDL );
+			shininess += 16;
+		}
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(0., 0., 1, 0);
-		glRotatef(-120, 0, 1, 0);
-		glTranslatef(0, 0, 2);
-		glScalef(1.5, 1.5, 1.5);
-		glCallList( PenguinDL );
+		glTranslatef(-5, 0, 0);
+		shininess = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			SetMaterial(0., 0., 1., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( PenguinDL );
+			shininess += 16;
+		}
+	glPopMatrix();
+
+	// OSU Shapes
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 1.3);
+		shininess = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			SetMaterial(1, 0., 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( SphereDL );
+			shininess += 16;
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 2.55);
+		shininess = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			SetMaterial(0, 1., 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( ConeDL );
+			shininess += 16;
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 4);
+		shininess = 0;
+		for (int i = 0; i < 8; i++)
+		{
+			SetMaterial(0, 0., 1., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( TorusDL );
+			shininess += 16;
+		}
 	glPopMatrix();
 
 	glDisable(GL_LIGHTING); 
+
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
 	{
@@ -939,17 +1009,20 @@ InitLists( )
 		glPopMatrix();
 	glEndList( );
 
+	// OBJ shapes
 	StrawberryDL = glGenLists( 1 );
 	glNewList( StrawberryDL, GL_COMPILE );
 		glPushMatrix();
-			//OsuSphere(.5, 500, 500);
-            LoadObjFile( (char *) "strawberry_10p.obj"); 
+			glScalef(0.2, 0.2, 0.2); 
+            LoadObjFile( (char *) "strawberry_50p.obj"); 
 		glPopMatrix();
 	glEndList( );
 
 	WormDL = glGenLists( 1 );
 	glNewList( WormDL, GL_COMPILE );
 		glPushMatrix();
+			glScalef(0.01, 0.01, 0.01); 
+			glRotatef(-45, 0, 1, 0);
             LoadObjFile( (char *) "worm.obj"); 
 		glPopMatrix();
 	glEndList( );
@@ -957,7 +1030,32 @@ InitLists( )
 	PenguinDL = glGenLists( 1 );
 	glNewList( PenguinDL, GL_COMPILE );
 		glPushMatrix();
+			glScalef(1.5, 1.5, 1.5);
             LoadObjFile( (char *) "penguin.obj"); 
+		glPopMatrix();
+	glEndList( );
+
+	// OSU shapes
+	SphereDL = glGenLists( 1 );
+	glNewList( SphereDL, GL_COMPILE );
+		glPushMatrix();
+			OsuSphere(.5, 500, 500);
+            //LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/Strawberry_obj.obj"); 
+		glPopMatrix();
+	glEndList( );
+
+	ConeDL = glGenLists( 1 );
+	glNewList( ConeDL, GL_COMPILE );
+		glPushMatrix();
+			OsuCone(0.5, 0.01, 0.75, 500, 500);
+		glPopMatrix();
+	glEndList( );
+
+	TorusDL = glGenLists( 1 );
+	glNewList( TorusDL, GL_COMPILE );
+		glPushMatrix();
+			glScalef(0.5, 0.5, 0.5);
+			OsuTorus(.25, 0.75, 500, 500);
 		glPopMatrix();
 	glEndList( );
 
@@ -986,10 +1084,12 @@ Keyboard( unsigned char c, int x, int y )
 			break;
 
 		case '-':
-            LightRadius -= .1;
+			if (Light_Z > -ZSIDE / 2)
+				Light_Z -= 0.5;
             break;
 		case '=':
-            LightRadius += .1;
+			if (Light_Z < ZSIDE / 2)
+				Light_Z += 0.5;
             break;
 
 		case 'f':
@@ -1165,7 +1265,7 @@ Reset( )
 	DepthFightingOn = 0;
 	DepthCueOn = 0;
 	Frozen = false;
-    LightRadius = 2.5;
+    Light_Z = 0.5;
 	Scale  = 1.0;
 	ShadowsOn = 0;
 	NowColor = WHITE_COL;
