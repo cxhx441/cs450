@@ -1,29 +1,39 @@
 ﻿  sample.cpp
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(541,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(542,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(554,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(555,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(566,28): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(567,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(575,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(579,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(580,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(587,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(591,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(592,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(603,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(604,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(997,47): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(997,22): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(998,47): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(998,22): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1008,14): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1016,23): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1016,18): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1016,13): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1024,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1024,19): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1024,13): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1050,17): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(577,27): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(584,27): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(954,47): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(954,22): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(955,47): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(955,22): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(965,14): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(973,23): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(973,18): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(973,13): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(981,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(981,19): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(981,13): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1007,17): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1515,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1516,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1526,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1527,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1537,28): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1538,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1545,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1549,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1550,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1556,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1560,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1561,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1571,27): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1572,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1588,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1599,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1610,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1617,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1622,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1628,25): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1633,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Users\craig\Documents\GitHub\cs450\p3\win\sample.cpp(1644,17): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
 sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Sample.vcxproj -> C:\Users\craig\Documents\GitHub\cs450\p3\win\Debug\Sample.exe

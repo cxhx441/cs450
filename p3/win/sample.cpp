@@ -111,6 +111,12 @@ enum Projections
 	PERSP
 };
 
+enum MaterialSettings
+{
+	SHINE,
+	ROUGH
+};
+
 enum LightTypes
 {
 	SPOTLIGHT,
@@ -228,6 +234,7 @@ int		DepthFightingOn;		// != 0 means to force the creation of z-fighting
 int		MainWindow;				// window id for main graphics window
 int		NowColor;				// index into Colors[ ]
 int		NowProjection;			// ORTHO or PERSP
+int		NowMaterialType;			// ORTHO or PERSP
 int		NowLightType;			// ORTHO or PERSP
 float	Scale;					// scaling factor
 int		ShadowsOn;				// != 0 means to turn shadows on
@@ -270,6 +277,8 @@ float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 float			Unit(float [3]);
 
+void			draw_with_shine();
+void			draw_with_rough();
 
 // utility to create an array from 3 separate values:
 
@@ -447,8 +456,10 @@ Display( )
 
 	// set the eye position, look-at position, and up-vector:
 
+	//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be coal miners hat
 	gluLookAt( 0.f, 3.f, 5.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
 
+	SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be 
 	// rotate the scene:
 
 	glRotatef( (GLfloat)Yrot, 0.f, 1.f, 0.f );
@@ -489,7 +500,8 @@ Display( )
 
 	glShadeModel(GL_SMOOTH);
 	//glShadeModel(GL_FLAT);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, MulArray3(0.3f, 1.f, 1.f, 1.f));
+
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, MulArray3(0.3f, 1.f, 1.f, 1.f)); // setting ambient light to off-white
 	//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE); 
 
 
@@ -499,10 +511,6 @@ Display( )
 
 	// draw the scence objects by calling up display list:
 	glPushMatrix();
-		//glRotatef(360 * Time * 2, 0, 1, 0);
-		//glTranslatef(Light_Z, 1.5, 0);
-		// A * sin(2pi*f + phase)
-		//float z = ZSIDE/2 - (ZSIDE) * Time;
 		if (Time < 0.5)
 		{
 			glTranslatef(-XSIDE / 2, 1.5, Light_Z);
@@ -519,12 +527,13 @@ Display( )
 		glCallList( LightBulbDL );
 		glEnable(GL_LIGHTING);
 
-		if (NowLightType == POINTLIGHT)
+		//if (NowLightType == POINTLIGHT)
 			//SetPointLight( int ilight, float x, float y, float z,  float r, float g, float b )
-			SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
-		else
+			//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+		//else if (NowLightType == SPOTLIGHT)
 			//SetSpotLight( int ilight, float x, float y, float z,  float xdir, float ydir, float zdir, float r, float g, float b )
-			SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+			//SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+
 	glPopMatrix();
 
 	glPushMatrix();
@@ -533,79 +542,10 @@ Display( )
 	glPopMatrix();
 
 	//OBJs
-	glPushMatrix();
-		glTranslatef(-5, 0, -4);
-		shininess = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			SetMaterial(1, 0., 0., shininess);
-			glTranslatef(1.1, 0, 0);
-			glCallList( StrawberryDL );
-			shininess += 16;
-		}
-	glPopMatrix();
-
-	glPushMatrix();
-		glTranslatef(-5, 0, -2);
-		//glRotatef(-30, 0, 1, 0);
-		shininess = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			SetMaterial(0., 1, 0., shininess);
-			glTranslatef(1.1, 0, 0);
-			glCallList( WormDL );
-			shininess += 16;
-		}
-	glPopMatrix();
-
-	glPushMatrix();
-		glTranslatef(-5, 0, 0);
-		shininess = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			SetMaterial(0., 0., 1., shininess);
-			glTranslatef(1.1, 0, 0);
-			glCallList( PenguinDL );
-			shininess += 16;
-		}
-	glPopMatrix();
-
-	// OSU Shapes
-	glPushMatrix();
-		glTranslatef(-5, 0.5, 1.3);
-		shininess = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			SetMaterial(1, 0., 0., shininess);
-			glTranslatef(1.1, 0, 0);
-			glCallList( SphereDL );
-			shininess += 16;
-		}
-	glPopMatrix();
-
-	glPushMatrix();
-		glTranslatef(-5, 0.5, 2.55);
-		shininess = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			SetMaterial(0, 1., 0., shininess);
-			glTranslatef(1.1, 0, 0);
-			glCallList( ConeDL );
-			shininess += 16;
-		}
-	glPopMatrix();
-
-	glPushMatrix();
-		glTranslatef(-5, 0.5, 4);
-		shininess = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			SetMaterial(0, 0., 1., shininess);
-			glTranslatef(1.1, 0, 0);
-			glCallList( TorusDL );
-			shininess += 16;
-		}
-	glPopMatrix();
+	if (NowMaterialType == SHINE)
+		draw_with_shine(); 
+	else if (NowMaterialType == ROUGH)
+		draw_with_rough(); 
 
 	glDisable(GL_LIGHTING); 
 
@@ -627,7 +567,24 @@ Display( )
 
 	glDisable( GL_DEPTH_TEST );
 	glColor3f( 0.f, 1.f, 1.f );
-	//DoRasterString( 0.f, 1.f, 0.f, (char *)"Text That Moves" );
+	DoRasterString(-5.5f, 0.f, -5.5f, (char*)"Shininess:"); 
+	char snum[4]; 
+	for (int i = 0; i < 8; i++)
+	{
+		if (NowMaterialType == SHINE)
+		{
+			itoa((1 << i), snum, 10);
+			DoRasterString(i * 1.1 - 7.7 / 2, 0.f, -5.5f, (char*)snum);
+		}
+		else if (NowMaterialType == ROUGH)
+		{
+			char shine[10] = "1/";
+			itoa((1 << i), snum, 10);
+			strcat(shine, snum);
+			DoRasterString(i * 1.1 - 7.7 / 2, 0.f, -5.5f, (char*)shine);
+		}
+
+	}
 
 
 	// draw some gratuitous text that is fixed on the screen:
@@ -1014,7 +971,7 @@ InitLists( )
 	glNewList( StrawberryDL, GL_COMPILE );
 		glPushMatrix();
 			glScalef(0.2, 0.2, 0.2); 
-            LoadObjFile( (char *) "strawberry_50p.obj"); 
+            LoadObjFile( (char *) "strawberry_100p.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -1146,6 +1103,11 @@ Keyboard( unsigned char c, int x, int y )
 			NowLightType = SPOTLIGHT;
 			break;				// happy compiler
 
+		case 'm':
+		case 'M':
+			NowMaterialType ^= 1; 
+			break;
+
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
 	}
@@ -1271,6 +1233,7 @@ Reset( )
 	NowColor = WHITE_COL;
 	NowProjection = PERSP;
 	NowLightType = POINTLIGHT;
+	NowMaterialType = SHINE;
 	Xrot = Yrot = 0.;
 }
 
@@ -1539,4 +1502,147 @@ Unit( float v[3] )
 		v[2] /= dist;
 	}
 	return dist;
+}
+
+void
+draw_with_shine()
+{
+	glPushMatrix();
+		glTranslatef(-5, 0, -4);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(1, 0., 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( StrawberryDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0, -2);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0., 1, 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( WormDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0, 0);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0., 0., 1., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( PenguinDL );
+		}
+	glPopMatrix();
+
+	// OSU Shapes
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 1.3);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(1, 0., 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( SphereDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 2.55);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0, 1., 0., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( ConeDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 4);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0, 0., 1., shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( TorusDL );
+		}
+	glPopMatrix();
+
+}
+
+void
+draw_with_rough()
+{
+	glPushMatrix();
+		glTranslatef(-5, 0, -4);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(1, 0., 0., 1 / (float) shininess);
+			glTranslatef(1.1, 0, 0);
+			glCallList( StrawberryDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0, -2);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0., 1, 0., 1 / (float)shininess); 
+			glTranslatef(1.1, 0, 0);
+			glCallList( WormDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0, 0);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0., 0., 1., 1 / (float)shininess); 
+			glTranslatef(1.1, 0, 0);
+			glCallList( PenguinDL );
+		}
+	glPopMatrix();
+
+	// OSU Shapes
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 1.3);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(1, 0., 0., 1 / (float)shininess); 
+			glTranslatef(1.1, 0, 0);
+			glCallList( SphereDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 2.55);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0, 1., 0., 1 / (float)shininess); 
+			glTranslatef(1.1, 0, 0);
+			glCallList( ConeDL );
+		}
+	glPopMatrix();
+
+	glPushMatrix();
+		glTranslatef(-5, 0.5, 4);
+		for (int i = 0; i < 8; i++)
+		{
+			shininess = 1 << i; 
+			SetMaterial(0, 0., 1., 1 / (float)shininess); 
+			glTranslatef(1.1, 0, 0);
+			glCallList( TorusDL );
+		}
+	glPopMatrix();
 }
