@@ -457,7 +457,7 @@ Display( )
 	// set the eye position, look-at position, and up-vector:
 
 	//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be coal miners hat
-	gluLookAt( 0.f, 3.f, 5.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	gluLookAt( 0.f, 3.f, 0.1f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
 
 	//SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be in relation to scene. 
 	// rotate the scene:
@@ -537,7 +537,7 @@ Display( )
 	glPopMatrix();
 
 	glPushMatrix();
-		SetMaterial(0.5, 0.5, 0.5, 1000);
+		SetMaterial(0.5, 0.5, 0.5, 128);
 		glCallList( GridDL );
 	glPopMatrix();
 
@@ -574,14 +574,14 @@ Display( )
 		if (NowMaterialType == SHINE)
 		{
 			itoa((1 << i), snum, 10);
-			DoRasterString(i * 1.1 - 7.7 / 2, 0.f, -5.5f, (char*)snum);
+			DoRasterString(i * 1.1f - 7.7f / 2, 0.f, -5.5f, (char*)snum);
 		}
 		else if (NowMaterialType == ROUGH)
 		{
 			char shine[10] = "1/";
 			itoa((1 << i), snum, 10);
 			strcat(shine, snum);
-			DoRasterString(i * 1.1 - 7.7 / 2, 0.f, -5.5f, (char*)shine);
+			DoRasterString(i * 1.1f - 7.7f / 2, 0.f, -5.5f, (char*)shine);
 		}
 
 	}
@@ -962,7 +962,7 @@ InitLists( )
 	LightBulbDL = glGenLists( 1 );
 	glNewList( LightBulbDL, GL_COMPILE );
 		glPushMatrix();
-			OsuSphere(.1, 10, 10);
+			OsuSphere(.1f, 10, 10);
 		glPopMatrix();
 	glEndList( );
 
@@ -987,7 +987,7 @@ InitLists( )
 	PenguinDL = glGenLists( 1 );
 	glNewList( PenguinDL, GL_COMPILE );
 		glPushMatrix();
-			glScalef(1.5, 1.5, 1.5);
+			glScalef(1.5f, 1.5f, 1.5f);
             LoadObjFile( (char *) "penguin.obj"); 
 		glPopMatrix();
 	glEndList( );
@@ -996,7 +996,7 @@ InitLists( )
 	SphereDL = glGenLists( 1 );
 	glNewList( SphereDL, GL_COMPILE );
 		glPushMatrix();
-			OsuSphere(.5, 500, 500);
+			OsuSphere(.5f, 500, 500);
             //LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/Strawberry_obj.obj"); 
 		glPopMatrix();
 	glEndList( );
@@ -1004,15 +1004,15 @@ InitLists( )
 	ConeDL = glGenLists( 1 );
 	glNewList( ConeDL, GL_COMPILE );
 		glPushMatrix();
-			OsuCone(0.5, 0.01, 0.75, 500, 500);
+			OsuCone(0.5f, 0.01f, 0.75f, 500, 500);
 		glPopMatrix();
 	glEndList( );
 
 	TorusDL = glGenLists( 1 );
 	glNewList( TorusDL, GL_COMPILE );
 		glPushMatrix();
-			glScalef(0.5, 0.5, 0.5);
-			OsuTorus(.25, 0.75, 500, 500);
+			glScalef(0.5f, 0.5f, 0.5f);
+			OsuTorus(.25f, 0.75f, 500, 500);
 		glPopMatrix();
 	glEndList( );
 
@@ -1221,17 +1221,17 @@ void
 Reset( )
 {
 	ActiveButton = 0;
-	AxesOn = 1;
+	AxesOn = 0;
 	DebugOn = 0;
 	DepthBufferOn = 1;
 	DepthFightingOn = 0;
 	DepthCueOn = 0;
 	Frozen = false;
     Light_Z = 0.5;
-	Scale  = 1.0;
+	Scale = 0.32;
 	ShadowsOn = 0;
 	NowColor = WHITE_COL;
-	NowProjection = PERSP;
+	NowProjection = ORTHO;
 	NowLightType = POINTLIGHT;
 	NowMaterialType = SHINE;
 	Xrot = Yrot = 0.;
