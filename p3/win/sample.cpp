@@ -459,7 +459,7 @@ Display( )
 	//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be coal miners hat
 	gluLookAt( 0.f, 3.f, 5.5f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
 
-	SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be 
+	//SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be in relation to scene. 
 	// rotate the scene:
 
 	glRotatef( (GLfloat)Yrot, 0.f, 1.f, 0.f );
@@ -527,12 +527,12 @@ Display( )
 		glCallList( LightBulbDL );
 		glEnable(GL_LIGHTING);
 
-		//if (NowLightType == POINTLIGHT)
+		if (NowLightType == POINTLIGHT)
 			//SetPointLight( int ilight, float x, float y, float z,  float r, float g, float b )
-			//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
-		//else if (NowLightType == SPOTLIGHT)
+			SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+		else if (NowLightType == SPOTLIGHT)
 			//SetSpotLight( int ilight, float x, float y, float z,  float xdir, float ydir, float zdir, float r, float g, float b )
-			//SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+			SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 
 	glPopMatrix();
 
