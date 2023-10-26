@@ -573,13 +573,15 @@ Display( )
 	{
 		if (NowMaterialType == SHINE)
 		{
-			itoa((1 << i), snum, 10);
+			//itoa((1 << i), snum, 10);
+            snprintf(snum, 4, "%d", (1<<i));
 			DoRasterString(i * 1.1f - 7.7f / 2, 0.f, -5.5f, (char*)snum);
 		}
 		else if (NowMaterialType == ROUGH)
 		{
 			char shine[10] = "1/";
-			itoa((1 << i), snum, 10);
+			//itoa((1 << i), snum, 10);
+            snprintf(snum, 4, "%d", (1<<i));
 			strcat(shine, snum);
 			DoRasterString(i * 1.1f - 7.7f / 2, 0.f, -5.5f, (char*)shine);
 		}
@@ -971,7 +973,7 @@ InitLists( )
 	glNewList( StrawberryDL, GL_COMPILE );
 		glPushMatrix();
 			glScalef(0.2, 0.2, 0.2); 
-            LoadObjFile( (char *) "strawberry_100p.obj"); 
+            LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/strawberry_10p.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -980,7 +982,7 @@ InitLists( )
 		glPushMatrix();
 			glScalef(0.01, 0.01, 0.01); 
 			glRotatef(-45, 0, 1, 0);
-            LoadObjFile( (char *) "worm.obj"); 
+            LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/worm.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -988,7 +990,7 @@ InitLists( )
 	glNewList( PenguinDL, GL_COMPILE );
 		glPushMatrix();
 			glScalef(1.5f, 1.5f, 1.5f);
-            LoadObjFile( (char *) "penguin.obj"); 
+            LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/penguin.obj"); 
 		glPopMatrix();
 	glEndList( );
 
