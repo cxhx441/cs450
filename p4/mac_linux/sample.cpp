@@ -204,7 +204,7 @@ const float	WHITE[ ] = { 1.,1.,1.,1. };
 
 // for animation:
 
-const int MS_PER_CYCLE = 5000;		// 10000 milliseconds = 10 seconds
+const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 
 
 // what options should we compile-in?
@@ -233,12 +233,14 @@ int		NowMaterialType;			// ORTHO or PERSP
 int		NowLightType;			// ORTHO or PERSP
 float	Scale;					// scaling factor
 int		ShadowsOn;				// != 0 means to turn shadows on
-float	Time;					// used for animation, this has a value between 0. and 1.
+float	TimeFraction;	    	// used for animation, this has a value between 0. and 1.
+float	TimeCycleElapsed;		// used for keytimes; goes from 0 to MS_PER_CYCLE-1;
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 bool    Frozen;					// whether the animation is frozen or not
 float   Triangle_X;
 int		shininess;				// for use on object shine
+                                //
 
 // function prototypes:
 
@@ -324,8 +326,10 @@ MulArray3(float factor, float a, float b, float c )
 //#include "osutorus.cpp"
 //#include "bmptotexture.cpp"
 #include "loadobjfile.cpp"
-//#include "keytime.cpp"
+#include "keytime.cpp"
 //#include "glslprogram.cpp"
+
+Keytimes Xpos1;
 
 
 // main program:
@@ -383,7 +387,9 @@ Animate( )
 
 	int ms = glutGet(GLUT_ELAPSED_TIME);
 	ms %= MS_PER_CYCLE;							// makes the value of ms between 0 and MS_PER_CYCLE-1
-	Time = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
+	TimeFraction = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
+	TimeCycleElapsed = (float)ms / 1000;		// makes the value of Time between 0. and slightly less than 1.
+
 
 	// for example, if you wanted to spin an object in Display( ), you might call: glRotatef( 360.f*Time,   0., 1., 0. );
 
@@ -541,7 +547,7 @@ Display( )
 	glPushMatrix();
 		SetMaterial(1, 0.8, 0., 128);
 		glTranslatef(Triangle_X, 1.5, Triangle_X);
-		glRotatef(360 * Time * -2, 1, 1, 1);
+		glRotatef(360 * TimeFraction * -2, 1, 1, 1);
 		glCallList( TriangleDL );
 	glPopMatrix();
 
@@ -549,7 +555,7 @@ Display( )
 	glPushMatrix();
 		SetMaterial(1, 0.8, 0., 128);
 		glTranslatef(-Triangle_X, 1.5, -Triangle_X);
-		glRotatef(360 * Time * -2, 1, 1, 1);
+		glRotatef(360 * TimeFraction * -2, 1, 1, 1);
 		glCallList( TriangleDL );
 	glPopMatrix();
 
@@ -558,7 +564,7 @@ Display( )
 	glPushMatrix();
 		SetMaterial(1, 0.8, 0., 128);
 		glTranslatef(Triangle_X, 1.5, -Triangle_X);
-		glRotatef(360 * Time * 2, 1, 1, 1);
+		glRotatef(360 * TimeFraction * 2, 1, 1, 1);
 		glCallList( TriangleDL );
 	glPopMatrix();
 
@@ -566,7 +572,17 @@ Display( )
 	glPushMatrix();
 		SetMaterial(1, 0.8, 0., 128);
 		glTranslatef(-Triangle_X, 1.5, Triangle_X);
-		glRotatef(360 * Time *2, 1, 1, 1);
+		glRotatef(360 * TimeFraction *2, 1, 1, 1);
+		glCallList( TriangleDL );
+	glPopMatrix();
+
+    // using Keytimes
+	glPushMatrix();
+		SetMaterial(1, 0.2, 0., 128);
+        glTranslatef( Xpos1.GetValue( TimeCycleElapsed ), 0., 0. );
+		// glRotatef( 0.,  1., 0., 0. );
+		// glRotatef( 0.,  0., 1., 0. );
+		// glRotatef( 0.,  0., 0., 1. );
 		glCallList( TriangleDL );
 	glPopMatrix();
 
@@ -590,7 +606,10 @@ Display( )
 
 	glDisable( GL_DEPTH_TEST );
 	glColor3f( 0.f, 1.f, 1.f );
+    char thistime[10];
+    snprintf(thistime, 10, "%f", TimeCycleElapsed); 
 	//DoRasterString(-5.5f, 0.f, -5.5f, (char*)"Shininess:"); 
+	DoRasterString(-5.5f, 0.f, -5.5f, (char*)thistime); 
 
 
 	// draw some gratuitous text that is fixed on the screen:
@@ -928,6 +947,16 @@ InitGraphics( )
 #endif
 
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
+
+    //KEYTIMES
+    Xpos1.Init( );
+    Xpos1.AddTimeValue( 0.0, 0.000 ); 
+    Xpos1.AddTimeValue(  0.0,  0.000 );
+	Xpos1.AddTimeValue(  0.5,  2.718 );
+	Xpos1.AddTimeValue(  2.0,  0.333 );
+	Xpos1.AddTimeValue(  5.0,  3.142 );
+	Xpos1.AddTimeValue(  8.0,  2.718 );
+	Xpos1.AddTimeValue( 10.0,  0.000 );
 
 }
 
