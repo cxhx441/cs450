@@ -973,7 +973,7 @@ InitLists( )
 	glNewList( StrawberryDL, GL_COMPILE );
 		glPushMatrix();
 			glScalef(0.2, 0.2, 0.2); 
-            LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/strawberry_10p.obj"); 
+            LoadObjFile( (char *) "git_repos/cs450/OBJs/strawberry_10p.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -982,7 +982,7 @@ InitLists( )
 		glPushMatrix();
 			glScalef(0.01, 0.01, 0.01); 
 			glRotatef(-45, 0, 1, 0);
-            LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/worm.obj"); 
+            LoadObjFile( (char *) "git_repos/cs450/OBJs/worm.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -990,7 +990,7 @@ InitLists( )
 	glNewList( PenguinDL, GL_COMPILE );
 		glPushMatrix();
 			glScalef(1.5f, 1.5f, 1.5f);
-            LoadObjFile( (char *) "git_repos/cs450/p3/mac_linux/penguin.obj"); 
+            LoadObjFile( (char *) "git_repos/cs450/OBJs/penguin.obj"); 
 		glPopMatrix();
 	glEndList( );
 

@@ -977,7 +977,7 @@ InitLists( )
 	glNewList( TriangleDL, GL_COMPILE );
 		glPushMatrix();
 			//glScalef(0.2, 0.2, 0.2); 
-            LoadObjFile( (char *) "git_repos/cs450/p4/mac_linux/Triangle.obj"); 
+            LoadObjFile( (char *) "git_repos/cs450/OBJs/Triangle.obj"); 
 		glPopMatrix();
 	glEndList( );
 
