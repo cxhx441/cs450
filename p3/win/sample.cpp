@@ -971,7 +971,7 @@ InitLists( )
 	glNewList( StrawberryDL, GL_COMPILE );
 		glPushMatrix();
 			glScalef(0.2, 0.2, 0.2); 
-            LoadObjFile( (char *) "strawberry_100p.obj"); 
+            LoadObjFile( (char *)  "..\\..\\OBJs\\strawberry_100p.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -980,7 +980,7 @@ InitLists( )
 		glPushMatrix();
 			glScalef(0.01, 0.01, 0.01); 
 			glRotatef(-45, 0, 1, 0);
-            LoadObjFile( (char *) "worm.obj"); 
+            LoadObjFile( (char *)  "..\\..\\OBJs\\worm.obj"); 
 		glPopMatrix();
 	glEndList( );
 
@@ -988,7 +988,7 @@ InitLists( )
 	glNewList( PenguinDL, GL_COMPILE );
 		glPushMatrix();
 			glScalef(1.5f, 1.5f, 1.5f);
-            LoadObjFile( (char *) "penguin.obj"); 
+            LoadObjFile( (char *) "..\\..\\OBJs\\penguin.obj"); 
 		glPopMatrix();
 	glEndList( );
 
