@@ -221,7 +221,10 @@ GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
 GLuint	GridDL;					// object display list
 GLuint	LightBulbDL;			// object display list
-GLuint  TriangleDL; 
+GLuint  PingPongTableDL; 
+GLuint  PingPongPaddleUsDL; 
+GLuint  PingPongPaddleThemDL; 
+GLuint  PingPongBallDL; 
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -510,7 +513,9 @@ Display( )
 
 	// draw the scence objects by calling up display list:
 	glPushMatrix();
-		glTranslatef(0, 2.5, 0);
+		float x = cos(F_2_PI * TimeFraction*4); 
+		float z = sin(F_2_PI * TimeFraction*4); 
+		glTranslatef(x, 1.5, z);
 		//if (Time < 0.5)
 		//{
 		//	glTranslatef(-XSIDE / 2, 1.5, Light_Z);
@@ -536,54 +541,34 @@ Display( )
 
 	glPopMatrix();
 
-	glPushMatrix();
-		SetMaterial(0.5, 0.5, 0.5, 1);
-		glCallList( GridDL );
-	glPopMatrix();
+	//glPushMatrix();
+	//	SetMaterial(0.5, 0.5, 0.5, 1);
+	//	glCallList( GridDL );
+	//glPopMatrix();
 
 	//OBJs
 	Triangle_X -= 0.01;
-	//top_right
 	glPushMatrix();
-		SetMaterial(1, 0.8, 0., 128);
-		glTranslatef(Triangle_X, 1.5, Triangle_X);
-		glRotatef(360 * TimeFraction * -2, 1, 1, 1);
-		glCallList( TriangleDL );
+		glTranslatef(0, 0.5, 0);
+		//glRotatef(360 * TimeFraction * -2, 1, 1, 1);
+		glCallList( PingPongPaddleUsDL );
 	glPopMatrix();
 
-	//bottom_left
 	glPushMatrix();
-		SetMaterial(1, 0.8, 0., 128);
-		glTranslatef(-Triangle_X, 1.5, -Triangle_X);
-		glRotatef(360 * TimeFraction * -2, 1, 1, 1);
-		glCallList( TriangleDL );
-	glPopMatrix();
-
-
-	//bottom_right
-	glPushMatrix();
-		SetMaterial(1, 0.8, 0., 128);
-		glTranslatef(Triangle_X, 1.5, -Triangle_X);
-		glRotatef(360 * TimeFraction * 2, 1, 1, 1);
-		glCallList( TriangleDL );
-	glPopMatrix();
-
-	//top_left
-	glPushMatrix();
-		SetMaterial(1, 0.8, 0., 128);
-		glTranslatef(-Triangle_X, 1.5, Triangle_X);
-		glRotatef(360 * TimeFraction *2, 1, 1, 1);
-		glCallList( TriangleDL );
+		glTranslatef(0, 0.5, 0);
+		//glRotatef(360 * TimeFraction * -2, 1, 1, 1);
+		glCallList( PingPongPaddleThemDL );
 	glPopMatrix();
 
     // using Keytimes
 	glPushMatrix();
-		SetMaterial(1, 0.2, 0., 128);
-        glTranslatef( Xpos1.GetValue( TimeCycleElapsed ), 0., 0. );
-		// glRotatef( 0.,  1., 0., 0. );
-		// glRotatef( 0.,  0., 1., 0. );
-		// glRotatef( 0.,  0., 0., 1. );
-		glCallList( TriangleDL );
+        //glTranslatef( Xpos1.GetValue( TimeCycleElapsed ), 0., 0. );
+		glCallList( PingPongTableDL );
+	glPopMatrix();
+
+	glPushMatrix();
+        //glTranslatef( Xpos1.GetValue( TimeCycleElapsed ), 0., 0. );
+		glCallList( PingPongBallDL );
 	glPopMatrix();
 
 	glDisable(GL_LIGHTING); 
@@ -1002,11 +987,50 @@ InitLists( )
 	glEndList( );
 
 	// OBJ shapes
-	TriangleDL = glGenLists( 1 );
-	glNewList( TriangleDL, GL_COMPILE );
+	PingPongTableDL = glGenLists( 1 );
+	glNewList( PingPongTableDL, GL_COMPILE );
 		glPushMatrix();
-			//glScalef(0.2, 0.2, 0.2); 
-            LoadObjFile( (char *) "..\\..\\OBJs\\Triangle.obj"); 
+			glScalef(5, 5, 5);
+			SetMaterial(0.2, 0.5, 0.2, 1);
+			glRotatef(90, 0, 1, 0);
+            LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_table.obj"); 
+		glPopMatrix();
+	glEndList( );
+
+	PingPongPaddleUsDL = glGenLists( 1 );
+	glNewList( PingPongPaddleUsDL, GL_COMPILE );
+		glPushMatrix();
+			glScalef(5, 5, 5);
+			glTranslatef(0, 0, 1.6);
+			glTranslatef(-0.1, 0, 0);
+			glRotatef(45, 0, 0, 1);
+			glRotatef(-90, 1, 0, 0);
+			glRotatef(-90, 0, 1, 0);
+			SetMaterial(0.5, 0.2, 0, 1);
+            LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_paddle.obj"); 
+		glPopMatrix();
+	glEndList( );
+
+	PingPongPaddleThemDL = glGenLists( 1 );
+	glNewList( PingPongPaddleThemDL, GL_COMPILE );
+		glPushMatrix();
+			glScalef(5, 5, 5);
+			glTranslatef(0, 0, -1.6);
+			glTranslatef(0.1, 0, 0);
+			glRotatef(-45, 0, 0, 1);
+			glRotatef(90, 1, 0, 0);
+			glRotatef(90, 0, 1, 0);
+			SetMaterial(0, 0.2, 0.5, 1);
+            LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_paddle.obj"); 
+		glPopMatrix();
+	glEndList( );
+
+	PingPongBallDL = glGenLists( 1 );
+	glNewList( PingPongBallDL, GL_COMPILE );
+		glPushMatrix();
+			glTranslatef(0, 0.9, 0);
+			SetMaterial(0.8, 0.8, 0.8, 8);
+			OsuSphere(0.1f, 10, 10);
 		glPopMatrix();
 	glEndList( );
 
