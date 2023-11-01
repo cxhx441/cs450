@@ -558,30 +558,29 @@ Display( )
 	//	glCallList( GridDL );
 	//glPopMatrix();
 
-	//OBJs
-	Triangle_X -= 0.01;
+	//US_PADDLE
 	glPushMatrix();
-		glTranslatef(0, 0.5, 8);
-		//glRotatef(360 * TimeFraction * -2, 1, 1, 1);
+		glTranslatef(paddle_us_x.GetValue(TimeCycleElapsed, true), paddle_us_y.GetValue(TimeCycleElapsed, true), 8);
+		glRotatef(paddle_us_rotation.GetValue(TimeCycleElapsed, true), 0, 1, 0);
 		glCallList( PingPongPaddleUsDL );
 	glPopMatrix();
 
+	//THEM_PADDLE
 	glPushMatrix();
-		glTranslatef(0, 0.5, -8);
-		glRotatef(paddle_them_rotation.GetValue(TimeCycleElapsed), 0, 1, 0);
+		glTranslatef(paddle_them_x.GetValue(TimeCycleElapsed, true), 0.5, -8);
+		glRotatef(paddle_them_rotation.GetValue(TimeCycleElapsed, true), 0, 1, 0);
 		glCallList( PingPongPaddleThemDL );
 	glPopMatrix();
 
-    // using Keytimes
+	//TABLE
 	glPushMatrix();
         //glTranslatef( Xpos1.GetValue( TimeCycleElapsed ), 0., 0. );
 		glCallList( PingPongTableDL );
 	glPopMatrix();
 
+	//BALL
 	glPushMatrix();
-        //glTranslatef( Xpos1.GetValue( TimeCycleElapsed ), 0., 0. );
-		//glTranslatef(0, 1, 8);
-		glTranslatef(ball_x.GetValue(TimeCycleElapsed), ball_y.GetValue(TimeCycleElapsed), ball_z.GetValue(TimeCycleElapsed));
+		glTranslatef(ball_x.GetValue(TimeCycleElapsed, true), ball_y.GetValue(TimeCycleElapsed, true), ball_z.GetValue(TimeCycleElapsed, true));
 		glCallList( PingPongBallDL );
 	glPopMatrix();
 
@@ -963,19 +962,22 @@ InitGraphics( )
 	paddle_us_rotation.AddTimeValue(0, 0);
 	paddle_them_rotation.AddTimeValue(0, 0);
 	// ball start at paddle_us
-	ball_x.AddTimeValue(0.0, 0);
+	ball_x.AddTimeValue(0.0, -2.9);
 	ball_y.AddTimeValue(0.0, 1);
 	ball_z.AddTimeValue(0.0, 8);
+	paddle_us_x.AddTimeValue(0.0, -3.5);
+	paddle_them_x.AddTimeValue(0.0, 3.5);
 
 	// ball toss upn for serv;
 	ball_y.AddTimeValue(0.5, 2.5);
 	// come down, hit!
+	ball_x.AddTimeValue(1.0, -2.9);
 	ball_y.AddTimeValue(1.0, 1);
 	ball_z.AddTimeValue(1.0, 8);
 	paddle_us_rotation.AddTimeValue(0, 0);
-	paddle_us_rotation.AddTimeValue(0.5, 45);
+	paddle_us_rotation.AddTimeValue(0.5, -45);
 	paddle_us_rotation.AddTimeValue(1, 0);
-	paddle_us_rotation.AddTimeValue(1.25, -45);
+	paddle_us_rotation.AddTimeValue(1.25, 45);
 	paddle_us_rotation.AddTimeValue(2, 0);
 
 	// ball bounce on their side once
@@ -983,6 +985,7 @@ InitGraphics( )
 	ball_z.AddTimeValue(2.5, -6);
 
 	//ball bounce up to their paddle and return;
+	ball_x.AddTimeValue(3, 2.9);
 	ball_y.AddTimeValue(3, 1);
 	ball_z.AddTimeValue(3, -8);
 	paddle_them_rotation.AddTimeValue(2.25, 0);
@@ -996,12 +999,13 @@ InitGraphics( )
 	ball_z.AddTimeValue(4.5, 6);
 
 	// ball bounce up to our paddle and return
+	ball_x.AddTimeValue(5, -2.9);
 	ball_y.AddTimeValue(5, 1);
 	ball_z.AddTimeValue(5, 8);
 	paddle_us_rotation.AddTimeValue(4.25, 0);
-	paddle_us_rotation.AddTimeValue(4.5, 45);
+	paddle_us_rotation.AddTimeValue(4.5, -45);
 	paddle_us_rotation.AddTimeValue(5, 0);
-	paddle_us_rotation.AddTimeValue(5.25, -45);
+	paddle_us_rotation.AddTimeValue(5.25, 45);
 	paddle_us_rotation.AddTimeValue(6, 0);
 
 	// ball bounce on their side once
@@ -1009,9 +1013,9 @@ InitGraphics( )
 	ball_z.AddTimeValue(6.5, -6);
 
 	//ball bounce up to their paddle and return with a sneak shot;
+	ball_x.AddTimeValue(7, 2.9);
 	ball_y.AddTimeValue(7, 1);
 	ball_z.AddTimeValue(7, -8);
-	ball_x.AddTimeValue(7, 0);
 	paddle_them_rotation.AddTimeValue(6.25, 0);
 	paddle_them_rotation.AddTimeValue(6.5, -45);
 	paddle_them_rotation.AddTimeValue(7, 0);
@@ -1028,6 +1032,14 @@ InitGraphics( )
 	ball_x.AddTimeValue(9, 3);
 	ball_y.AddTimeValue(10, 2.5);
 	ball_z.AddTimeValue(10, 15);
+	// throw paddle
+	paddle_us_x.AddTimeValue(8.5, -3.5);
+	paddle_us_x.AddTimeValue(10, 15); 
+	paddle_us_y.AddTimeValue(8.5, 0.5); 
+	paddle_us_rotation.AddTimeValue(8.5, 0);
+	paddle_us_rotation.AddTimeValue(9, 360);
+	paddle_us_rotation.AddTimeValue(10, 720);
+	paddle_us_y.AddTimeValue(10, -4); 
 
     //Xpos1.AddTimeValue( 0.0, 0.000 ); 
     //Xpos1.AddTimeValue(  0.0,  0.000 );
