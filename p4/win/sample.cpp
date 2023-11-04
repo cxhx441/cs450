@@ -335,16 +335,24 @@ MulArray3(float factor, float a, float b, float c )
 Keytimes ball_x;
 Keytimes ball_y;
 Keytimes ball_z;
+Keytimes ball_color_R; 
 
 Keytimes paddle_us_x;
 Keytimes paddle_us_y;
 Keytimes paddle_us_z;
 Keytimes paddle_us_rotation;
+Keytimes paddle_us_color_r;
 
 Keytimes paddle_them_x;
 Keytimes paddle_them_y;
 Keytimes paddle_them_z;
 Keytimes paddle_them_rotation;
+Keytimes paddle_them_color_g;
+
+
+Keytimes light_z; 
+
+Keytimes lookat_pos_z; 
 
 
 // main program:
@@ -471,7 +479,7 @@ Display( )
 	// set the eye position, look-at position, and up-vector:
 
 	//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be coal miners hat
-	gluLookAt( 5.f, 2.f, 2.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	gluLookAt( 5.f, 2.f, lookat_pos_z.GetValue(TimeCycleElapsed), 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
 	//SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be in relation to scene. 
 	// rotate the scene:
@@ -525,19 +533,7 @@ Display( )
 
 	// draw the scence objects by calling up display list:
 	glPushMatrix();
-		float x = cos(F_2_PI * TimeFraction*4); 
-		float z = sin(F_2_PI * TimeFraction*4); 
-		glTranslatef(x, 1.5, z);
-		//if (Time < 0.5)
-		//{
-		//	glTranslatef(-XSIDE / 2, 1.5, Light_Z);
-		//	glTranslatef(XSIDE * Time * 2, 0, 0);
-		//}
-		//else
-		//{
-		//	glTranslatef(XSIDE*1.5, 1.5, Light_Z);
-		//	glTranslatef(-XSIDE * Time * 2, 0, 0);
-		//}
+		glTranslatef(0, 5, light_z.GetValue(TimeCycleElapsed, true));
 
 		glDisable(GL_LIGHTING);
 		glColor3fv(&Colors[NowColor][0]);
@@ -550,7 +546,6 @@ Display( )
 		else if (NowLightType == SPOTLIGHT)
 			//SetSpotLight( int ilight, float x, float y, float z,  float xdir, float ydir, float zdir, float r, float g, float b )
 			SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
-
 	glPopMatrix();
 
 	//glPushMatrix();
@@ -560,15 +555,17 @@ Display( )
 
 	//US_PADDLE
 	glPushMatrix();
-		glTranslatef(paddle_us_x.GetValue(TimeCycleElapsed, true), paddle_us_y.GetValue(TimeCycleElapsed, true), 8);
+		glTranslatef(paddle_us_x.GetValue(TimeCycleElapsed, true), paddle_us_y.GetValue(TimeCycleElapsed, true), paddle_us_z.GetValue(TimeCycleElapsed, true));
 		glRotatef(paddle_us_rotation.GetValue(TimeCycleElapsed, true), 0, 1, 0);
+		SetMaterial(paddle_us_color_r.GetValue(TimeCycleElapsed), 0.2, 0, 1);
 		glCallList( PingPongPaddleUsDL );
 	glPopMatrix();
 
 	//THEM_PADDLE
 	glPushMatrix();
-		glTranslatef(paddle_them_x.GetValue(TimeCycleElapsed, true), 0.5, -8);
+		glTranslatef(paddle_them_x.GetValue(TimeCycleElapsed, true), paddle_them_y.GetValue(TimeCycleElapsed, true), paddle_them_z.GetValue(TimeCycleElapsed, true));
 		glRotatef(paddle_them_rotation.GetValue(TimeCycleElapsed, true), 0, 1, 0);
+		SetMaterial(0, 0.2, paddle_them_color_g.GetValue(TimeCycleElapsed), 1);
 		glCallList( PingPongPaddleThemDL );
 	glPopMatrix();
 
@@ -581,6 +578,8 @@ Display( )
 	//BALL
 	glPushMatrix();
 		glTranslatef(ball_x.GetValue(TimeCycleElapsed, true), ball_y.GetValue(TimeCycleElapsed, true), ball_z.GetValue(TimeCycleElapsed, true));
+		float ball_color_R_modifier = ball_color_R.GetValue(TimeCycleElapsed);
+		SetMaterial(0.8, 0.8 - ball_color_R_modifier, 0.8 - ball_color_R_modifier, 8);
 		glCallList( PingPongBallDL );
 	glPopMatrix();
 
@@ -947,17 +946,33 @@ InitGraphics( )
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
 
     //KEYTIMES
+	float lookat_pos_z_mag = 4;
+	float paddle_y_home = 0.5;
+	float paddle_us_x_home = -3.5;
+	float paddle_them_x_home = 3.5;
+	float paddle_us_z_home = 8;
+	float paddle_them_z_home = -8;
+	float paddle_x_waver = 0.5;
+	float paddle_y_waver = 0.5;
+	float paddle_z_waver = 0.5;
+	float paddle_us_color_r_home = 0.3;
+	float paddle_them_color_g_home = 0.3;
     ball_x.Init( );
     ball_y.Init( );
     ball_z.Init( );
+	ball_color_R.Init();
 	paddle_us_x.Init();
 	paddle_us_y.Init();
 	paddle_us_z.Init();
 	paddle_us_rotation.Init();
+	paddle_us_color_r.Init();
 	paddle_them_x.Init();
 	paddle_them_y.Init();
 	paddle_them_z.Init();
 	paddle_them_rotation.Init();
+	paddle_them_color_g.Init();
+	light_z.Init();
+	lookat_pos_z.Init();
 
 	paddle_us_rotation.AddTimeValue(0, 0);
 	paddle_them_rotation.AddTimeValue(0, 0);
@@ -965,75 +980,164 @@ InitGraphics( )
 	ball_x.AddTimeValue(0.0, -2.9);
 	ball_y.AddTimeValue(0.0, 1);
 	ball_z.AddTimeValue(0.0, 8);
-	paddle_us_x.AddTimeValue(0.0, -3.5);
-	paddle_them_x.AddTimeValue(0.0, 3.5);
+	light_z.AddTimeValue(0.0, 8);
+	lookat_pos_z.AddTimeValue(0.0, lookat_pos_z_mag);
+	ball_color_R.AddTimeValue(0.0, 0);
+	paddle_us_x.AddTimeValue(0.0, paddle_us_x_home);
+	paddle_us_y.AddTimeValue(0.0, paddle_y_home);
+	paddle_us_z.AddTimeValue(0.0, paddle_us_z_home);
+	paddle_us_color_r.AddTimeValue(0.0, paddle_us_color_r_home);
+	paddle_them_x.AddTimeValue(0.0, paddle_them_x_home);
+	paddle_them_y.AddTimeValue(0.0, paddle_y_home);
+	paddle_them_z.AddTimeValue(0.0, paddle_them_z_home);
+	paddle_them_color_g.AddTimeValue(0.0, paddle_them_color_g_home);
 
-	// ball toss upn for serv;
+	// ball toss up for serv;
 	ball_y.AddTimeValue(0.5, 2.5);
 	// come down, hit!
 	ball_x.AddTimeValue(1.0, -2.9);
 	ball_y.AddTimeValue(1.0, 1);
 	ball_z.AddTimeValue(1.0, 8);
+	light_z.AddTimeValue(1.0, 8);
+	lookat_pos_z.AddTimeValue(1.0, lookat_pos_z_mag);
+	ball_color_R.AddTimeValue(0.999, 0);
+	ball_color_R.AddTimeValue(1.0, 0.8);
 	paddle_us_rotation.AddTimeValue(0, 0);
 	paddle_us_rotation.AddTimeValue(0.5, -45);
 	paddle_us_rotation.AddTimeValue(1, 0);
 	paddle_us_rotation.AddTimeValue(1.25, 45);
 	paddle_us_rotation.AddTimeValue(2, 0);
+	paddle_us_color_r.AddTimeValue(0.8, paddle_us_color_r_home);
+	paddle_us_color_r.AddTimeValue(1, 1);
+	paddle_us_color_r.AddTimeValue(1.2, paddle_us_color_r_home);
+	// our paddle wavers after hit until next hit
+	paddle_us_x.AddTimeValue(2, paddle_us_x_home-paddle_x_waver);
+	paddle_us_x.AddTimeValue(3, paddle_us_x_home+paddle_x_waver);
+	paddle_us_x.AddTimeValue(4, paddle_us_x_home-paddle_x_waver);
+	paddle_us_x.AddTimeValue(5, paddle_us_x_home);
+	paddle_us_y.AddTimeValue(2, paddle_y_home-paddle_y_waver);
+	paddle_us_y.AddTimeValue(3, paddle_y_home+paddle_y_waver);
+	paddle_us_y.AddTimeValue(5, paddle_y_home);
+	paddle_us_z.AddTimeValue(3, paddle_us_z_home-paddle_z_waver);
+	paddle_us_z.AddTimeValue(4, paddle_us_z_home+paddle_z_waver);
+	paddle_us_z.AddTimeValue(5, paddle_us_z_home);
 
-	// ball bounce on their side once
+
+
+
+	// ball bounce on their side once while our paddle wavers
 	ball_y.AddTimeValue(2.5, 0);
 	ball_z.AddTimeValue(2.5, -6);
+	light_z.AddTimeValue(2.5, -6);
 
 	//ball bounce up to their paddle and return;
 	ball_x.AddTimeValue(3, 2.9);
 	ball_y.AddTimeValue(3, 1);
 	ball_z.AddTimeValue(3, -8);
+	light_z.AddTimeValue(3, -8);
+	lookat_pos_z.AddTimeValue(3.0, -lookat_pos_z_mag);
+	ball_color_R.AddTimeValue(2.999, 0.0);
+	ball_color_R.AddTimeValue(3, 0.8);
 	paddle_them_rotation.AddTimeValue(2.25, 0);
 	paddle_them_rotation.AddTimeValue(2.5, -45);
 	paddle_them_rotation.AddTimeValue(3, 0);
 	paddle_them_rotation.AddTimeValue(3.25, 45);
 	paddle_them_rotation.AddTimeValue(4, 0);
+	paddle_them_color_g.AddTimeValue(2.8, paddle_them_color_g_home);
+	paddle_them_color_g.AddTimeValue(3, 1);
+	paddle_them_color_g.AddTimeValue(3.2, paddle_them_color_g_home);
+	// their paddle wavers after hit until next hit
+	paddle_them_x.AddTimeValue(4, paddle_them_x_home-paddle_x_waver);
+	paddle_them_x.AddTimeValue(5, paddle_them_x_home+paddle_x_waver);
+	paddle_them_x.AddTimeValue(6, paddle_them_x_home-paddle_x_waver);
+	paddle_them_x.AddTimeValue(7, paddle_them_x_home);
+	paddle_them_y.AddTimeValue(4, paddle_y_home-paddle_y_waver);
+	paddle_them_y.AddTimeValue(5, paddle_y_home+paddle_y_waver);
+	paddle_them_y.AddTimeValue(7, paddle_y_home);
+	paddle_them_z.AddTimeValue(5, paddle_them_z_home-paddle_z_waver);
+	paddle_them_z.AddTimeValue(6, paddle_them_z_home+paddle_z_waver);
+	paddle_them_z.AddTimeValue(7, paddle_them_z_home);
 
 	// ball bounce on our side once
 	ball_y.AddTimeValue(4.5, 0);
 	ball_z.AddTimeValue(4.5, 6);
+	light_z.AddTimeValue(4.5, 6);
 
 	// ball bounce up to our paddle and return
 	ball_x.AddTimeValue(5, -2.9);
 	ball_y.AddTimeValue(5, 1);
 	ball_z.AddTimeValue(5, 8);
+	light_z.AddTimeValue(5, 8);
+	lookat_pos_z.AddTimeValue(5.0, lookat_pos_z_mag);
+	ball_color_R.AddTimeValue(4.999, 0.0);
+	ball_color_R.AddTimeValue(5, 0.8);
 	paddle_us_rotation.AddTimeValue(4.25, 0);
 	paddle_us_rotation.AddTimeValue(4.5, -45);
 	paddle_us_rotation.AddTimeValue(5, 0);
 	paddle_us_rotation.AddTimeValue(5.25, 45);
 	paddle_us_rotation.AddTimeValue(6, 0);
+	paddle_us_color_r.AddTimeValue(4.8, paddle_us_color_r_home);
+	paddle_us_color_r.AddTimeValue(5, 1);
+	paddle_us_color_r.AddTimeValue(5.2, paddle_us_color_r_home);
+	paddle_us_x.AddTimeValue(6, paddle_us_x_home-paddle_x_waver);
+	paddle_us_x.AddTimeValue(7, paddle_us_x_home+paddle_x_waver);
+	paddle_us_x.AddTimeValue(8, paddle_us_x_home-paddle_x_waver);
+	paddle_us_x.AddTimeValue(9, paddle_us_x_home);
+	paddle_us_y.AddTimeValue(6, paddle_y_home-paddle_y_waver);
+	paddle_us_y.AddTimeValue(7, paddle_y_home+paddle_y_waver);
+	paddle_us_y.AddTimeValue(9, paddle_y_home);
+	paddle_us_z.AddTimeValue(7, paddle_us_z_home-paddle_z_waver);
+	paddle_us_z.AddTimeValue(8, paddle_us_z_home+paddle_z_waver);
+	paddle_us_z.AddTimeValue(9, paddle_us_z_home);
 
 	// ball bounce on their side once
 	ball_y.AddTimeValue(6.5, 0);
 	ball_z.AddTimeValue(6.5, -6);
+	light_z.AddTimeValue(6.5, -6);
+	ball_color_R.AddTimeValue(6.5, 0.0);
 
 	//ball bounce up to their paddle and return with a sneak shot;
 	ball_x.AddTimeValue(7, 2.9);
 	ball_y.AddTimeValue(7, 1);
 	ball_z.AddTimeValue(7, -8);
+	light_z.AddTimeValue(7, -8);
+	lookat_pos_z.AddTimeValue(7.0, -lookat_pos_z_mag);
+	ball_color_R.AddTimeValue(6.999, 0.0);
+	ball_color_R.AddTimeValue(7, 0.8);
 	paddle_them_rotation.AddTimeValue(6.25, 0);
 	paddle_them_rotation.AddTimeValue(6.5, -45);
 	paddle_them_rotation.AddTimeValue(7, 0);
 	paddle_them_rotation.AddTimeValue(7.25, 45);
 	paddle_them_rotation.AddTimeValue(8, 0);
+	paddle_them_color_g.AddTimeValue(6.8, paddle_them_color_g_home);
+	paddle_them_color_g.AddTimeValue(7, 1);
+	paddle_them_color_g.AddTimeValue(7.2, paddle_them_color_g_home);
+	paddle_them_x.AddTimeValue(8, paddle_them_x_home-paddle_x_waver);
+	paddle_them_x.AddTimeValue(9, paddle_them_x_home+paddle_x_waver);
+	paddle_them_x.AddTimeValue(10, paddle_them_x_home);
+	paddle_them_y.AddTimeValue(8, paddle_y_home-paddle_y_waver);
+	paddle_them_y.AddTimeValue(9, paddle_y_home+paddle_y_waver);
+	paddle_them_y.AddTimeValue(10, paddle_y_home);
+	paddle_them_z.AddTimeValue(9, paddle_them_z_home-paddle_z_waver);
+	paddle_them_z.AddTimeValue(10, paddle_them_z_home);
 
 	// ball bounce on our side once
 	ball_y.AddTimeValue(8.5, 0);
 	ball_z.AddTimeValue(8.5, 6);
+	light_z.AddTimeValue(8.5, 6);
+	ball_color_R.AddTimeValue(8.999, 0.0);
 
 	// ball bounce up to our paddle and miss
 	ball_y.AddTimeValue(9, 1);
 	ball_z.AddTimeValue(9, 8);
+	light_z.AddTimeValue(9, 8);
+	lookat_pos_z.AddTimeValue(9.0, lookat_pos_z_mag);
 	ball_x.AddTimeValue(9, 3);
 	ball_y.AddTimeValue(10, 2.5);
 	ball_z.AddTimeValue(10, 15);
+	light_z.AddTimeValue(10, 8);
 	// throw paddle
-	paddle_us_x.AddTimeValue(8.5, -3.5);
+	paddle_us_x.AddTimeValue(8.5, paddle_us_x_home);
 	paddle_us_x.AddTimeValue(10, 15); 
 	paddle_us_y.AddTimeValue(8.5, 0.5); 
 	paddle_us_rotation.AddTimeValue(8.5, 0);
@@ -1110,7 +1214,6 @@ InitLists( )
 			glRotatef(45, 0, 0, 1);
 			glRotatef(-90, 1, 0, 0);
 			glRotatef(-90, 0, 1, 0);
-			SetMaterial(0.5, 0.2, 0, 1);
             LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_paddle.obj"); 
 		glPopMatrix();
 	glEndList( );
@@ -1122,7 +1225,6 @@ InitLists( )
 			glRotatef(-45, 0, 0, 1);
 			glRotatef(90, 1, 0, 0);
 			glRotatef(90, 0, 1, 0);
-			SetMaterial(0, 0.2, 0.5, 1);
             LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_paddle.obj"); 
 		glPopMatrix();
 	glEndList( );
@@ -1131,7 +1233,6 @@ InitLists( )
 	glNewList( PingPongBallDL, GL_COMPILE );
 		glPushMatrix();
 			glTranslatef(0, 0.2, 0);
-			SetMaterial(0.8, 0.8, 0.8, 8);
 			OsuSphere(0.1f, 10, 10);
 		glPopMatrix();
 	glEndList( );
@@ -1348,7 +1449,7 @@ Reset( )
 	DepthCueOn = 0;
 	Frozen = false;
     Triangle_X = 5;
-	Scale = 0.32;
+	Scale = 0.20;
 	ShadowsOn = 0;
 	NowColor = WHITE_COL;
 	NowProjection = ORTHO;
