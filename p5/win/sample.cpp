@@ -92,6 +92,7 @@ const int RIGHT  = 1;
 
 // which projection:
 
+
 enum Projections
 {
 	ORTHO,
@@ -207,6 +208,31 @@ int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
 GLuint	LightBulbDL;			// object display list
+GLuint	UnitSphereDL;			// object display list
+GLuint	VenusDL;				// object display list
+GLuint	EarthDL;				// object display list
+GLuint	MarsDL;					// object display list
+GLuint	JupiterDL;				// object display list
+GLuint	SaturnDL;				// object display list
+GLuint	UranusDL;				// object display list
+GLuint	NeptuneDL;				// object display list
+GLuint	VenusTex;				
+GLuint	EarthTex;				
+GLuint	MarsTex;				
+GLuint	JupiterTex;			
+GLuint	SaturnTex;		
+GLuint	UranusTex;	
+GLuint	NeptuneTex;
+GLuint  SelectedPlanetDL; 
+float   SelectedPlanetScale;
+GLuint	SelectedPlanetTexture;
+float   VenusScale = 0.95f;
+float   EarthScale = 1.f;
+float   MarsScale = 0.53f;
+float   JupiterScale = 11.21f;
+float   SaturnScale = 9.45f;
+float   UranusScale = 4.01f;
+float   NeptuneScale = 3.88f;
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -214,7 +240,7 @@ int		DepthFightingOn;		// != 0 means to force the creation of z-fighting
 int		MainWindow;				// window id for main graphics window
 int		NowColor;				// index into Colors[ ]
 int		NowProjection;			// ORTHO or PERSP
-int		NowMaterialType;			// ORTHO or PERSP
+int		NowMaterialType;		
 int		NowLightType;			// ORTHO or PERSP
 float	Scale;					// scaling factor
 int		ShadowsOn;				// != 0 means to turn shadows on
@@ -224,9 +250,8 @@ int 	TimeFreezeOffsetMs;		// used to offset any frozen time.
 bool    Frozen;					// whether the animation is frozen or not
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
-float   Triangle_X;
-int		shininess;				// for use on object shine
-                                //
+int		texture_mode;			// determine if textures are used or not
+int		lighting_mode;			// determine if lighting is used or not
 
 // function prototypes:
 
@@ -305,7 +330,7 @@ MulArray3(float factor, float a, float b, float c )
 
 // these are here for when you need them -- just uncomment the ones you need:
 
-//#include "setmaterial.cpp"
+#include "setmaterial.cpp"
 #include "setlight.cpp"
 #include "osusphere.cpp"
 //#include "osucone.cpp"
@@ -405,9 +430,10 @@ Display( )
 #endif
 
 
-	// specify shading to be flat:
+	// specify shading
 
-	glShadeModel( GL_FLAT );
+	//glShadeModel( GL_FLAT );
+	glShadeModel( GL_SMOOTH );
 
 	// set the viewport to be a square centered in the window:
 
@@ -439,7 +465,7 @@ Display( )
 	// set the eye position, look-at position, and up-vector:
 
 	//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be coal miners hat
-	gluLookAt( 5.f, 2.f, lookat_pos_z.GetValue(TimeCycleElapsed), 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+	gluLookAt( 2.f*SelectedPlanetScale, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
 	//SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be in relation to scene. 
 	// rotate the scene:
@@ -476,73 +502,64 @@ Display( )
 	if( AxesOn != 0 )
 	{
 		glColor3fv( &Colors[NowColor][0] );
+		glScalef(1.25 * SelectedPlanetScale, 1.25 * SelectedPlanetScale, 1.25 * SelectedPlanetScale);
 		glCallList( AxesList );
 	}
 	glPopMatrix();
 
-	glShadeModel(GL_SMOOTH);
-	//glShadeModel(GL_FLAT);
-
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, MulArray3(0.3f, 1.f, 1.f, 1.f)); // setting ambient light to off-white
 	//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE); 
-
+	
 
 	// since we are using glScalef( ), be sure the normals get unitized:
 	glEnable( GL_NORMALIZE );
 
+	// TEXTURE ADDITIONS
+	if (texture_mode == 1)
+		glEnable(GL_TEXTURE_2D);
+	else
+		glDisable(GL_TEXTURE_2D);
+	
+	if (lighting_mode == 1)
+	{
+		glEnable(GL_LIGHTING);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+		glPushMatrix();
+			glRotatef(360 * TimeFraction*1.5, 0, 1, 0);
+			glTranslatef(0, 0.8*SelectedPlanetScale, 1.1*SelectedPlanetScale);
+			glDisable(GL_LIGHTING);
+			//glColor3fv(&Colors[NowColor][0]);
+			//glCallList( LightBulbDL );
+			glEnable(GL_LIGHTING);
+			if (NowLightType == POINTLIGHT)
+				//SetPointLight( int ilight, float x, float y, float z,  float r, float g, float b )
+				SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+			else if (NowLightType == SPOTLIGHT)
+				//SetSpotLight( int ilight, float x, float y, float z,  float xdir, float ydir, float zdir, float r, float g, float b )
+				SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+		glPopMatrix();
+	}
+	else 
+	{
+		glDisable(GL_LIGHTING);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	}
 
 	// draw the scence objects by calling up display list:
-	glPushMatrix();
-		glTranslatef(0, 5, light_z.GetValue(TimeCycleElapsed, true));
-
-		glDisable(GL_LIGHTING);
-		glColor3fv(&Colors[NowColor][0]);
-		glCallList( LightBulbDL );
-		glEnable(GL_LIGHTING);
-
-		if (NowLightType == POINTLIGHT)
-			//SetPointLight( int ilight, float x, float y, float z,  float r, float g, float b )
-			SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
-		else if (NowLightType == SPOTLIGHT)
-			//SetSpotLight( int ilight, float x, float y, float z,  float xdir, float ydir, float zdir, float r, float g, float b )
-			SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
-	glPopMatrix();
 
 	//glPushMatrix();
 	//	SetMaterial(0.5, 0.5, 0.5, 1);
 	//	glCallList( GridDL );
 	//glPopMatrix();
 
-	//US_PADDLE
+	// draw currently selected planent
 	glPushMatrix();
-		glTranslatef(paddle_us_x.GetValue(TimeCycleElapsed, true), paddle_us_y.GetValue(TimeCycleElapsed, true), paddle_us_z.GetValue(TimeCycleElapsed, true));
-		glRotatef(paddle_us_rotation.GetValue(TimeCycleElapsed, true), 0, 1, 0);
-		SetMaterial(paddle_us_color_r.GetValue(TimeCycleElapsed), 0.2, 0, 1);
-		glCallList( PingPongPaddleUsDL );
+		SetMaterial(1, 1, 1, 128);
+		glCallList( SelectedPlanetDL );
 	glPopMatrix();
 
-	//THEM_PADDLE
-	glPushMatrix();
-		glTranslatef(paddle_them_x.GetValue(TimeCycleElapsed, true), paddle_them_y.GetValue(TimeCycleElapsed, true), paddle_them_z.GetValue(TimeCycleElapsed, true));
-		glRotatef(paddle_them_rotation.GetValue(TimeCycleElapsed, true), 0, 1, 0);
-		SetMaterial(0, 0.2, paddle_them_color_g.GetValue(TimeCycleElapsed), 1);
-		glCallList( PingPongPaddleThemDL );
-	glPopMatrix();
-
-	//TABLE
-	glPushMatrix();
-        //glTranslatef( Xpos1.GetValue( TimeCycleElapsed ), 0., 0. );
-		glCallList( PingPongTableDL );
-	glPopMatrix();
-
-	//BALL
-	glPushMatrix();
-		glTranslatef(ball_x.GetValue(TimeCycleElapsed, true), ball_y.GetValue(TimeCycleElapsed, true), ball_z.GetValue(TimeCycleElapsed, true));
-		float ball_color_R_modifier = ball_color_R.GetValue(TimeCycleElapsed);
-		SetMaterial(0.8, 0.8 - ball_color_R_modifier, 0.8 - ball_color_R_modifier, 8);
-		glCallList( PingPongBallDL );
-	glPopMatrix();
-
+	glDisable(GL_TEXTURE_2D); 
 	glDisable(GL_LIGHTING); 
 
 #ifdef DEMO_Z_FIGHTING
@@ -563,10 +580,10 @@ Display( )
 
 	glDisable( GL_DEPTH_TEST );
 	glColor3f( 0.f, 1.f, 1.f );
-    char thistime[10];
-    snprintf(thistime, 10, "%f", TimeCycleElapsed); 
+    //char thistime[10];
+    //snprintf(thistime, 10, "%f", TimeCycleElapsed); 
 	//DoRasterString(-5.5f, 0.f, -5.5f, (char*)"Shininess:"); 
-	DoRasterString(-5.5f, 0.f, -5.5f, (char*)thistime); 
+	//DoRasterString(-5.5f, 0.f, -5.5f, (char*)thistime); 
 
 
 	// draw some gratuitous text that is fixed on the screen:
@@ -904,6 +921,117 @@ InitGraphics()
 #endif
 
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
+	// TEXTURES
+	int width, height;
+	char *file = (char *)"..\\..\\Textures\\venus.bmp";
+	unsigned char *texture = BmpToTexture( file, &width, &height );
+	if( texture == NULL )
+        	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	else
+        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	glGenTextures( 1, &VenusTex );
+	glBindTexture( GL_TEXTURE_2D, VenusTex );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+
+	file = (char *)"..\\..\\Textures\\earth.bmp";
+    texture = BmpToTexture( file, &width, &height );
+	if( texture == NULL )
+        	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	else
+        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	glGenTextures( 1, &EarthTex );
+	glBindTexture( GL_TEXTURE_2D, EarthTex );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+
+
+	file = (char *)"..\\..\\Textures\\mars.bmp";
+    texture = BmpToTexture( file, &width, &height );
+	if( texture == NULL )
+        	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	else
+        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	glGenTextures( 1, &MarsTex );
+	glBindTexture( GL_TEXTURE_2D, MarsTex );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+
+	file = (char *)"..\\..\\Textures\\jupiter.bmp";
+    texture = BmpToTexture( file, &width, &height );
+	if( texture == NULL )
+        	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	else
+        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	glGenTextures( 1, &JupiterTex );
+	glBindTexture( GL_TEXTURE_2D, JupiterTex );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+
+	file = (char *)"..\\..\\Textures\\saturn.bmp";
+    texture = BmpToTexture( file, &width, &height );
+	if( texture == NULL )
+        	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	else
+        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	glGenTextures( 1, &SaturnTex );
+	glBindTexture( GL_TEXTURE_2D, SaturnTex );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+
+
+	file = (char *)"..\\..\\Textures\\uranus.bmp";
+    texture = BmpToTexture( file, &width, &height );
+	if( texture == NULL )
+        	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	else
+        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	glGenTextures( 1, &UranusTex );
+	glBindTexture( GL_TEXTURE_2D, UranusTex );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+
+
+	file = (char *)"..\\..\\Textures\\neptune.bmp";
+    texture = BmpToTexture( file, &width, &height );
+	if( texture == NULL )
+        	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	else
+        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	glGenTextures( 1, &NeptuneTex );
+	glBindTexture( GL_TEXTURE_2D, NeptuneTex );
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+
+
 }
 
 // initialize the display lists that will not change:
@@ -921,24 +1049,6 @@ InitLists( )
 
 	// create the object:
 
-	GridDL = glGenLists( 1 );
-	glNewList( GridDL, GL_COMPILE );
-		glPushMatrix();
-			SetMaterial( 0.6f, 0.6f, 0.6f, 30.f );
-			glNormal3f( 0., 1., 0. );
-			for( int i = 0; i < NZ; i++ )
-			{
-				glBegin( GL_QUAD_STRIP );
-					for( int j = 0; j < NX; j++ )
-					{
-						glVertex3f( X0 + DX*(float)j, YGRID, Z0 + DZ*(float)(i+0) );
-						glVertex3f( X0 + DX*(float)j, YGRID, Z0 + DZ*(float)(i+1) );
-					}
-				glEnd( );
-			}
-		glPopMatrix();
-	glEndList( );
-
 	LightBulbDL = glGenLists( 1 );
 	glNewList( LightBulbDL, GL_COMPILE );
 		glPushMatrix();
@@ -946,44 +1056,74 @@ InitLists( )
 		glPopMatrix();
 	glEndList( );
 
-	// OBJ shapes
-	PingPongTableDL = glGenLists( 1 );
-	glNewList( PingPongTableDL, GL_COMPILE );
+	UnitSphereDL = glGenLists( 1 );
+	glNewList( UnitSphereDL, GL_COMPILE );
 		glPushMatrix();
-			glScalef(5, 5, 5);
-			SetMaterial(0.2, 0.5, 0.2, 1);
-			glRotatef(90, 0, 1, 0);
-            LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_table.obj"); 
+			glColor3f(1, 1, 1);
+			OsuSphere(1.f, 1000, 1000);
 		glPopMatrix();
 	glEndList( );
 
-	PingPongPaddleUsDL = glGenLists( 1 );
-	glNewList( PingPongPaddleUsDL, GL_COMPILE );
+	VenusDL = glGenLists( 1 );
+	glNewList( VenusDL, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, VenusTex);
 		glPushMatrix();
-			glScalef(5, 5, 5);
-			glRotatef(45, 0, 0, 1);
-			glRotatef(-90, 1, 0, 0);
-			glRotatef(-90, 0, 1, 0);
-            LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_paddle.obj"); 
+			glScalef(VenusScale, VenusScale, VenusScale);
+			glCallList(UnitSphereDL);
 		glPopMatrix();
 	glEndList( );
 
-	PingPongPaddleThemDL = glGenLists( 1 );
-	glNewList( PingPongPaddleThemDL, GL_COMPILE );
+	EarthDL = glGenLists( 1 );
+	glNewList( EarthDL, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, EarthTex);
 		glPushMatrix();
-			glScalef(5, 5, 5);
-			glRotatef(-45, 0, 0, 1);
-			glRotatef(90, 1, 0, 0);
-			glRotatef(90, 0, 1, 0);
-            LoadObjFile( (char *) "..\\..\\OBJs\\pingpong_paddle.obj"); 
+			glScalef(1, 1, 1);
+			glCallList(UnitSphereDL);
 		glPopMatrix();
 	glEndList( );
 
-	PingPongBallDL = glGenLists( 1 );
-	glNewList( PingPongBallDL, GL_COMPILE );
+	MarsDL = glGenLists( 1 );
+	glNewList( MarsDL, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, MarsTex);
 		glPushMatrix();
-			glTranslatef(0, 0.2, 0);
-			OsuSphere(0.1f, 10, 10);
+			glScalef(MarsScale, MarsScale, MarsScale);
+			glCallList(UnitSphereDL);
+		glPopMatrix();
+	glEndList( );
+
+	JupiterDL = glGenLists( 1 );
+	glNewList( JupiterDL, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, JupiterTex);
+		glPushMatrix();
+			glScalef(JupiterScale, JupiterScale, JupiterScale);
+			glCallList(UnitSphereDL);
+		glPopMatrix();
+	glEndList( );
+
+	SaturnDL = glGenLists( 1 );
+	glNewList( SaturnDL, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, SaturnTex);
+		glPushMatrix();
+			glScalef(SaturnScale, SaturnScale, SaturnScale);
+			glCallList(UnitSphereDL);
+		glPopMatrix();
+	glEndList( );
+
+	UranusDL = glGenLists( 1 );
+	glNewList( UranusDL, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, UranusTex);
+		glPushMatrix();
+			glScalef(UranusScale, UranusScale, UranusScale);
+			glCallList(UnitSphereDL);
+		glPopMatrix();
+	glEndList( );
+
+	NeptuneDL = glGenLists( 1 );
+	glNewList( NeptuneDL, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, NeptuneTex);
+		glPushMatrix();
+			glScalef(NeptuneScale, NeptuneScale, NeptuneScale);
+			glCallList(UnitSphereDL);
 		glPopMatrix();
 	glEndList( );
 
@@ -991,7 +1131,7 @@ InitLists( )
 	AxesList = glGenLists( 1 );
 	glNewList( AxesList, GL_COMPILE );
 		glLineWidth( AXES_WIDTH );
-			Axes( 1.5 );
+			Axes( 1. );
 		glLineWidth( 1. );
 	glEndList( );
 }
@@ -1011,15 +1151,24 @@ Keyboard( unsigned char c, int x, int y )
 			Reset();
 			break;
 
-		case '-':
-			if (Triangle_X > -ZSIDE / 2)
-				Triangle_X -= 0.5;
-            break;
-		case '=':
-			if (Triangle_X < ZSIDE / 2)
-				Triangle_X += 0.5;
-            break;
-
+		case 't':
+		case 'T':
+			if (lighting_mode == 1 && texture_mode == 1)
+			{
+				lighting_mode = 1;
+				texture_mode = 0;
+			}
+			else if (lighting_mode == 1 && texture_mode == 0)
+			{
+				lighting_mode = 0;
+				texture_mode = 1;
+			}
+			else if (lighting_mode == 0 && texture_mode == 1)
+			{
+				lighting_mode = 1;
+				texture_mode = 1;
+			}
+			break;
 		case 'f':
 		case 'F':
 			Frozen = !Frozen;
@@ -1045,6 +1194,42 @@ Keyboard( unsigned char c, int x, int y )
 		case 'Q':
 		case ESCAPE:
 			DoMainMenu( QUIT );	// will not return here
+			break;				// happy compiler
+
+		case 'v':
+		case 'V':
+			SelectedPlanetDL = VenusDL;
+			SelectedPlanetScale = VenusScale;
+			break;				// happy compiler
+		case 'e':
+		case 'E':
+			SelectedPlanetDL = EarthDL;
+			SelectedPlanetScale = EarthScale;
+			break;				// happy compiler
+		case 'm':
+		case 'M':
+			SelectedPlanetDL = MarsDL;
+			SelectedPlanetScale = MarsScale;
+			break;				// happy compiler
+		case 'j':
+		case 'J':
+			SelectedPlanetDL = JupiterDL;
+			SelectedPlanetScale = JupiterScale;
+			break;				// happy compiler
+		case 's':
+		case 'S':
+			SelectedPlanetDL = SaturnDL;
+			SelectedPlanetScale = SaturnScale;
+			break;				// happy compiler
+		case 'u':
+		case 'U':
+			SelectedPlanetDL = UranusDL;
+			SelectedPlanetScale = UranusScale;
+			break;				// happy compiler
+		case 'n':
+		case 'N':
+			SelectedPlanetDL = NeptuneDL;
+			SelectedPlanetScale = NeptuneScale;
 			break;				// happy compiler
 
 		case 'w':
@@ -1076,15 +1261,15 @@ Keyboard( unsigned char c, int x, int y )
 			NowLightType = POINTLIGHT;
 			break;				// happy compiler
 
-		case 's':
-		case 'S':
-			NowLightType = SPOTLIGHT;
-			break;				// happy compiler
+		//case 's':
+		//case 'S':
+		//	NowLightType = SPOTLIGHT;
+		//	break;				// happy compiler
 
-		case 'm':
-		case 'M':
-			NowMaterialType ^= 1; 
-			break;
+		//case 'm':
+		//case 'M':
+		//	NowMaterialType ^= 1; 
+		//	break;
 
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
@@ -1199,7 +1384,7 @@ void
 Reset( )
 {
 	ActiveButton = 0;
-	AxesOn = 0;
+	AxesOn = 1;
 	DebugOn = 0;
 	DepthBufferOn = 1;
 	DepthFightingOn = 0;
@@ -1208,11 +1393,15 @@ Reset( )
 	TimeFreezeOffsetMs = 0;
 	Scale = 0.20;
 	ShadowsOn = 0;
+	SelectedPlanetDL = EarthDL;
+	SelectedPlanetScale = EarthScale;
 	NowColor = WHITE_COL;
 	NowProjection = ORTHO;
 	NowLightType = POINTLIGHT;
 	NowMaterialType = SHINE;
 	Xrot = Yrot = 0.;
+	lighting_mode = 1; 
+	texture_mode = 1; 
 }
 
 
