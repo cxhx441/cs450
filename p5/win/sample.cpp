@@ -526,8 +526,8 @@ Display( )
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 		glPushMatrix();
-			glRotatef(360 * TimeFraction*1.5, 0, 1, 0);
-			glTranslatef(0, 0.8*SelectedPlanetScale, 1.1*SelectedPlanetScale);
+			glRotatef(360 * TimeFraction*2, 0, 1, 0);
+			glTranslatef(0, 100*SelectedPlanetScale, 1.1*SelectedPlanetScale);
 			glDisable(GL_LIGHTING);
 			//glColor3fv(&Colors[NowColor][0]);
 			//glCallList( LightBulbDL );
