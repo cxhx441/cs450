@@ -29,19 +29,6 @@
 #include "glut.h"
 
 
-#define XSIDE	10			 		// length of the x side of the grid
-#define X0      (-XSIDE/2.)			// where one side starts
-#define NX	    2000					// how many points in x
-#define DX	    ( XSIDE/(float)NX )	// change in x between the points
-
-#define YGRID	0.f
-
-#define ZSIDE	10					// length of the z side of the grid
-#define Z0      (-ZSIDE/2.)			// where one side starts
-#define NZ	    2000    	        // how many points in z
-#define DZ	    ( ZSIDE/(float)NZ )	// change in z between the points
-
-
 //	This is a sample OpenGL / GLUT program
 //
 //	The objective is to draw a 3d object and change the color of the axes
