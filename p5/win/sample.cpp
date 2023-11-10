@@ -206,12 +206,7 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	GridDL;					// object display list
 GLuint	LightBulbDL;			// object display list
-GLuint  PingPongTableDL; 
-GLuint  PingPongPaddleUsDL; 
-GLuint  PingPongPaddleThemDL; 
-GLuint  PingPongBallDL; 
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -310,38 +305,15 @@ MulArray3(float factor, float a, float b, float c )
 
 // these are here for when you need them -- just uncomment the ones you need:
 
-#include "setmaterial.cpp"
+//#include "setmaterial.cpp"
 #include "setlight.cpp"
 #include "osusphere.cpp"
 //#include "osucone.cpp"
 //#include "osutorus.cpp"
-//#include "bmptotexture.cpp"
-#include "loadobjfile.cpp"
-#include "keytime.cpp"
+#include "bmptotexture.cpp"
+//#include "loadobjfile.cpp"
+//#include "keytime.cpp"
 //#include "glslprogram.cpp"
-
-Keytimes ball_x;
-Keytimes ball_y;
-Keytimes ball_z;
-Keytimes ball_color_R; 
-
-Keytimes paddle_us_x;
-Keytimes paddle_us_y;
-Keytimes paddle_us_z;
-Keytimes paddle_us_rotation;
-Keytimes paddle_us_color_r;
-
-Keytimes paddle_them_x;
-Keytimes paddle_them_y;
-Keytimes paddle_them_z;
-Keytimes paddle_them_rotation;
-Keytimes paddle_them_color_g;
-
-
-Keytimes light_z; 
-
-Keytimes lookat_pos_z; 
-
 
 // main program:
 
