@@ -238,9 +238,10 @@ float	Scale;					// scaling factor
 int		ShadowsOn;				// != 0 means to turn shadows on
 float	TimeFraction;	    	// used for animation, this has a value between 0. and 1.
 float	TimeCycleElapsed;		// used for keytimes; goes from 0 to MS_PER_CYCLE-1;
+int 	TimeFreezeOffsetMs;		// used to offset any frozen time. 
+bool    Frozen;					// whether the animation is frozen or not
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
-bool    Frozen;					// whether the animation is frozen or not
 float   Triangle_X;
 int		shininess;				// for use on object shine
                                 //
@@ -408,7 +409,7 @@ Animate( )
 {
 	// put animation stuff in here -- change some global variables for Display( ) to find:
 
-	int ms = glutGet(GLUT_ELAPSED_TIME);
+	int ms = glutGet(GLUT_ELAPSED_TIME) + TimeFreezeOffsetMs;
 	ms %= MS_PER_CYCLE;							// makes the value of ms between 0 and MS_PER_CYCLE-1
 	TimeFraction = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
 	TimeCycleElapsed = (float)ms / 1000;		// makes the value of Time between 0. and slightly less than 1.
@@ -1273,10 +1274,17 @@ Keyboard( unsigned char c, int x, int y )
 		case 'f':
 		case 'F':
 			Frozen = !Frozen;
-			if ( Frozen )
-				glutIdleFunc( NULL );
+			if (Frozen)
+			{
+				TimeFreezeOffsetMs += glutGet(GLUT_ELAPSED_TIME);
+				glutIdleFunc(NULL);
+			}
 			else
-				glutIdleFunc( Animate );
+			{
+				TimeFreezeOffsetMs -= glutGet(GLUT_ELAPSED_TIME);
+				TimeFreezeOffsetMs %= MS_PER_CYCLE;
+				glutIdleFunc(Animate);
+			}
 			break;
 
 		case 'o':
