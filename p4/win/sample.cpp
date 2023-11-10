@@ -1456,7 +1456,7 @@ Reset( )
 	DepthFightingOn = 0;
 	DepthCueOn = 0;
 	Frozen = false;
-    Triangle_X = 5;
+	TimeFreezeOffsetMs = 0;
 	Scale = 0.20;
 	ShadowsOn = 0;
 	NowColor = WHITE_COL;
