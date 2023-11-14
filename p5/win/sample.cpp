@@ -277,6 +277,7 @@ void	MouseMotion( int, int );
 void	Reset( );
 void	Resize( int, int );
 void	Visibility( int );
+void    LoadAndSetTexture(char*, GLuint*);
 
 void			Axes( float );
 void			HsvRgb( float[3], float [3] );
@@ -922,114 +923,31 @@ InitGraphics()
 
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
 	// TEXTURES
-	int width, height;
-	char *file = (char *)"..\\..\\Textures\\venus.bmp";
-	unsigned char *texture = BmpToTexture( file, &width, &height );
-	if( texture == NULL )
-        	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	else
-        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	glGenTextures( 1, &VenusTex );
-	glBindTexture( GL_TEXTURE_2D, VenusTex );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+	// Usage
+	LoadAndSetTexture("..\\..\\Textures\\venus.bmp", &VenusTex);
+	LoadAndSetTexture("..\\..\\Textures\\earth.bmp", &EarthTex);
+	LoadAndSetTexture("..\\..\\Textures\\mars.bmp", &MarsTex);
+	LoadAndSetTexture("..\\..\\Textures\\jupiter.bmp", &JupiterTex);
+	LoadAndSetTexture("..\\..\\Textures\\saturn.bmp", &SaturnTex);
+	LoadAndSetTexture("..\\..\\Textures\\uranus.bmp", &UranusTex);
+	LoadAndSetTexture("..\\..\\Textures\\neptune.bmp", &NeptuneTex);
+	//int width, height;
+	//char *file = (char *)"..\\..\\Textures\\venus.bmp";
+	//unsigned char *texture = BmpToTexture( file, &width, &height );
+	//if( texture == NULL )
+ //       	fprintf( stderr, "Cannot open texture '%s'\n", file );
+	//else
+ //       	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
+	//glGenTextures( 1, &VenusTex );
+	//glBindTexture( GL_TEXTURE_2D, VenusTex );
+	//glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
+	///..... repeat for other planets
 
-	file = (char *)"..\\..\\Textures\\earth.bmp";
-    texture = BmpToTexture( file, &width, &height );
-	if( texture == NULL )
-        	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	else
-        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	glGenTextures( 1, &EarthTex );
-	glBindTexture( GL_TEXTURE_2D, EarthTex );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
-
-
-	file = (char *)"..\\..\\Textures\\mars.bmp";
-    texture = BmpToTexture( file, &width, &height );
-	if( texture == NULL )
-        	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	else
-        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	glGenTextures( 1, &MarsTex );
-	glBindTexture( GL_TEXTURE_2D, MarsTex );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
-
-	file = (char *)"..\\..\\Textures\\jupiter.bmp";
-    texture = BmpToTexture( file, &width, &height );
-	if( texture == NULL )
-        	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	else
-        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	glGenTextures( 1, &JupiterTex );
-	glBindTexture( GL_TEXTURE_2D, JupiterTex );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
-
-	file = (char *)"..\\..\\Textures\\saturn.bmp";
-    texture = BmpToTexture( file, &width, &height );
-	if( texture == NULL )
-        	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	else
-        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	glGenTextures( 1, &SaturnTex );
-	glBindTexture( GL_TEXTURE_2D, SaturnTex );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
-
-
-	file = (char *)"..\\..\\Textures\\uranus.bmp";
-    texture = BmpToTexture( file, &width, &height );
-	if( texture == NULL )
-        	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	else
-        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	glGenTextures( 1, &UranusTex );
-	glBindTexture( GL_TEXTURE_2D, UranusTex );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
-
-
-	file = (char *)"..\\..\\Textures\\neptune.bmp";
-    texture = BmpToTexture( file, &width, &height );
-	if( texture == NULL )
-        	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	else
-        	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	glGenTextures( 1, &NeptuneTex );
-	glBindTexture( GL_TEXTURE_2D, NeptuneTex );
-	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
 
 
 }
@@ -1670,4 +1588,25 @@ Unit( float v[3] )
 	}
 	return dist;
 }
+
+void LoadAndSetTexture(char* filePath, GLuint* textureID) {
+    int width, height;
+    unsigned char* texture = BmpToTexture(filePath, &width, &height);
+
+    if (texture == NULL) {
+        fprintf(stderr, "Cannot open texture '%s'\n", filePath);
+    } else {
+        fprintf(stderr, "Opened '%s': width = %d ; height = %d\n", filePath, width, height);
+
+        glGenTextures(1, textureID);
+        glBindTexture(GL_TEXTURE_2D, *textureID);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture);
+    }
+}
+
 
