@@ -1060,7 +1060,7 @@ InitLists( )
 	glNewList( UnitSphereDL, GL_COMPILE );
 		glPushMatrix();
 			glColor3f(1, 1, 1);
-			OsuSphere(1.f, 1000, 1000);
+			OsuSphere(1.f, 100, 100);
 		glPopMatrix();
 	glEndList( );
 
