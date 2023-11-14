@@ -209,13 +209,13 @@ GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
 GLuint	LightBulbDL;			// object display list
 GLuint	UnitSphereDL;			// object display list
-GLuint	VenusDL;				// object display list
-GLuint	EarthDL;				// object display list
-GLuint	MarsDL;					// object display list
-GLuint	JupiterDL;				// object display list
-GLuint	SaturnDL;				// object display list
-GLuint	UranusDL;				// object display list
-GLuint	NeptuneDL;				// object display list
+//GLuint	VenusDL;				// object display list
+//GLuint	EarthDL;				// object display list
+//GLuint	MarsDL;					// object display list
+//GLuint	JupiterDL;				// object display list
+//GLuint	SaturnDL;				// object display list
+//GLuint	UranusDL;				// object display list
+//GLuint	NeptuneDL;				// object display list
 const int NUM_PLANETS = 7; 
 const char* planetTextureFilePaths[NUM_PLANETS] = {
     "..\\..\\Textures\\venus.bmp",
@@ -227,23 +227,19 @@ const char* planetTextureFilePaths[NUM_PLANETS] = {
     "..\\..\\Textures\\neptune.bmp"
 };
 GLuint planetTextures[NUM_PLANETS];
-//GLuint	VenusTex;				
-//GLuint	EarthTex;				
-//GLuint	MarsTex;				
-//GLuint	JupiterTex;			
-//GLuint	SaturnTex;		
-//GLuint	UranusTex;	
-//GLuint	NeptuneTex;
+GLuint planetDLs[NUM_PLANETS];
 GLuint  SelectedPlanetDL; 
 float   SelectedPlanetScale;
 GLuint	SelectedPlanetTexture;
-float   VenusScale = 0.95f;
-float   EarthScale = 1.f;
-float   MarsScale = 0.53f;
-float   JupiterScale = 11.21f;
-float   SaturnScale = 9.45f;
-float   UranusScale = 4.01f;
-float   NeptuneScale = 3.88f;
+float   planetScales[NUM_PLANETS] = {
+	0.95f,
+	1.f,
+	0.53f,
+	11.21f,
+	9.45f,
+	4.01f,
+	3.88f,
+};
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -289,6 +285,7 @@ void	Reset( );
 void	Resize( int, int );
 void	Visibility( int );
 void    LoadAndSetTexture(char*, GLuint*);
+void	LoadAndSetDLs(GLuint*, GLuint, float);
 
 void			Axes( float );
 void			HsvRgb( float[3], float [3] );
@@ -938,32 +935,6 @@ InitGraphics()
 	{
 		LoadAndSetTexture((char *)planetTextureFilePaths[i], &planetTextures[i]);
 	};
-	//LoadAndSetTexture("..\\..\\Textures\\venus.bmp", &VenusTex);
-	//LoadAndSetTexture("..\\..\\Textures\\earth.bmp", &EarthTex);
-	//LoadAndSetTexture("..\\..\\Textures\\mars.bmp", &MarsTex);
-	//LoadAndSetTexture("..\\..\\Textures\\jupiter.bmp", &JupiterTex);
-	//LoadAndSetTexture("..\\..\\Textures\\saturn.bmp", &SaturnTex);
-	//LoadAndSetTexture("..\\..\\Textures\\uranus.bmp", &UranusTex);
-	//LoadAndSetTexture("..\\..\\Textures\\neptune.bmp", &NeptuneTex);
-	//int width, height;
-	//char *file = (char *)"..\\..\\Textures\\venus.bmp";
-	//unsigned char *texture = BmpToTexture( file, &width, &height );
-	//if( texture == NULL )
- //       	fprintf( stderr, "Cannot open texture '%s'\n", file );
-	//else
- //       	fprintf( stderr, "Opened '%s': width = %d ; height = %d\n", file, width, height );
-	//glGenTextures( 1, &VenusTex );
-	//glBindTexture( GL_TEXTURE_2D, VenusTex );
-	//glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	//glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexImage2D( GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture );
-	///..... repeat for other planets
-
-
-
 }
 
 // initialize the display lists that will not change:
@@ -996,68 +967,10 @@ InitLists( )
 		glPopMatrix();
 	glEndList( );
 
-	VenusDL = glGenLists( 1 );
-	glNewList( VenusDL, GL_COMPILE );
-		glBindTexture(GL_TEXTURE_2D, planetTextures[0]);
-		glPushMatrix();
-			glScalef(VenusScale, VenusScale, VenusScale);
-			glCallList(UnitSphereDL);
-		glPopMatrix();
-	glEndList( );
-
-	EarthDL = glGenLists( 1 );
-	glNewList( EarthDL, GL_COMPILE );
-		glBindTexture(GL_TEXTURE_2D, planetTextures[1]);
-		glPushMatrix();
-			glScalef(1, 1, 1);
-			glCallList(UnitSphereDL);
-		glPopMatrix();
-	glEndList( );
-
-	MarsDL = glGenLists( 1 );
-	glNewList( MarsDL, GL_COMPILE );
-		glBindTexture(GL_TEXTURE_2D, planetTextures[2]);
-		glPushMatrix();
-			glScalef(MarsScale, MarsScale, MarsScale);
-			glCallList(UnitSphereDL);
-		glPopMatrix();
-	glEndList( );
-
-	JupiterDL = glGenLists( 1 );
-	glNewList( JupiterDL, GL_COMPILE );
-		glBindTexture(GL_TEXTURE_2D, planetTextures[3]);
-		glPushMatrix();
-			glScalef(JupiterScale, JupiterScale, JupiterScale);
-			glCallList(UnitSphereDL);
-		glPopMatrix();
-	glEndList( );
-
-	SaturnDL = glGenLists( 1 );
-	glNewList( SaturnDL, GL_COMPILE );
-		glBindTexture(GL_TEXTURE_2D, planetTextures[4]);
-		glPushMatrix();
-			glScalef(SaturnScale, SaturnScale, SaturnScale);
-			glCallList(UnitSphereDL);
-		glPopMatrix();
-	glEndList( );
-
-	UranusDL = glGenLists( 1 );
-	glNewList( UranusDL, GL_COMPILE );
-		glBindTexture(GL_TEXTURE_2D, planetTextures[5]);
-		glPushMatrix();
-			glScalef(UranusScale, UranusScale, UranusScale);
-			glCallList(UnitSphereDL);
-		glPopMatrix();
-	glEndList( );
-
-	NeptuneDL = glGenLists( 1 );
-	glNewList( NeptuneDL, GL_COMPILE );
-		glBindTexture(GL_TEXTURE_2D, planetTextures[6]);
-		glPushMatrix();
-			glScalef(NeptuneScale, NeptuneScale, NeptuneScale);
-			glCallList(UnitSphereDL);
-		glPopMatrix();
-	glEndList( );
+	for (int i = 0; i < NUM_PLANETS; i++)
+	{
+		LoadAndSetDLs(&planetDLs[i], planetTextures[i], planetScales[i]);
+	};
 
 	// create the axes:
 	AxesList = glGenLists( 1 );
@@ -1130,38 +1043,38 @@ Keyboard( unsigned char c, int x, int y )
 
 		case 'v':
 		case 'V':
-			SelectedPlanetDL = VenusDL;
-			SelectedPlanetScale = VenusScale;
+			SelectedPlanetDL = planetDLs[0];
+			SelectedPlanetScale = planetScales[0];
 			break;				// happy compiler
 		case 'e':
 		case 'E':
-			SelectedPlanetDL = EarthDL;
-			SelectedPlanetScale = EarthScale;
+			SelectedPlanetDL = planetDLs[1];
+			SelectedPlanetScale = planetScales[1];
 			break;				// happy compiler
 		case 'm':
 		case 'M':
-			SelectedPlanetDL = MarsDL;
-			SelectedPlanetScale = MarsScale;
+			SelectedPlanetDL = planetDLs[2];
+			SelectedPlanetScale = planetScales[2];
 			break;				// happy compiler
 		case 'j':
 		case 'J':
-			SelectedPlanetDL = JupiterDL;
-			SelectedPlanetScale = JupiterScale;
+			SelectedPlanetDL = planetDLs[3];
+			SelectedPlanetScale = planetScales[3];
 			break;				// happy compiler
 		case 's':
 		case 'S':
-			SelectedPlanetDL = SaturnDL;
-			SelectedPlanetScale = SaturnScale;
+			SelectedPlanetDL = planetDLs[4];
+			SelectedPlanetScale = planetScales[4];
 			break;				// happy compiler
 		case 'u':
 		case 'U':
-			SelectedPlanetDL = UranusDL;
-			SelectedPlanetScale = UranusScale;
+			SelectedPlanetDL = planetDLs[5];
+			SelectedPlanetScale = planetScales[5];
 			break;				// happy compiler
 		case 'n':
 		case 'N':
-			SelectedPlanetDL = NeptuneDL;
-			SelectedPlanetScale = NeptuneScale;
+			SelectedPlanetDL = planetDLs[6];
+			SelectedPlanetScale = planetScales[6];
 			break;				// happy compiler
 
 		case 'w':
@@ -1325,8 +1238,8 @@ Reset( )
 	TimeFreezeOffsetMs = 0;
 	Scale = 0.20;
 	ShadowsOn = 0;
-	SelectedPlanetDL = EarthDL;
-	SelectedPlanetScale = EarthScale;
+	SelectedPlanetDL = planetDLs[1];
+	SelectedPlanetScale = planetScales[1];
 	NowColor = WHITE_COL;
 	NowProjection = ORTHO;
 	NowLightType = POINTLIGHT;
@@ -1623,3 +1536,15 @@ void LoadAndSetTexture(char* filePath, GLuint* textureID) {
     }
 }
 
+void 
+LoadAndSetDLs(GLuint* planetDL_ID, GLuint planetTexture, float scale) 
+{
+	*planetDL_ID = glGenLists( 1 );
+	glNewList( *planetDL_ID, GL_COMPILE );
+		glBindTexture(GL_TEXTURE_2D, planetTexture);
+		glPushMatrix();
+			glScalef(scale, scale, scale);
+			glCallList(UnitSphereDL);
+		glPopMatrix();
+	glEndList( );
+}
