@@ -536,7 +536,9 @@ Display( )
 		//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 		glPushMatrix();
 			glRotatef(360 * TimeFraction*2, 0, 1, 0);
-			glTranslatef(0, 100*SelectedPlanetScale, 1.1*SelectedPlanetScale);
+			printf("%f\n", TimeFraction*2);
+			glTranslatef(0, 0, 100*SelectedPlanetScale);
+			//glTranslatef(0, 0, 100*SelectedPlanetScale);
 			glDisable(GL_LIGHTING);
 			//glColor3fv(&Colors[NowColor][0]);
 			//glCallList( LightBulbDL );
