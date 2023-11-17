@@ -415,114 +415,120 @@ Animate( )
 // draw the complete scene:
 
 void
-Display( )
+Display()
 {
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting Display.\n");
 
 	// set which window we want to do the graphics into:
-	glutSetWindow( MainWindow );
+	glutSetWindow(MainWindow);
 
 	// erase the background:
-	glDrawBuffer( GL_BACK );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glDrawBuffer(GL_BACK);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable( GL_DEPTH_TEST );
+	glEnable(GL_DEPTH_TEST);
 #ifdef DEMO_DEPTH_BUFFER
-	if( DepthBufferOn == 0 )
-		glDisable( GL_DEPTH_TEST );
+	if (DepthBufferOn == 0)
+		glDisable(GL_DEPTH_TEST);
 #endif
 
 
 	// specify shading
 
 	//glShadeModel( GL_FLAT );
-	glShadeModel( GL_SMOOTH );
+	glShadeModel(GL_SMOOTH);
 
 	// set the viewport to be a square centered in the window:
 
-	GLsizei vx = glutGet( GLUT_WINDOW_WIDTH );
-	GLsizei vy = glutGet( GLUT_WINDOW_HEIGHT );
+	GLsizei vx = glutGet(GLUT_WINDOW_WIDTH);
+	GLsizei vy = glutGet(GLUT_WINDOW_HEIGHT);
 	GLsizei v = vx < vy ? vx : vy;			// minimum dimension
-	GLint xl = ( vx - v ) / 2;
-	GLint yb = ( vy - v ) / 2;
-	glViewport( xl, yb,  v, v );
+	GLint xl = (vx - v) / 2;
+	GLint yb = (vy - v) / 2;
+	glViewport(xl, yb, v, v);
 
 
 	// set the viewing volume:
 	// remember that the Z clipping  values are given as DISTANCES IN FRONT OF THE EYE
 	// USE gluOrtho2D( ) IF YOU ARE DOING 2D !
 
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
-	if( NowProjection == ORTHO )
-		glOrtho( -2.f, 2.f,     -2.f, 2.f,     0.1f, 1000.f );
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	if (NowProjection == ORTHO)
+		glOrtho(-2.f, 2.f, -2.f, 2.f, 0.1f, 1000.f);
 	else
-		gluPerspective( 70.f, 1.f,	0.1f, 1000.f );
+		gluPerspective(70.f, 1.f, 0.1f, 1000.f);
 
 	// place the objects into the scene:
 
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 
 	// set the eye position, look-at position, and up-vector:
 
 	//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be coal miners hat
-	gluLookAt( 6, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+	gluLookAt(6, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
 	//SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be in relation to scene. 
 	// rotate the scene:
 
-	glRotatef( (GLfloat)Yrot, 0.f, 1.f, 0.f );
-	glRotatef( (GLfloat)Xrot, 1.f, 0.f, 0.f );
+	glRotatef((GLfloat)Yrot, 0.f, 1.f, 0.f);
+	glRotatef((GLfloat)Xrot, 1.f, 0.f, 0.f);
 
 	// uniformly scale the scene:
 
-	if( Scale < MINSCALE )
+	if (Scale < MINSCALE)
 		Scale = MINSCALE;
-	glScalef( (GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale );
+	glScalef((GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale);
 
 	// set the fog parameters:
 
-	if( DepthCueOn != 0 )
+	if (DepthCueOn != 0)
 	{
-		glFogi( GL_FOG_MODE, FOGMODE );
-		glFogfv( GL_FOG_COLOR, FOGCOLOR );
-		glFogf( GL_FOG_DENSITY, FOGDENSITY );
-		glFogf( GL_FOG_START, FOGSTART );
-		glFogf( GL_FOG_END, FOGEND );
-		glEnable( GL_FOG );
+		glFogi(GL_FOG_MODE, FOGMODE);
+		glFogfv(GL_FOG_COLOR, FOGCOLOR);
+		glFogf(GL_FOG_DENSITY, FOGDENSITY);
+		glFogf(GL_FOG_START, FOGSTART);
+		glFogf(GL_FOG_END, FOGEND);
+		glEnable(GL_FOG);
 	}
 	else
 	{
-		glDisable( GL_FOG );
+		glDisable(GL_FOG);
 	}
 
 
 	// possibly draw the axes:
 
 	glPushMatrix();
-	if( AxesOn != 0 )
+	if (AxesOn != 0)
 	{
-		glColor3fv( &Colors[NowColor][0] );
+		glColor3fv(&Colors[NowColor][0]);
 		glScalef(1.25 * Planets[SelectedPlanet].scale, 1.25 * Planets[SelectedPlanet].scale, 1.25 * Planets[SelectedPlanet].scale);
-		glCallList( AxesList );
+		glCallList(AxesList);
 	}
 	glPopMatrix();
 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, MulArray3(0.3f, 1.f, 1.f, 1.f)); // setting ambient light to off-white
 	//glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE); 
-	
+
 
 	// since we are using glScalef( ), be sure the normals get unitized:
-	glEnable( GL_NORMALIZE );
+	glEnable(GL_NORMALIZE);
 
 	// TEXTURE ADDITIONS
 	if (texture_mode == 1)
+	{
 		glEnable(GL_TEXTURE_2D);
+		printf("GL_TEXTURE_2D - ENABLED\n");
+	}
 	else
+	{
 		glDisable(GL_TEXTURE_2D);
+		printf("GL_TEXTURE_2D - DISABLED\n");
+	};
 	
 	if (lighting_mode == 1)
 	{
@@ -552,11 +558,13 @@ Display( )
 				SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 			}
 		glPopMatrix();
+		printf("GL_MODULATE\n");
 	}
 	else 
 	{
 		glDisable(GL_LIGHTING);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		printf("GL_REPLACE\n");
 	}
 
 	// draw the scence objects by calling up display list:
@@ -1050,31 +1058,26 @@ Keyboard( unsigned char c, int x, int y )
 
 		case 'v':
 		case 'V':
-			SelectedPlanet = 0;
-			break;				// happy compiler
 		case 'e':
 		case 'E':
-			SelectedPlanet = 1;
-			break;				// happy compiler
 		case 'm':
 		case 'M':
-			SelectedPlanet = 2;
-			break;				// happy compiler
 		case 'j':
 		case 'J':
-			SelectedPlanet = 3;
-			break;				// happy compiler
 		case 's':
 		case 'S':
-			SelectedPlanet = 4;
-			break;				// happy compiler
 		case 'u':
 		case 'U':
-			SelectedPlanet = 5;
-			break;				// happy compiler
 		case 'n':
 		case 'N':
-			SelectedPlanet = 6;
+			for (int i = 0; i < NUM_PLANETS; i++)
+			{
+				if (Planets[i].key == c)
+				{
+					SelectedPlanet = i;
+					break;
+				}
+			}
 			break;				// happy compiler
 
 		case 'w':
