@@ -568,7 +568,7 @@ Display( )
 
 	// draw currently selected planent
 	glPushMatrix();
-		SetMaterial(1, 1, 1, 1);
+		SetMaterial(1, 1, 1, 8);
 		glCallList( Planets[SelectedPlanet].displayList);
 	glPopMatrix();
 
