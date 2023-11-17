@@ -522,12 +522,12 @@ Display()
 	if (texture_mode == 1)
 	{
 		glEnable(GL_TEXTURE_2D);
-		printf("GL_TEXTURE_2D - ENABLED\n");
+		//printf("GL_TEXTURE_2D - ENABLED\n");
 	}
 	else
 	{
 		glDisable(GL_TEXTURE_2D);
-		printf("GL_TEXTURE_2D - DISABLED\n");
+		//printf("GL_TEXTURE_2D - DISABLED\n");
 	};
 	
 	if (lighting_mode == 1)
@@ -558,13 +558,13 @@ Display()
 				SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 			}
 		glPopMatrix();
-		printf("GL_MODULATE\n");
+		//printf("GL_MODULATE\n");
 	}
 	else 
 	{
 		glDisable(GL_LIGHTING);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-		printf("GL_REPLACE\n");
+		//printf("GL_REPLACE\n");
 	}
 
 	// draw the scence objects by calling up display list:
