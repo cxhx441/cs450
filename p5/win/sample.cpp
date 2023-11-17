@@ -538,11 +538,19 @@ Display( )
 			//glCallList( LightBulbDL );
 			glEnable(GL_LIGHTING);
 			if (NowLightType == POINTLIGHT)
+			{
 				//SetPointLight( int ilight, float x, float y, float z,  float r, float g, float b )
-				SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+				//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+				// Tried to get a hard line but this actually doesn't look different at all. Maybe it's the set material? ... that was it... change shininess from 128 to 0. 
+				float SOLAR_POSITION[4] = { 0, 0, 1, 0 };
+				glLightfv(GL_LIGHT0, GL_POSITION, SOLAR_POSITION);
+				glEnable(GL_LIGHT0);
+			}
 			else if (NowLightType == SPOTLIGHT)
+			{
 				//SetSpotLight( int ilight, float x, float y, float z,  float xdir, float ydir, float zdir, float r, float g, float b )
 				SetSpotLight(GL_LIGHT0, 0, 0, 0, 0, -1, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
+			}
 		glPopMatrix();
 	}
 	else 
@@ -560,7 +568,7 @@ Display( )
 
 	// draw currently selected planent
 	glPushMatrix();
-		SetMaterial(1, 1, 1, 128);
+		SetMaterial(1, 1, 1, 1);
 		glCallList( Planets[SelectedPlanet].displayList);
 	glPopMatrix();
 
@@ -1230,7 +1238,7 @@ Reset( )
 	TimeFreezeOffsetMs = 0;
 	Scale = 0.20;
 	ShadowsOn = 0;
-	SelectedPlanet = 0;
+	SelectedPlanet = 1;
 	NowColor = WHITE_COL;
 	NowProjection = ORTHO;
 	NowLightType = POINTLIGHT;
