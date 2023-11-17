@@ -209,37 +209,32 @@ GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
 GLuint	LightBulbDL;			// object display list
 GLuint	UnitSphereDL;			// object display list
-//GLuint	VenusDL;				// object display list
-//GLuint	EarthDL;				// object display list
-//GLuint	MarsDL;					// object display list
-//GLuint	JupiterDL;				// object display list
-//GLuint	SaturnDL;				// object display list
-//GLuint	UranusDL;				// object display list
-//GLuint	NeptuneDL;				// object display list
-const int NUM_PLANETS = 7; 
-const char* planetTextureFilePaths[NUM_PLANETS] = {
-    "..\\..\\Textures\\venus.bmp",
-    "..\\..\\Textures\\earth.bmp",
-    "..\\..\\Textures\\mars.bmp",
-    "..\\..\\Textures\\jupiter.bmp",
-    "..\\..\\Textures\\saturn.bmp",
-    "..\\..\\Textures\\uranus.bmp",
-    "..\\..\\Textures\\neptune.bmp"
+
+struct planet
+{
+	char*		 name;
+	char*        file;
+	float        scale;
+	GLuint       displayList;
+	char         key;
+	unsigned int texObject;
 };
-GLuint planetTextures[NUM_PLANETS];
-GLuint planetDLs[NUM_PLANETS];
-GLuint  SelectedPlanetDL; 
-float   SelectedPlanetScale;
-GLuint	SelectedPlanetTexture;
-float   planetScales[NUM_PLANETS] = {
-	0.95f,
-	1.f,
-	0.53f,
-	11.21f,
-	9.45f,
-	4.01f,
-	3.88f,
+
+struct planet Planets[ ] = 
+{
+    { "Venus",   "..\\..\\Textures\\venus.bmp",    0.95f, 0, 'v', 0 },
+    { "Earth",   "..\\..\\Textures\\earth.bmp",    1.00f, 0, 'e', 0 },
+    { "Mars",    "..\\..\\Textures\\mars.bmp",     0.53f, 0, 'm', 0 },
+    { "Jupiter", "..\\..\\Textures\\jupiter.bmp", 11.21f, 0, 'j', 0 },
+    { "Saturn",  "..\\..\\Textures\\saturn.bmp",   9.45f, 0, 's', 0 },
+    { "Uranus",  "..\\..\\Textures\\uranus.bmp",   4.01f, 0, 'u', 0 },
+    { "Neptune", "..\\..\\Textures\\neptune.bmp",  3.88f, 0, 'n', 0 },
 };
+
+const int NUM_PLANETS = sizeof(Planets) / sizeof(struct planet); 
+
+int     SelectedPlanet; 
+
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -474,7 +469,7 @@ Display( )
 	// set the eye position, look-at position, and up-vector:
 
 	//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be coal miners hat
-	gluLookAt( 2.f*SelectedPlanetScale, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+	gluLookAt( 6, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
 	//SetPointLight(GL_LIGHT0, 0, 2, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]); // put here to be in relation to scene. 
 	// rotate the scene:
@@ -511,7 +506,7 @@ Display( )
 	if( AxesOn != 0 )
 	{
 		glColor3fv( &Colors[NowColor][0] );
-		glScalef(1.25 * SelectedPlanetScale, 1.25 * SelectedPlanetScale, 1.25 * SelectedPlanetScale);
+		glScalef(1.25 * Planets[SelectedPlanet].scale, 1.25 * Planets[SelectedPlanet].scale, 1.25 * Planets[SelectedPlanet].scale);
 		glCallList( AxesList );
 	}
 	glPopMatrix();
@@ -536,8 +531,7 @@ Display( )
 		//SetPointLight(GL_LIGHT0, 0, 0, 0, float_Colors[NowColor][0], float_Colors[NowColor][1], float_Colors[NowColor][2]);
 		glPushMatrix();
 			glRotatef(360 * TimeFraction*2, 0, 1, 0);
-			printf("%f\n", TimeFraction*2);
-			glTranslatef(0, 0, 100*SelectedPlanetScale);
+			glTranslatef(0, 0, 100*Planets[SelectedPlanet].scale);
 			//glTranslatef(0, 0, 100*SelectedPlanetScale);
 			glDisable(GL_LIGHTING);
 			//glColor3fv(&Colors[NowColor][0]);
@@ -567,7 +561,7 @@ Display( )
 	// draw currently selected planent
 	glPushMatrix();
 		SetMaterial(1, 1, 1, 128);
-		glCallList( SelectedPlanetDL );
+		glCallList( Planets[SelectedPlanet].displayList);
 	glPopMatrix();
 
 	glDisable(GL_TEXTURE_2D); 
@@ -932,10 +926,12 @@ InitGraphics()
 #endif
 
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
-	// TEXTURES
+
+	// LOAD PLANET TEXTURES
 	for (int i = 0; i < NUM_PLANETS; i++)
 	{
-		LoadAndSetTexture((char *)planetTextureFilePaths[i], &planetTextures[i]);
+		//LoadAndSetTexture((char *)Planets[i].file, &planetTextures[i]);
+		LoadAndSetTexture((char *)Planets[i].file, &Planets[i].texObject);
 	};
 }
 
@@ -971,7 +967,8 @@ InitLists( )
 
 	for (int i = 0; i < NUM_PLANETS; i++)
 	{
-		LoadAndSetDLs(&planetDLs[i], planetTextures[i], planetScales[i]);
+		//LoadAndSetDLs(&planetDLs[i], planetTextures[i], planetScales[i]);
+		LoadAndSetDLs(&Planets[i].displayList, Planets[i].texObject, Planets[i].scale);
 	};
 
 	// create the axes:
@@ -1045,38 +1042,31 @@ Keyboard( unsigned char c, int x, int y )
 
 		case 'v':
 		case 'V':
-			SelectedPlanetDL = planetDLs[0];
-			SelectedPlanetScale = planetScales[0];
+			SelectedPlanet = 0;
 			break;				// happy compiler
 		case 'e':
 		case 'E':
-			SelectedPlanetDL = planetDLs[1];
-			SelectedPlanetScale = planetScales[1];
+			SelectedPlanet = 1;
 			break;				// happy compiler
 		case 'm':
 		case 'M':
-			SelectedPlanetDL = planetDLs[2];
-			SelectedPlanetScale = planetScales[2];
+			SelectedPlanet = 2;
 			break;				// happy compiler
 		case 'j':
 		case 'J':
-			SelectedPlanetDL = planetDLs[3];
-			SelectedPlanetScale = planetScales[3];
+			SelectedPlanet = 3;
 			break;				// happy compiler
 		case 's':
 		case 'S':
-			SelectedPlanetDL = planetDLs[4];
-			SelectedPlanetScale = planetScales[4];
+			SelectedPlanet = 4;
 			break;				// happy compiler
 		case 'u':
 		case 'U':
-			SelectedPlanetDL = planetDLs[5];
-			SelectedPlanetScale = planetScales[5];
+			SelectedPlanet = 5;
 			break;				// happy compiler
 		case 'n':
 		case 'N':
-			SelectedPlanetDL = planetDLs[6];
-			SelectedPlanetScale = planetScales[6];
+			SelectedPlanet = 6;
 			break;				// happy compiler
 
 		case 'w':
@@ -1240,8 +1230,7 @@ Reset( )
 	TimeFreezeOffsetMs = 0;
 	Scale = 0.20;
 	ShadowsOn = 0;
-	SelectedPlanetDL = planetDLs[1];
-	SelectedPlanetScale = planetScales[1];
+	SelectedPlanet = 0;
 	NowColor = WHITE_COL;
 	NowProjection = ORTHO;
 	NowLightType = POINTLIGHT;
