@@ -498,29 +498,29 @@ Display( )
 	// a good use for thefirst one might be to have your name on the screen
 	// a good use for the second one might be to have vertex numbers on the screen alongside each vertex
 
-	glDisable( GL_DEPTH_TEST );
-	glColor3f( 0.f, 1.f, 1.f );
-	//DoRasterString( 0.f, 1.f, 0.f, (char *)"Text That Moves" );
+	//glDisable( GL_DEPTH_TEST );
+	////glColor3f( 0.f, 1.f, 1.f );
+	////DoRasterString( 0.f, 1.f, 0.f, (char *)"Text That Moves" );
 
 
-	// draw some gratuitous text that is fixed on the screen:
-	//
-	// the projection matrix is reset to define a scene whose
-	// world coordinate system goes from 0-100 in each axis
-	//
-	// this is called "percent units", and is just a convenience
-	//
-	// the modelview matrix is reset to identity as we don't
-	// want to transform these coordinates
+	//// draw some gratuitous text that is fixed on the screen:
+	////
+	//// the projection matrix is reset to define a scene whose
+	//// world coordinate system goes from 0-100 in each axis
+	////
+	//// this is called "percent units", and is just a convenience
+	////
+	//// the modelview matrix is reset to identity as we don't
+	//// want to transform these coordinates
 
-	glDisable( GL_DEPTH_TEST );
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
-	gluOrtho2D( 0.f, 100.f,     0.f, 100.f );
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
-	glColor3f( 1.f, 1.f, 1.f );
-	//DoRasterString( 5.f, 5.f, 0.f, (char *)"Text That Doesn't" );
+	//glDisable( GL_DEPTH_TEST );
+	//glMatrixMode( GL_PROJECTION );
+	//glLoadIdentity( );
+	//gluOrtho2D( 0.f, 100.f,     0.f, 100.f );
+	//glMatrixMode( GL_MODELVIEW );
+	//glLoadIdentity( );
+	//glColor3f( 1.f, 1.f, 1.f );
+	////DoRasterString( 5.f, 5.f, 0.f, (char *)"Text That Doesn't" );
 
 	// swap the double-buffered framebuffers:
 
