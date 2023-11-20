@@ -75,7 +75,7 @@ Keytimes::GetNumKeytimes( )
 }
 
 float
-Keytimes::GetValue( float _time )
+Keytimes::GetValue( float _time, bool linear = false )
 {
 	// if empty, return zero:
 
@@ -108,6 +108,13 @@ Keytimes::GetValue( float _time )
 			v1 = tvs[i+1]->value;
 			break;
 		}
+	}
+
+	if (linear == true)
+	{
+		float fraction = (_time - t0) / (t1 - t0);
+		float value = v0 + (v1 - v0) * fraction;
+		return value;
 	}
 
 	// fprintf( stderr, "_time = %8.3f: i0 = %3d, i1 = %3d, t0 = %8.2f, t1 = %8.3f\n", _time, i0, i1, t0, t1 );

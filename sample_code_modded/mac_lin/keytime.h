@@ -24,7 +24,7 @@ public:
 	float	GetFirstTime( );
 	float	GetLastTime( );
 	int	GetNumKeytimes( );
-	float	GetValue( float );
+	float	GetValue( float, bool );
 	void	Init( );
 	void	PrintTimeValues( );
 };
