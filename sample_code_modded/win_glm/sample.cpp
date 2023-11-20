@@ -186,13 +186,14 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 //#define DEMO_Z_FIGHTING
 //#define DEMO_DEPTH_BUFFER
 
-
+#include "vertexbufferobject.cpp"
 // non-constant global variables:
 
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	BoxList;				// object display list
+//GLuint	BoxList;				// object display list  // USING VBO
+VertexBufferObject VBO_BoxList;         
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -477,7 +478,9 @@ Display( )
 
 	// draw the box object by calling up its display list:
 
-	glCallList( BoxList );
+	//glCallList( BoxList ); // USING VBO
+	VBO_BoxList.Draw();
+
 
 #ifdef DEMO_Z_FIGHTING
 	if( DepthFightingOn != 0 )
@@ -850,67 +853,122 @@ InitLists( )
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting InitLists.\n");
 
+	glutSetWindow( MainWindow );
+
 	float dx = BOXSIZE / 2.f;
 	float dy = BOXSIZE / 2.f;
 	float dz = BOXSIZE / 2.f;
-	glutSetWindow( MainWindow );
+	const int vertex_count = 24;
+	const int normal_count = 6;
+	const int color_count = 3;
+	//vertices
+	static GLfloat BoxVertices[vertex_count][3] =
+	{
+		{ dx, -dy,  dz},
+		{ dx, -dy, -dz},
+		{ dx,  dy, -dz},
+		{ dx,  dy,  dz},
+
+		{-dx, -dy,  dz},
+		{-dx,  dy,  dz},
+		{-dx,  dy, -dz},
+		{-dx, -dy, -dz},
+
+		{-dx,  dy,  dz},
+		{ dx,  dy,  dz},
+		{ dx,  dy, -dz},
+		{-dx,  dy, -dz},
+
+		{-dx, -dy,  dz},
+		{-dx, -dy, -dz},
+		{ dx, -dy, -dz},
+		{ dx, -dy,  dz},
+
+		{-dx, -dy, dz},
+		{ dx, -dy, dz},
+		{ dx,  dy, dz},
+		{-dx,  dy, dz},
+
+		{-dx, -dy, -dz},
+		{-dx,  dy, -dz},
+		{ dx,  dy, -dz},
+		{ dx, -dy, -dz},
+	};
+	//normals
+	static GLfloat BoxNormals[normal_count][3] =
+	{
+		{ 1.,  0.,  0.},
+		{-1.,  0.,  0.},
+		{ 0.,  1.,  0.},
+		{ 0., -1.,  0.},
+		{ 0.,  0.,  1.},
+		{ 0.,  0., -1.},
+	};
+	//colors
+	static GLfloat BoxColors[color_count][3] =
+	{
+		{1., 0., 0.},
+		{0., 1., 0.},
+		{0., 0., 1.},
+	};
+
+
+	VBO_BoxList.Init();
+	VBO_BoxList.glBegin(GL_QUADS);
+	int c_i;
+	int n_i;
+	for (int v_i = 0; v_i < vertex_count; v_i++)
+	{
+		c_i = v_i / 8;
+		n_i = v_i / 4;
+		VBO_BoxList.glColor3fv(BoxColors[c_i]);
+		VBO_BoxList.glNormal3fv(BoxNormals[n_i]);
+		VBO_BoxList.glVertex3fv(BoxVertices[v_i]);
+	};
+	VBO_BoxList.glEnd(); 
 
 	// create the object:
+	//BoxList = glGenLists( 1 );
+	//glNewList( BoxList, GL_COMPILE );
+	//	glBegin( GL_QUADS );
+	//		glColor3f( 1., 0., 0. );
+	//			glNormal3f( 1., 0., 0. );
+	//				glVertex3f(  dx, -dy,  dz );
+	//				glVertex3f(  dx, -dy, -dz );
+	//				glVertex3f(  dx,  dy, -dz );
+	//				glVertex3f(  dx,  dy,  dz );
+	//			glNormal3f(-1., 0., 0.);
+	//				glVertex3f( -dx, -dy,  dz);
+	//				glVertex3f( -dx,  dy,  dz );
+	//				glVertex3f( -dx,  dy, -dz );
+	//				glVertex3f( -dx, -dy, -dz );
+	//		glColor3f( 0., 1., 0. );
+	//			glNormal3f(0., 1., 0.);
+	//				glVertex3f( -dx,  dy,  dz );
+	//				glVertex3f(  dx,  dy,  dz );
+	//				glVertex3f(  dx,  dy, -dz );
+	//				glVertex3f( -dx,  dy, -dz );
+	//			glNormal3f(0., -1., 0.);
+	//				glVertex3f( -dx, -dy,  dz);
+	//				glVertex3f( -dx, -dy, -dz );
+	//				glVertex3f(  dx, -dy, -dz );
+	//				glVertex3f(  dx, -dy,  dz );
+	//		glColor3f(0., 0., 1.);
+	//			glNormal3f(0., 0., 1.);
+	//				glVertex3f(-dx, -dy, dz);
+	//				glVertex3f( dx, -dy, dz);
+	//				glVertex3f( dx,  dy, dz);
+	//				glVertex3f(-dx,  dy, dz);
+	//			glNormal3f(0., 0., -1.);
+	//				glVertex3f(-dx, -dy, -dz);
+	//				glVertex3f(-dx,  dy, -dz);
+	//				glVertex3f( dx,  dy, -dz);
+	//				glVertex3f( dx, -dy, -dz);
+	//	glEnd( );
 
-	BoxList = glGenLists( 1 );
-	glNewList( BoxList, GL_COMPILE );
-
-		glBegin( GL_QUADS );
-
-			glColor3f( 1., 0., 0. );
-
-				glNormal3f( 1., 0., 0. );
-					glVertex3f(  dx, -dy,  dz );
-					glVertex3f(  dx, -dy, -dz );
-					glVertex3f(  dx,  dy, -dz );
-					glVertex3f(  dx,  dy,  dz );
-
-				glNormal3f(-1., 0., 0.);
-					glVertex3f( -dx, -dy,  dz);
-					glVertex3f( -dx,  dy,  dz );
-					glVertex3f( -dx,  dy, -dz );
-					glVertex3f( -dx, -dy, -dz );
-
-			glColor3f( 0., 1., 0. );
-
-				glNormal3f(0., 1., 0.);
-					glVertex3f( -dx,  dy,  dz );
-					glVertex3f(  dx,  dy,  dz );
-					glVertex3f(  dx,  dy, -dz );
-					glVertex3f( -dx,  dy, -dz );
-
-				glNormal3f(0., -1., 0.);
-					glVertex3f( -dx, -dy,  dz);
-					glVertex3f( -dx, -dy, -dz );
-					glVertex3f(  dx, -dy, -dz );
-					glVertex3f(  dx, -dy,  dz );
-
-			glColor3f(0., 0., 1.);
-
-				glNormal3f(0., 0., 1.);
-					glVertex3f(-dx, -dy, dz);
-					glVertex3f( dx, -dy, dz);
-					glVertex3f( dx,  dy, dz);
-					glVertex3f(-dx,  dy, dz);
-
-				glNormal3f(0., 0., -1.);
-					glVertex3f(-dx, -dy, -dz);
-					glVertex3f(-dx,  dy, -dz);
-					glVertex3f( dx,  dy, -dz);
-					glVertex3f( dx, -dy, -dz);
-
-		glEnd( );
-
-	glEndList( );
-
+	//glEndList( );
 
 	// create the axes:
-
 	AxesList = glGenLists( 1 );
 	glNewList( AxesList, GL_COMPILE );
 		glLineWidth( AXES_WIDTH );
