@@ -186,15 +186,13 @@ const int MS_PER_ANIMATION_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 //#define DEMO_Z_FIGHTING
 //#define DEMO_DEPTH_BUFFER
 
-#include "vertexbufferobject.cpp"
 #include "glslprogram.cpp"
 // non-constant global variables:
 
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
-VertexBufferObject VBO_BoxList;         
-GLuint BoxDisplayList;
+GLuint  SphereDL;
 GLSLProgram Pattern;			// Used for shaders
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
@@ -290,7 +288,7 @@ MulArray3(float factor, float a, float b, float c )
 
 //#include "setmaterial.cpp"
 //#include "setlight.cpp"
-//#include "osusphere.cpp"
+#include "osusphere.cpp"
 //#include "osucone.cpp"
 //#include "osutorus.cpp"
 //#include "bmptotexture.cpp"
@@ -470,22 +468,22 @@ Display( )
 	glEnable( GL_NORMALIZE );
 
 	// draw the box object by calling up its display list:
-	float x0 = 0;
-	float y0 = 0;
-	float d = 0.5;
-	Pattern.Use();
-	Pattern.SetUniformVariable("uX0", x0);
-	Pattern.SetUniformVariable("uY0", y0);
-	Pattern.SetUniformVariable("uD", d);
+	//float x0 = 0;
+	//float y0 = 0;
+	//float d = 0.5;
+	//Pattern.Use();
+	//Pattern.SetUniformVariable("uX0", x0);
+	//Pattern.SetUniformVariable("uY0", y0);
+	//Pattern.SetUniformVariable("uD", d);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	Pattern.SetAttributePointer3fv("aVertex", (GLfloat*)0);
-	Pattern.EnableVertexAttribArray("aVertex");
-	Pattern.SetAttributeVariable("aColor", 1, 1, 0 );
-	Pattern.EnableVertexAttribArray("aColor");
-    VBO_BoxList.Draw(); // CHECK VBO NOTES FOR HOW TO ACTUALLY USE THE SHADER HERE... NOT WORKING
-	Pattern.UnUse();
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_COLOR_ARRAY);
+	//Pattern.SetAttributePointer3fv("aVertex", (GLfloat*)0);
+	//Pattern.EnableVertexAttribArray("aVertex");
+	//Pattern.SetAttributeVariable("aColor", 1, 1, 0 );
+	//Pattern.EnableVertexAttribArray("aColor");
+	//Pattern.UnUse();
+	glCallList(SphereDL);
 
 
 #ifdef DEMO_Z_FIGHTING
@@ -865,117 +863,10 @@ InitLists( )
 
 	glutSetWindow( MainWindow );
 
-	//float dx = BOXSIZE / 2.f;
-	//float dy = BOXSIZE / 2.f;
-	//float dz = BOXSIZE / 2.f;
-	const int vertex_count = 24;
-	const int normal_count = 6;
-	const int color_count = 3;
-	//vertices
-	static GLfloat BoxVertices[vertex_count][3] =
-	{
-		{ 1, -1,  1},
-		{ 1, -1, -1},
-		{ 1,  1, -1},
-		{ 1,  1,  1},
-
-		{-1, -1,  1},
-		{-1,  1,  1},
-		{-1,  1, -1},
-		{-1, -1, -1},
-
-		{-1,  1,  1},
-		{ 1,  1,  1},
-		{ 1,  1, -1},
-		{-1,  1, -1},
-
-		{-1, -1,  1},
-		{-1, -1, -1},
-		{ 1, -1, -1},
-		{ 1, -1,  1},
-
-		{-1, -1, 1},
-		{ 1, -1, 1},
-		{ 1,  1, 1},
-		{-1,  1, 1},
-
-		{-1, -1, -1},
-		{-1,  1, -1},
-		{ 1,  1, -1},
-		{ 1, -1, -1},
-	};
-	//normals
-	static GLfloat BoxNormals[normal_count][3] =
-	{
-		{ 1.,  0.,  0.},
-		{-1.,  0.,  0.},
-		{ 0.,  1.,  0.},
-		{ 0., -1.,  0.},
-		{ 0.,  0.,  1.},
-		{ 0.,  0., -1.},
-	};
-	//colors
-	static GLfloat BoxColors[color_count][3] =
-	{
-		{1., 0., 0.},
-		{0., 1., 0.},
-		{0., 0., 1.},
-	};
-
-
-	VBO_BoxList.Init();
-	VBO_BoxList.glBegin(GL_QUADS);
-	int c_i;
-	int n_i;
-	for (int v_i = 0; v_i < vertex_count; v_i++)
-	{
-		c_i = v_i / 8;
-		n_i = v_i / 4;
-		VBO_BoxList.glColor3fv(BoxColors[c_i]);
-		VBO_BoxList.glNormal3fv(BoxNormals[n_i]);
-		VBO_BoxList.glVertex3fv(BoxVertices[v_i]);
-	};
-	VBO_BoxList.glEnd(); 
-
-	////create the boxlist:
-	//BoxDisplayList = glGenLists( 1 );
-	//glNewList( BoxDisplayList, GL_COMPILE );
-	//	glBegin( GL_QUADS );
-	//		glColor3f( 1., 0., 0. );
-	//			glNormal3f( 1., 0., 0. );
-	//				glVertex3f(  dx, -dy,  dz );
-	//				glVertex3f(  dx, -dy, -dz );
-	//				glVertex3f(  dx,  dy, -dz );
-	//				glVertex3f(  dx,  dy,  dz );
-	//			glNormal3f(-1., 0., 0.);
-	//				glVertex3f( -dx, -dy,  dz);
-	//				glVertex3f( -dx,  dy,  dz );
-	//				glVertex3f( -dx,  dy, -dz );
-	//				glVertex3f( -dx, -dy, -dz );
-	//		glColor3f( 0., 1., 0. );
-	//			glNormal3f(0., 1., 0.);
-	//				glVertex3f( -dx,  dy,  dz );
-	//				glVertex3f(  dx,  dy,  dz );
-	//				glVertex3f(  dx,  dy, -dz );
-	//				glVertex3f( -dx,  dy, -dz );
-	//			glNormal3f(0., -1., 0.);
-	//				glVertex3f( -dx, -dy,  dz);
-	//				glVertex3f( -dx, -dy, -dz );
-	//				glVertex3f(  dx, -dy, -dz );
-	//				glVertex3f(  dx, -dy,  dz );
-	//		glColor3f(0., 0., 1.);
-	//			glNormal3f(0., 0., 1.);
-	//				glVertex3f(-dx, -dy, dz);
-	//				glVertex3f( dx, -dy, dz);
-	//				glVertex3f( dx,  dy, dz);
-	//				glVertex3f(-dx,  dy, dz);
-	//			glNormal3f(0., 0., -1.);
-	//				glVertex3f(-dx, -dy, -dz);
-	//				glVertex3f(-dx,  dy, -dz);
-	//				glVertex3f( dx,  dy, -dz);
-	//				glVertex3f( dx, -dy, -dz);
-	//	glEnd( );
-	//glEndList( );
+	SphereDL = glGenLists(1); 
+	glNewList(SphereDL, GL_COMPILE);
+		OsuSphere(1, 100, 100);
+	glEndList();
 
 	// create the axes:
 	AxesList = glGenLists( 1 );
