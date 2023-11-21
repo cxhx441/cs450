@@ -177,7 +177,7 @@ const float	WHITE[ ] = { 1.,1.,1.,1. };
 
 // for animation:
 
-const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
+const int MS_PER_ANIMATION_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 
 
 // what options should we compile-in?
@@ -187,13 +187,15 @@ const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
 //#define DEMO_DEPTH_BUFFER
 
 #include "vertexbufferobject.cpp"
+#include "glslprogram.cpp"
 // non-constant global variables:
 
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
-//GLuint	BoxList;				// object display list  // USING VBO
 VertexBufferObject VBO_BoxList;         
+GLuint BoxDisplayList;
+GLSLProgram Pattern;			// Used for shaders
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -294,7 +296,6 @@ MulArray3(float factor, float a, float b, float c )
 //#include "bmptotexture.cpp"
 //#include "loadobjfile.cpp"
 //#include "keytime.cpp"
-//#include "glslprogram.cpp"
 
 
 // main program:
@@ -351,8 +352,8 @@ Animate( )
 	// put animation stuff in here -- change some global variables for Display( ) to find:
 
 	int ms = glutGet(GLUT_ELAPSED_TIME);
-	ms %= MS_PER_CYCLE;							// makes the value of ms between 0 and MS_PER_CYCLE-1
-	Time = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
+	ms %= MS_PER_ANIMATION_CYCLE;							// makes the value of ms between 0 and MS_PER_ANIMATION_CYCLE-1
+	Time = (float)ms / (float)MS_PER_ANIMATION_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
 
 	// for example, if you wanted to spin an object in Display( ), you might call: glRotatef( 360.f*Time,   0., 1., 0. );
 
@@ -386,11 +387,9 @@ Display( )
 
 
 	// specify shading to be flat:
-
 	glShadeModel( GL_FLAT );
 
 	// set the viewport to be a square centered in the window:
-
 	GLsizei vx = glutGet( GLUT_WINDOW_WIDTH );
 	GLsizei vy = glutGet( GLUT_WINDOW_HEIGHT );
 	GLsizei v = vx < vy ? vx : vy;			// minimum dimension
@@ -410,12 +409,10 @@ Display( )
 	glm::mat4 projection;
 	if (NowProjection == ORTHO)
 	{
-		//glOrtho(-2.f, 2.f, -2.f, 2.f, 0.1f, 1000.f); // OLD MOVING TO GLM SETUP
 		projection = glm::ortho(-2., 2., -2., 2., 0.1, 1000.);
 	}
 	else
 	{
-		//gluPerspective( 70.f, 1.f,	0.1f, 1000.f ); // OLD MOVING TO GLM SETUP
 		projection = glm::perspective(D2R * 90., 1., 0.1, 1000.);
 	}
 	// apply projection matrix to opengl matrix
@@ -427,15 +424,12 @@ Display( )
 	glLoadIdentity( );
 
 	// set the eye position, look-at position, and up-vector:
-	//gluLookAt( 0.f, 0.f, 3.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f ); // OLD MOVING TO GLM SETUP
 	glm::vec3 eye(0., 0., 3.);
 	glm::vec3 look(0., 0., 0.);
 	glm::vec3 up(0., 1., 0.);
 	glm::mat4 modelview = glm::lookAt(eye, look, up);
 
 	// rotate the scene:
-	//glRotatef( (GLfloat)Yrot, 0.f, 1.f, 0.f ); // OLD MOVING TO GLM SETUP
-	//glRotatef( (GLfloat)Xrot, 1.f, 0.f, 0.f ); // OLD MOVING TO GLM SETUP
 	// note glm::rotate takes in radians
 	modelview = glm::rotate(modelview, D2R*Yrot, glm::vec3(0., 1., 0.)); 
 	modelview = glm::rotate(modelview, D2R*Xrot, glm::vec3(1., 0., 0.));
@@ -443,7 +437,6 @@ Display( )
 	// uniformly scale the scene:
 	if( Scale < MINSCALE )
 		Scale = MINSCALE;
-	//glScalef( (GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale ); // OLD MOVING TO GLM SETUP
 	modelview = glm::scale(modelview, glm::vec3(Scale, Scale, Scale));
 
 	// apply modelview matrix to opengl matrix
@@ -472,14 +465,27 @@ Display( )
 		glCallList( AxesList );
 	}
 
+
 	// since we are using glScalef( ), be sure the normals get unitized:
 	glEnable( GL_NORMALIZE );
 
-
 	// draw the box object by calling up its display list:
+	float x0 = 0;
+	float y0 = 0;
+	float d = 0.5;
+	Pattern.Use();
+	Pattern.SetUniformVariable("uX0", x0);
+	Pattern.SetUniformVariable("uY0", y0);
+	Pattern.SetUniformVariable("uD", d);
 
-	//glCallList( BoxList ); // USING VBO
-	VBO_BoxList.Draw();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	Pattern.SetAttributePointer3fv("aVertex", (GLfloat*)0);
+	Pattern.EnableVertexAttribArray("aVertex");
+	Pattern.SetAttributeVariable("aColor", 1, 1, 0 );
+	Pattern.EnableVertexAttribArray("aColor");
+    VBO_BoxList.Draw(); // CHECK VBO NOTES FOR HOW TO ACTUALLY USE THE SHADER HERE... NOT WORKING
+	Pattern.UnUse();
 
 
 #ifdef DEMO_Z_FIGHTING
@@ -838,6 +844,10 @@ InitGraphics( )
 #endif
 
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
+	Pattern.Init(); 
+	bool valid = Pattern.Create("pattern.vert", "pattern.frag");
+	if (!valid)
+		fprintf(stderr, "error creating pattern shaders");
 
 }
 
@@ -855,44 +865,44 @@ InitLists( )
 
 	glutSetWindow( MainWindow );
 
-	float dx = BOXSIZE / 2.f;
-	float dy = BOXSIZE / 2.f;
-	float dz = BOXSIZE / 2.f;
+	//float dx = BOXSIZE / 2.f;
+	//float dy = BOXSIZE / 2.f;
+	//float dz = BOXSIZE / 2.f;
 	const int vertex_count = 24;
 	const int normal_count = 6;
 	const int color_count = 3;
 	//vertices
 	static GLfloat BoxVertices[vertex_count][3] =
 	{
-		{ dx, -dy,  dz},
-		{ dx, -dy, -dz},
-		{ dx,  dy, -dz},
-		{ dx,  dy,  dz},
+		{ 1, -1,  1},
+		{ 1, -1, -1},
+		{ 1,  1, -1},
+		{ 1,  1,  1},
 
-		{-dx, -dy,  dz},
-		{-dx,  dy,  dz},
-		{-dx,  dy, -dz},
-		{-dx, -dy, -dz},
+		{-1, -1,  1},
+		{-1,  1,  1},
+		{-1,  1, -1},
+		{-1, -1, -1},
 
-		{-dx,  dy,  dz},
-		{ dx,  dy,  dz},
-		{ dx,  dy, -dz},
-		{-dx,  dy, -dz},
+		{-1,  1,  1},
+		{ 1,  1,  1},
+		{ 1,  1, -1},
+		{-1,  1, -1},
 
-		{-dx, -dy,  dz},
-		{-dx, -dy, -dz},
-		{ dx, -dy, -dz},
-		{ dx, -dy,  dz},
+		{-1, -1,  1},
+		{-1, -1, -1},
+		{ 1, -1, -1},
+		{ 1, -1,  1},
 
-		{-dx, -dy, dz},
-		{ dx, -dy, dz},
-		{ dx,  dy, dz},
-		{-dx,  dy, dz},
+		{-1, -1, 1},
+		{ 1, -1, 1},
+		{ 1,  1, 1},
+		{-1,  1, 1},
 
-		{-dx, -dy, -dz},
-		{-dx,  dy, -dz},
-		{ dx,  dy, -dz},
-		{ dx, -dy, -dz},
+		{-1, -1, -1},
+		{-1,  1, -1},
+		{ 1,  1, -1},
+		{ 1, -1, -1},
 	};
 	//normals
 	static GLfloat BoxNormals[normal_count][3] =
@@ -927,9 +937,9 @@ InitLists( )
 	};
 	VBO_BoxList.glEnd(); 
 
-	// create the object:
-	//BoxList = glGenLists( 1 );
-	//glNewList( BoxList, GL_COMPILE );
+	////create the boxlist:
+	//BoxDisplayList = glGenLists( 1 );
+	//glNewList( BoxDisplayList, GL_COMPILE );
 	//	glBegin( GL_QUADS );
 	//		glColor3f( 1., 0., 0. );
 	//			glNormal3f( 1., 0., 0. );
@@ -965,7 +975,6 @@ InitLists( )
 	//				glVertex3f( dx,  dy, -dz);
 	//				glVertex3f( dx, -dy, -dz);
 	//	glEnd( );
-
 	//glEndList( );
 
 	// create the axes:
