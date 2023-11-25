@@ -138,7 +138,7 @@ const float	WHITE[ ] = { 1.,1.,1.,1. };
 
 // for animation:
 
-const int MS_PER_CYCLE = 10000;		// 10000 milliseconds = 10 seconds
+const int MS_PER_CYCLE = 35000;		// 10000 milliseconds = 10 seconds
 
 // non-constant global variables:
 
@@ -150,12 +150,18 @@ bool	Freeze;
 int		MainWindow;				// window id for main graphics window
 int		NowColor;				// index into Colors[ ]
 int		NowProjection;			// ORTHO or PERSP
+bool	UseAnimation;			// use animation bool
+bool	UseKeytime;			// use keytime bool
 float	Scale;					// scaling factor
 float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
+int		NowList;
+int		DisplayLists[3];
 int		SphereList;
+int		TorusList;
+int		ConeList;
 
 
 // function prototypes:
@@ -235,15 +241,16 @@ MulArray3(float factor, float a, float b, float c )
 //#include "setmaterial.cpp"
 //#include "setlight.cpp"
 #include "osusphere.cpp"
-//#include "osucone.cpp"
-//#include "osutorus.cpp"
+#include "osucone.cpp"
+#include "osutorus.cpp"
 //#include "bmptotexture.cpp"
 //#include "loadobjfile.cpp"
 #include "keytime.cpp"
 #include "glslprogram.cpp"
 
-float NowS0, NowT0, NowD;
+float NowS_center, NowT_center, NowRadius_s, NowRadius_t; // elipse center and radius
 GLSLProgram Pattern;
+Keytimes ellipseS_Center, ellipseT_Center;
 
 
 // main program:
@@ -296,7 +303,7 @@ main( int argc, char *argv[ ] )
 // do not call Display( ) from here -- let glutPostRedisplay( ) do it
 
 void
-Animate( )
+Animate()
 {
 	// put animation stuff in here -- change some global variables for Display( ) to find:
 
@@ -308,98 +315,118 @@ Animate( )
 
 	// force a call to Display( ) next time it is convenient:
 
-	glutSetWindow( MainWindow );
-	glutPostRedisplay( );
+	glutSetWindow(MainWindow);
+	glutPostRedisplay();
 }
 
 
 // draw the complete scene:
 
 void
-Display( )
+Display()
 {
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting Display.\n");
 
 	// set which window we want to do the graphics into:
-	glutSetWindow( MainWindow );
+	glutSetWindow(MainWindow);
 
 	// erase the background:
-	glDrawBuffer( GL_BACK );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glDrawBuffer(GL_BACK);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable( GL_DEPTH_TEST );
+	glEnable(GL_DEPTH_TEST);
 
 	// specify shading to be flat:
 
-	glShadeModel( GL_FLAT );
+	glShadeModel(GL_FLAT);
 
 	// set the viewport to be a square centered in the window:
 
-	GLsizei vx = glutGet( GLUT_WINDOW_WIDTH );
-	GLsizei vy = glutGet( GLUT_WINDOW_HEIGHT );
+	GLsizei vx = glutGet(GLUT_WINDOW_WIDTH);
+	GLsizei vy = glutGet(GLUT_WINDOW_HEIGHT);
 	GLsizei v = vx < vy ? vx : vy;			// minimum dimension
-	GLint xl = ( vx - v ) / 2;
-	GLint yb = ( vy - v ) / 2;
-	glViewport( xl, yb,  v, v );
+	GLint xl = (vx - v) / 2;
+	GLint yb = (vy - v) / 2;
+	glViewport(xl, yb, v, v);
 
 	// set the viewing volume:
 	// remember that the Z clipping  values are given as DISTANCES IN FRONT OF THE EYE
 	// USE gluOrtho2D( ) IF YOU ARE DOING 2D !
 
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
-	if( NowProjection == ORTHO )
-		glOrtho( -2.f, 2.f,     -2.f, 2.f,     0.1f, 1000.f );
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	if (NowProjection == ORTHO)
+		glOrtho(-2.f, 2.f, -2.f, 2.f, 0.1f, 1000.f);
 	else
-		gluPerspective( 70.f, 1.f,	0.1f, 1000.f );
+		gluPerspective(70.f, 1.f, 0.1f, 1000.f);
 
 	// place the objects into the scene:
 
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	// set the eye position, look-at position, and up-vector:
 
-	gluLookAt( 0.f, 0.f, 3.f,     0.f, 0.f, 0.f,     0.f, 1.f, 0.f );
+	gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
 	// rotate the scene:
 
-	glRotatef( (GLfloat)Yrot, 0.f, 1.f, 0.f );
-	glRotatef( (GLfloat)Xrot, 1.f, 0.f, 0.f );
+	glRotatef((GLfloat)Yrot, 0.f, 1.f, 0.f);
+	glRotatef((GLfloat)Xrot, 1.f, 0.f, 0.f);
 
 	// uniformly scale the scene:
 
-	if( Scale < MINSCALE )
+	if (Scale < MINSCALE)
 		Scale = MINSCALE;
-	glScalef( (GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale );
+	glScalef((GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale);
 
 	// possibly draw the axes:
 
-	if( AxesOn != 0 )
+	if (AxesOn != 0)
 	{
-		glColor3fv( &Colors[NowColor][0] );
-		glCallList( AxesList );
+		glColor3fv(&Colors[NowColor][0]);
+		glCallList(AxesList);
 	}
 
 	// since we are using glScalef( ), be sure the normals get unitized:
 
-	glEnable( GL_NORMALIZE );
+	glEnable(GL_NORMALIZE);
 
 	// draw the box object by calling up its display list:
 
-	Pattern.Use( );
+	Pattern.Use();
 
 	// set the uniform variables that will change over time:
 
-	NowS0 = 0.5f;
-	NowT0 = 0.5f;
-	NowD  = 0.25f;
-	Pattern.SetUniformVariable( "uS0", NowS0 );
-	Pattern.SetUniformVariable( "uT0", NowT0 );
-	Pattern.SetUniformVariable( "uD" , NowD  );
+	if (UseKeytime == true)
+	{
+		NowS_center = ellipseS_Center.GetValue(Time * MS_PER_CYCLE, false);
+		NowT_center = ellipseT_Center.GetValue(Time * MS_PER_CYCLE, false);
+	}
+	else
+	{
+		NowS_center = 0.5;
+		NowT_center = 0.5;
+	}
 
-	glCallList( SphereList );
+	if (UseAnimation == true)
+	{
+		NowRadius_s = 0.1*sin(3 * F_2_PI * Time);
+		NowRadius_t = 0.1*cos(F_2_PI * Time);
+	}
+	else
+	{
+		NowRadius_s = 0.05;
+		NowRadius_t = 0.1;
+	}
+	Pattern.SetUniformVariable( "uSc", NowS_center ); 
+	Pattern.SetUniformVariable( "uTc", NowT_center ); 
+	Pattern.SetUniformVariable( "uRs", NowRadius_s );
+	Pattern.SetUniformVariable( "uRt", NowRadius_t );
+
+	//glCallList( SphereList );
+	glCallList(DisplayLists[NowList]);
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
 
@@ -611,7 +638,7 @@ InitMenus( )
 //	also setup callback functions
 
 void
-InitGraphics( )
+InitGraphics()
 {
 	if (DebugOn != 0)
 		fprintf(stderr, "Starting InitGraphics.\n");
@@ -619,21 +646,21 @@ InitGraphics( )
 	// request the display modes:
 	// ask for red-green-blue-alpha color, double-buffering, and z-buffering:
 
-	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
 	// set the initial window configuration:
 
-	glutInitWindowPosition( 0, 0 );
-	glutInitWindowSize( INIT_WINDOW_SIZE, INIT_WINDOW_SIZE );
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(INIT_WINDOW_SIZE, INIT_WINDOW_SIZE);
 
 	// open the window and set its title:
 
-	MainWindow = glutCreateWindow( WINDOWTITLE );
-	glutSetWindowTitle( WINDOWTITLE );
+	MainWindow = glutCreateWindow(WINDOWTITLE);
+	glutSetWindowTitle(WINDOWTITLE);
 
 	// set the framebuffer clear values:
 
-	glClearColor( BACKCOLOR[0], BACKCOLOR[1], BACKCOLOR[2], BACKCOLOR[3] );
+	glClearColor(BACKCOLOR[0], BACKCOLOR[1], BACKCOLOR[2], BACKCOLOR[3]);
 
 	// setup the callback functions:
 	// DisplayFunc -- redraw the window
@@ -656,68 +683,118 @@ InitGraphics( )
 	// TimerFunc -- trigger something to happen a certain time from now
 	// IdleFunc -- what to do when nothing else is going on
 
-	glutSetWindow( MainWindow );
-	glutDisplayFunc( Display );
-	glutReshapeFunc( Resize );
-	glutKeyboardFunc( Keyboard );
-	glutMouseFunc( MouseButton );
-	glutMotionFunc( MouseMotion );
+	glutSetWindow(MainWindow);
+	glutDisplayFunc(Display);
+	glutReshapeFunc(Resize);
+	glutKeyboardFunc(Keyboard);
+	glutMouseFunc(MouseButton);
+	glutMotionFunc(MouseMotion);
 	glutPassiveMotionFunc(MouseMotion);
 	//glutPassiveMotionFunc( NULL );
-	glutVisibilityFunc( Visibility );
-	glutEntryFunc( NULL );
-	glutSpecialFunc( NULL );
-	glutSpaceballMotionFunc( NULL );
-	glutSpaceballRotateFunc( NULL );
-	glutSpaceballButtonFunc( NULL );
-	glutButtonBoxFunc( NULL );
-	glutDialsFunc( NULL );
-	glutTabletMotionFunc( NULL );
-	glutTabletButtonFunc( NULL );
-	glutMenuStateFunc( NULL );
-	glutTimerFunc( -1, NULL, 0 );
+	glutVisibilityFunc(Visibility);
+	glutEntryFunc(NULL);
+	glutSpecialFunc(NULL);
+	glutSpaceballMotionFunc(NULL);
+	glutSpaceballRotateFunc(NULL);
+	glutSpaceballButtonFunc(NULL);
+	glutButtonBoxFunc(NULL);
+	glutDialsFunc(NULL);
+	glutTabletMotionFunc(NULL);
+	glutTabletButtonFunc(NULL);
+	glutMenuStateFunc(NULL);
+	glutTimerFunc(-1, NULL, 0);
 
 	// setup glut to call Animate( ) every time it has
 	// 	nothing it needs to respond to (which is most of the time)
 	// we don't need to do this for this program, and really should set the argument to NULL
 	// but, this sets us up nicely for doing animation
 
-	glutIdleFunc( Animate );
+	glutIdleFunc(Animate);
 
 	// init the glew package (a window must be open to do this):
 
 #ifdef WIN32
-	GLenum err = glewInit( );
-	if( err != GLEW_OK )
+	GLenum err = glewInit();
+	if (err != GLEW_OK)
 	{
-		fprintf( stderr, "glewInit Error\n" );
+		fprintf(stderr, "glewInit Error\n");
 	}
 	else
-		fprintf( stderr, "GLEW initialized OK\n" );
-	fprintf( stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+		fprintf(stderr, "GLEW initialized OK\n");
+	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 #endif
 
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
-
-	Pattern.Init( );
-	bool valid = Pattern.Create( "pattern.vert", "pattern.frag" );
-	if( !valid )
-		fprintf( stderr, "Could not create the Pattern shader!\n" );
+	Pattern.Init();
+	bool valid = Pattern.Create("pattern.vert", "pattern.frag");
+	if (!valid)
+		fprintf(stderr, "Could not create the Pattern shader!\n");
 	else
-		fprintf( stderr, "Pattern shader created!\n" );
+		fprintf(stderr, "Pattern shader created!\n");
 
 	// set the uniform variables that will not change:
-	
-	Pattern.Use( );
-	Pattern.SetUniformVariable( "uKa", 0.1f );
-	Pattern.SetUniformVariable( "uKd", 0.5f );
-	Pattern.SetUniformVariable( "uKs", 0.4f );
-	Pattern.SetUniformVariable( "uColor", 1.f, 0.5f, 0.f );
-	Pattern.SetUniformVariable( "uSpecularColor", 1.f, 1.f, 1.f );
-	Pattern.SetUniformVariable( "uShininess", 12.f );
-	Pattern.UnUse( );
-}
 
+	Pattern.Use();
+	Pattern.SetUniformVariable("uKambient", 0.1f);
+	Pattern.SetUniformVariable("uKdiffuse", 0.5f);
+	Pattern.SetUniformVariable("uKspecular", 0.4f);
+	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); // blue as base color
+	Pattern.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
+	Pattern.SetUniformVariable("uShininess", 12.f); // shine
+	Pattern.UnUse();
+
+	ellipseS_Center.Init();
+	ellipseT_Center.Init();
+
+	struct st_pair {
+		float s;
+		float t;
+	};
+	struct st_pair ST_PAIRS[] =
+	{
+		{0.5, 0.5},
+		{0.5, 0.5},
+		{0.5, 0.5},
+		{0.5, 0.5},
+
+		{0.5+.05f, 0.5},
+		{0.5    , 0.5+.05f},
+		{0.5-.05f, 0.5},
+		{0.5    , 0.5-.05f},
+
+		{0.5+.1f, 0.5},
+		{0.5    , 0.5+.1f},
+		{0.5-.1f, 0.5},
+		{0.5    , 0.5-.1f},
+
+		{0.5+.15f, 0.5},
+		{0.5    , 0.5+.15f},
+		{0.5-.15f, 0.5},
+		{0.5    , 0.5-.15f},
+
+		{0.5+.2f, 0.5},
+		{0.5    , 0.5+.2f},
+		{0.5-.2f, 0.5},
+		{0.5    , 0.5-.2f},
+
+		{0.5+.25f, 0.5},
+		{0.5    , 0.5+.25f},
+		{0.5-.25f, 0.5},
+		{0.5    , 0.5-.25f},
+	};
+
+	int num_pairs = sizeof(ST_PAIRS) / sizeof(st_pair);
+	for (int pair = 0; pair < num_pairs; pair++)
+	{
+		float front_half = (MS_PER_CYCLE / (num_pairs * 2)) * pair;
+		float back_half = MS_PER_CYCLE - front_half; 
+		ellipseS_Center.AddTimeValue(front_half, ST_PAIRS[pair].s);
+		ellipseT_Center.AddTimeValue(front_half, ST_PAIRS[pair].t);
+
+		ellipseS_Center.AddTimeValue(back_half, ST_PAIRS[pair].s);
+		ellipseT_Center.AddTimeValue(back_half, ST_PAIRS[pair].t);
+	}
+}
 
 // initialize the display lists that will not change:
 // (a display list is a way to store opengl commands in
@@ -738,6 +815,20 @@ InitLists( )
 	glNewList( SphereList, GL_COMPILE );
 		OsuSphere( 1., 64, 64 );
 	glEndList( );
+
+	TorusList = glGenLists( 1 );
+	glNewList( TorusList, GL_COMPILE );
+		OsuTorus(0.25, 0.75, 64, 64);
+	glEndList( );
+
+	ConeList = glGenLists( 1 );
+	glNewList( ConeList, GL_COMPILE );
+		OsuCone(1., 0.1, 1, 64, 64);
+	glEndList( );
+
+	DisplayLists[0] = SphereList;
+	DisplayLists[1] = TorusList;
+	DisplayLists[2] = ConeList;
 
 
 	// create the axes:
@@ -761,6 +852,19 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+	case 'n':
+	case 'N':
+		NowList++;
+		NowList %= 3;
+		break;
+	case 'k':
+	case 'K': 
+		UseKeytime = !UseKeytime;
+		break;
+	case 't':
+	case 'T': 
+		UseAnimation = !UseAnimation;
+		break;
 	case 'f':
 	case 'F':
 		Freeze = !Freeze;
@@ -906,6 +1010,9 @@ Reset( )
 	NowColor = YELLOW;
 	NowProjection = PERSP;
 	Xrot = Yrot = 0.;
+	UseAnimation = true;
+	UseKeytime = true;
+	NowList = 0;
 }
 
 
