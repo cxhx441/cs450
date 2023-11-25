@@ -30,7 +30,7 @@
 
 // title of these windows:
 
-const char *WINDOWTITLE = "OpenGL Shader Sample -- Joe Graphics";
+const char *WINDOWTITLE = "OpenGL Shader Sample -- Craig Harris";
 const char *GLUITITLE   = "User Interface Window";
 
 // what the glui package defines as true and false:
