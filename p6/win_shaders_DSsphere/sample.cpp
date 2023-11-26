@@ -158,10 +158,12 @@ int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
 int		NowList;
-int		DisplayLists[3];
+const int		numLists = 4;
+int		DisplayLists[numLists];
 int		SphereList;
 int		TorusList;
 int		ConeList;
+int		TriangleList;
 
 
 // function prototypes:
@@ -244,7 +246,7 @@ MulArray3(float factor, float a, float b, float c )
 #include "osucone.cpp"
 #include "osutorus.cpp"
 //#include "bmptotexture.cpp"
-//#include "loadobjfile.cpp"
+#include "loadobjfile.cpp"
 #include "keytime.cpp"
 #include "glslprogram.cpp"
 
@@ -826,9 +828,16 @@ InitLists( )
 		OsuCone(1., 0.1, 1, 64, 64);
 	glEndList( );
 
+	TriangleList = glGenLists( 1 );
+	glNewList( TriangleList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//Triangle.obj");
+	glEndList( );
+
+
 	DisplayLists[0] = SphereList;
 	DisplayLists[1] = TorusList;
 	DisplayLists[2] = ConeList;
+	DisplayLists[3] = TriangleList;
 
 
 	// create the axes:
@@ -855,7 +864,7 @@ Keyboard( unsigned char c, int x, int y )
 	case 'n':
 	case 'N':
 		NowList++;
-		NowList %= 3;
+		NowList %= numLists;
 		break;
 	case 'k':
 	case 'K': 
