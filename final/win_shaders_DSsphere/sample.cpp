@@ -44,7 +44,7 @@ const int ESCAPE = 0x1b;
 
 // initial window size:
 
-const int INIT_WINDOW_SIZE = 600;
+const int INIT_WINDOW_SIZE = 1200;
 
 // multiplication factors for input interaction:
 //  (these are known from previous experience)
@@ -246,9 +246,9 @@ MulArray3(float factor, float a, float b, float c )
 
 //#include "setmaterial.cpp"
 //#include "setlight.cpp"
-#include "osusphere.cpp"
-#include "osucone.cpp"
-#include "osutorus.cpp"
+//#include "osusphere.cpp"
+//#include "osucone.cpp"
+//#include "osutorus.cpp"
 //#include "bmptotexture.cpp"
 #include "loadobjfile.cpp"
 #include "keytime.cpp"
@@ -359,7 +359,6 @@ Display()
 	// set the viewing volume:
 	// remember that the Z clipping  values are given as DISTANCES IN FRONT OF THE EYE
 	// USE gluOrtho2D( ) IF YOU ARE DOING 2D !
-
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	if (NowProjection == ORTHO)
@@ -368,27 +367,22 @@ Display()
 		gluPerspective(70.f, 1.f, 0.1f, 1000.f);
 
 	// place the objects into the scene:
-
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
 	// set the eye position, look-at position, and up-vector:
-
-	gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+	gluLookAt(0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
 
 	// rotate the scene:
-
 	glRotatef((GLfloat)Yrot, 0.f, 1.f, 0.f);
 	glRotatef((GLfloat)Xrot, 1.f, 0.f, 0.f);
 
 	// uniformly scale the scene:
-
 	if (Scale < MINSCALE)
 		Scale = MINSCALE;
 	glScalef((GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale);
 
 	// possibly draw the axes:
-
 	if (AxesOn != 0)
 	{
 		glColor3fv(&Colors[NowColor][0]);
@@ -396,15 +390,12 @@ Display()
 	}
 
 	// since we are using glScalef( ), be sure the normals get unitized:
-
 	glEnable(GL_NORMALIZE);
 
 	// draw the box object by calling up its display list:
-
 	Pattern.Use();
 
 	// set the uniform variables that will change over time:
-
 	if (UseKeytime == true)
 	{
 		NowS_center = ellipseS_Center.GetValue(Time * MS_PER_CYCLE, false);
@@ -431,17 +422,34 @@ Display()
 	Pattern.SetUniformVariable( "uRs", NowRadius_s );
 	Pattern.SetUniformVariable( "uRt", NowRadius_t );
 
-	//glCallList( SphereList );
+
+	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 0.f); // Triforce Color
 	glCallList(TriforceTopList);
 	glCallList(TriforceLeftList);
 	glCallList(TriforceRightList);
+
+	Pattern.SetUniformVariable("uColor", 1.f, 0.f, 0.f); // Zelda Text Color
 	glCallList(ZeldaTextList);
+
+	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // LTTP Text
 	glCallList(LTTPTextList);
+
+	Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword 
 	glCallList(SwordList);
+
+	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 	glCallList(MountainList);
+
+	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); // Hills
 	glCallList(HillsList);
+
+	Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
 	glCallList(CastleList);
+
+	Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
 	glCallList(SkyList);
+
+	Pattern.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
 	glCallList(WaterList);
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
@@ -754,7 +762,6 @@ InitGraphics()
 	Pattern.SetUniformVariable("uKambient", 0.1f);
 	Pattern.SetUniformVariable("uKdiffuse", 0.5f);
 	Pattern.SetUniformVariable("uKspecular", 0.4f);
-	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); // blue as base color
 	Pattern.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
 	Pattern.SetUniformVariable("uShininess", 12.f); // shine
 	Pattern.UnUse();
