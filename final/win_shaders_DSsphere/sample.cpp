@@ -158,15 +158,17 @@ int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 
 
-int		NowList;
-const int		numLists = 5;
-int		DisplayLists[numLists];
-int		SphereList;
-int		TorusList;
-int		ConeList;
-int		TriangleList;
-int		TriangleList_LowSub;
-
+int		TriforceTopList;
+int		TriforceLeftList;
+int		TriforceRightList;
+int		ZeldaTextList;
+int		LTTPTextList;
+int		SwordList;
+int		MountainList;
+int		HillsList;
+int		CastleList;
+int		SkyList;
+int		WaterList;
 
 // function prototypes:
 
@@ -430,7 +432,17 @@ Display()
 	Pattern.SetUniformVariable( "uRt", NowRadius_t );
 
 	//glCallList( SphereList );
-	glCallList(DisplayLists[NowList]);
+	glCallList(TriforceTopList);
+	glCallList(TriforceLeftList);
+	glCallList(TriforceRightList);
+	glCallList(ZeldaTextList);
+	glCallList(LTTPTextList);
+	glCallList(SwordList);
+	glCallList(MountainList);
+	glCallList(HillsList);
+	glCallList(CastleList);
+	glCallList(SkyList);
+	glCallList(WaterList);
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
 
@@ -815,38 +827,60 @@ InitLists( )
 
 	// create the object:
 
-	SphereList = glGenLists( 1 );
-	glNewList( SphereList, GL_COMPILE );
-		OsuSphere( 1., 64, 64 );
+	TriforceTopList = glGenLists( 1 );
+	glNewList( TriforceTopList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//triforce_top.obj");
 	glEndList( );
 
-	TorusList = glGenLists( 1 );
-	glNewList( TorusList, GL_COMPILE );
-		OsuTorus(0.25, 0.75, 64, 64);
+	TriforceLeftList = glGenLists( 1 );
+	glNewList( TriforceLeftList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//triforce_left.obj");
 	glEndList( );
 
-	ConeList = glGenLists( 1 );
-	glNewList( ConeList, GL_COMPILE );
-		OsuCone(1., 0.1, 1, 64, 64);
+	TriforceRightList = glGenLists( 1 );
+	glNewList( TriforceRightList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//triforce_right.obj");
 	glEndList( );
 
-	TriangleList = glGenLists( 1 );
-	glNewList( TriangleList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//Triangle.obj");
+	ZeldaTextList = glGenLists( 1 );
+	glNewList( ZeldaTextList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//zelda_text.obj");
 	glEndList( );
 
-	TriangleList_LowSub = glGenLists( 1 );
-	glNewList( TriangleList_LowSub, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//Triangle_lowsub.obj");
+	LTTPTextList = glGenLists( 1 );
+	glNewList( LTTPTextList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//lttp_text.obj");
 	glEndList( );
 
+	SwordList = glGenLists( 1 );
+	glNewList( SwordList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//sword.obj");
+	glEndList( );
 
-	DisplayLists[0] = SphereList;
-	DisplayLists[1] = TorusList;
-	DisplayLists[2] = ConeList;
-	DisplayLists[3] = TriangleList;
-	DisplayLists[4] = TriangleList_LowSub;
+	MountainList = glGenLists( 1 );
+	glNewList( MountainList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//mountain.obj");
+	glEndList( );
 
+	HillsList = glGenLists( 1 );
+	glNewList( HillsList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//hills.obj");
+	glEndList( );
+
+	CastleList = glGenLists( 1 );
+	glNewList( CastleList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//castle.obj");
+	glEndList( );
+
+	SkyList = glGenLists( 1 );
+	glNewList( SkyList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//sky.obj");
+	glEndList( );
+
+	WaterList = glGenLists( 1 );
+	glNewList( WaterList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda//water.obj");
+	glEndList( );
 
 	// create the axes:
 
@@ -869,11 +903,6 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
-	case 'n':
-	case 'N':
-		NowList++;
-		NowList %= numLists;
-		break;
 	case 'k':
 	case 'K': 
 		UseKeytime = !UseKeytime;
@@ -1029,7 +1058,6 @@ Reset( )
 	Xrot = Yrot = 0.;
 	UseAnimation = true;
 	UseKeytime = true;
-	NowList = 0;
 }
 
 
