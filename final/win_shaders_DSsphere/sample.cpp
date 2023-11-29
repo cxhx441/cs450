@@ -158,6 +158,7 @@ int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 GLdouble fovy, aspect, zNear, zFar; // for perspective
 float	increment;
+int		parity;
 
 
 int		TriforceTopList;
@@ -357,7 +358,7 @@ Display()
 	GLsizei v = vx < vy ? vx : vy;			// minimum dimension
 	GLint xl = (vx - v) / 2;
 	GLint yb = (vy - v) / 2;
-	glViewport(xl, yb, v, v);
+	glViewport(0, 0, vx, vy);
 
 	// set the viewing volume:
 	// remember that the Z clipping  values are given as DISTANCES IN FRONT OF THE EYE
@@ -375,7 +376,7 @@ Display()
 	glLoadIdentity();
 
 	// set the eye position, look-at position, and up-vector:
-	gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
+	gluLookAt(0.f, 0.f, 5.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
 	// rotate the scene:
 	glRotatef((GLfloat)Yrot, 0.f, 1.f, 0.f);
@@ -680,7 +681,7 @@ InitGraphics()
 	// set the initial window configuration:
 
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(INIT_WINDOW_SIZE, INIT_WINDOW_SIZE);
+	glutInitWindowSize(INIT_WINDOW_SIZE*16/9, INIT_WINDOW_SIZE);
 
 	// open the window and set its title:
 
@@ -921,19 +922,19 @@ Keyboard( unsigned char c, int x, int y )
 	switch( c )
 	{
 	case 'v':
-		fovy += increment;
+		fovy += parity*increment;
 		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
 		break;
 	case 'a':
-		aspect -= increment;
+		aspect -= parity*increment;
 		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
 		break;
 	case 'z':
-		zFar += increment;
+		zFar += parity*increment;
 		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
 		break;
 	case 'n':
-		zNear += increment;
+		zNear += parity*increment;
 		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
 		break;
 	case 'j':
@@ -946,6 +947,9 @@ Keyboard( unsigned char c, int x, int y )
 		break;
 	case 'r':
 		Reset();
+		break;
+	case 'w':
+		parity *= -1;
 		break;
 
 	case 'k':
@@ -1103,11 +1107,12 @@ Reset( )
 	Xrot = Yrot = 0.;
 	UseAnimation = true;
 	UseKeytime = true;
-	fovy = 116.f;
-	aspect = 1.f; 
+	fovy = 70.f; // 27?
+	aspect = 1.78f; 
 	zNear = 0.1f;
 	zFar = 1000.f;
 	increment = 0.1;
+	parity = 1;
 }
 
 
