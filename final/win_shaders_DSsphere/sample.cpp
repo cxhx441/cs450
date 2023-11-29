@@ -156,6 +156,8 @@ float	Scale;					// scaling factor
 float	Time;					// used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
+GLdouble fovy, aspect, zNear, zFar; // for perspective
+float	increment;
 
 
 int		TriforceTopList;
@@ -365,7 +367,8 @@ Display()
 	if (NowProjection == ORTHO)
 		glOrtho(-2.f, 2.f, -2.f, 2.f, 0.1f, 1000.f);
 	else
-		gluPerspective(70.f, 1.f, 0.1f, 1000.f);
+		//gluPerspective(70.f, 1.f, 0.1f, 1000.f);
+		gluPerspective(fovy, aspect, zNear, zFar);
 
 	// place the objects into the scene:
 	glMatrixMode(GL_MODELVIEW);
@@ -917,6 +920,34 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+	case 'v':
+		fovy += increment;
+		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
+		break;
+	case 'a':
+		aspect -= increment;
+		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
+		break;
+	case 'z':
+		zFar += increment;
+		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
+		break;
+	case 'n':
+		zNear += increment;
+		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
+		break;
+	case 'j':
+		increment /= 10;
+		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
+		break;
+	case 'l':
+		increment *= 10;
+		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
+		break;
+	case 'r':
+		Reset();
+		break;
+
 	case 'k':
 	case 'K': 
 		UseKeytime = !UseKeytime;
@@ -934,24 +965,24 @@ Keyboard( unsigned char c, int x, int y )
 			glutIdleFunc(Animate);
 		break;
 
-		case 'o':
-		case 'O':
-			NowProjection = ORTHO;
-			break;
+	case 'o':
+	case 'O':
+		NowProjection = ORTHO;
+		break;
 
-		case 'p':
-		case 'P':
-			NowProjection = PERSP;
-			break;
+	case 'p':
+	case 'P':
+		NowProjection = PERSP;
+		break;
 
-		case 'q':
-		case 'Q':
-		case ESCAPE:
-			DoMainMenu( QUIT );	// will not return here
-			break;				// happy compiler
+	case 'q':
+	case 'Q':
+	case ESCAPE:
+		DoMainMenu( QUIT );	// will not return here
+		break;				// happy compiler
 
-		default:
-			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
+	default:
+		fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
 	}
 
 	// force a call to Display( ):
@@ -1072,6 +1103,11 @@ Reset( )
 	Xrot = Yrot = 0.;
 	UseAnimation = true;
 	UseKeytime = true;
+	fovy = 116.f;
+	aspect = 1.f; 
+	zNear = 0.1f;
+	zFar = 1000.f;
+	increment = 0.1;
 }
 
 
