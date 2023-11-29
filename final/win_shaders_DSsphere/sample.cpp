@@ -162,6 +162,7 @@ int		TriforceTopList;
 int		TriforceLeftList;
 int		TriforceRightList;
 int		ZeldaTextList;
+int		TheLegendOfTextList;
 int		LTTPTextList;
 int		SwordList;
 int		MountainList;
@@ -371,7 +372,7 @@ Display()
 	glLoadIdentity();
 
 	// set the eye position, look-at position, and up-vector:
-	gluLookAt(0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, -1.f);
+	gluLookAt(0.f, 0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f);
 
 	// rotate the scene:
 	glRotatef((GLfloat)Yrot, 0.f, 1.f, 0.f);
@@ -433,6 +434,7 @@ Display()
 
 	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // LTTP Text
 	glCallList(LTTPTextList);
+	glCallList(TheLegendOfTextList);
 
 	Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword 
 	glCallList(SwordList);
@@ -836,57 +838,62 @@ InitLists( )
 
 	TriforceTopList = glGenLists( 1 );
 	glNewList( TriforceTopList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//triforce_top.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//triforce_top.obj");
 	glEndList( );
 
 	TriforceLeftList = glGenLists( 1 );
 	glNewList( TriforceLeftList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//triforce_left.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//triforce_left.obj");
 	glEndList( );
 
 	TriforceRightList = glGenLists( 1 );
 	glNewList( TriforceRightList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//triforce_right.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//triforce_right.obj");
 	glEndList( );
 
 	ZeldaTextList = glGenLists( 1 );
 	glNewList( ZeldaTextList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//zelda_text.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//zelda_text.obj");
+	glEndList( );
+
+	TheLegendOfTextList = glGenLists( 1 );
+	glNewList( TheLegendOfTextList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda_2//TheLegendOf_text.obj");
 	glEndList( );
 
 	LTTPTextList = glGenLists( 1 );
 	glNewList( LTTPTextList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//lttp_text.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//lttp_text.obj");
 	glEndList( );
 
 	SwordList = glGenLists( 1 );
 	glNewList( SwordList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//sword.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//sword.obj");
 	glEndList( );
 
 	MountainList = glGenLists( 1 );
 	glNewList( MountainList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//mountain.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//mountain.obj");
 	glEndList( );
 
 	HillsList = glGenLists( 1 );
 	glNewList( HillsList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//hills.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//hills.obj");
 	glEndList( );
 
 	CastleList = glGenLists( 1 );
 	glNewList( CastleList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//castle.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//castle.obj");
 	glEndList( );
 
 	SkyList = glGenLists( 1 );
 	glNewList( SkyList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//sky.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//sky.obj");
 	glEndList( );
 
 	WaterList = glGenLists( 1 );
 	glNewList( WaterList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda//water.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//water.obj");
 	glEndList( );
 
 	// create the axes:
