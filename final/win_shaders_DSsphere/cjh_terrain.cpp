@@ -25,6 +25,19 @@ const int OCTAVES = 3;
 const float ROUGHNESS = 0.3f;
 
 void
+normalize(float v[3])
+{
+	float magnitude = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+	if (magnitude > 0.0)
+	{
+		magnitude = sqrtf(magnitude);
+		v[0] /= magnitude;
+		v[1] /= magnitude;
+		v[2] /= magnitude;
+	}
+}
+
+void
 set_terrain_seed(int new_seed)
 {
 	if (new_seed == 0)
@@ -184,6 +197,7 @@ cjh_terrain( int side_length, int side_vertex_count )
 			t1_v_vector[1] = p3.y - p1.y;
 			t1_v_vector[2] = p3.z - p1.z;
 			Cross(t1_v_vector, t1_u_vector, t1_normal);
+			normalize(t1_normal);
 
 			t2_u_vector[0] = p2.x - p4.x;
 			t2_u_vector[1] = p2.y - p4.y;
@@ -192,10 +206,13 @@ cjh_terrain( int side_length, int side_vertex_count )
 			t2_v_vector[1] = p3.y - p4.y;
 			t2_v_vector[2] = p3.z - p4.z;
 			Cross(t2_u_vector, t2_v_vector, t2_normal);
+			normalize(t2_normal);
 
 
+			float s = (i * d) / (float)side_length;
+			float t = (j * d) / (float)side_length;
 			glBegin( GL_TRIANGLES );
-				//glNormal3f( 0., 1., 0. );
+				glTexCoord2f(s, t);
 				glNormal3f(t1_normal[0], t1_normal[1], t1_normal[2]);
 				glVertex3f(p1.x, p1.y, p1.z);
 				glVertex3f(p2.x, p2.y, p2.z);
@@ -203,7 +220,6 @@ cjh_terrain( int side_length, int side_vertex_count )
 			glEnd();
 
 			glBegin( GL_TRIANGLES );
-				//glNormal3f( 0., 1., 0. );
 				glNormal3f(t2_normal[0], t2_normal[1], t2_normal[2]);
 				// 2, 4, 3 for clockwise draw
 				glVertex3f(p2.x, p2.y, p2.z);

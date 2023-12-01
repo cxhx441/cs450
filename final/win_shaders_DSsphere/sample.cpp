@@ -260,7 +260,7 @@ MulArray3(float factor, float a, float b, float c )
 #include "osusphere.cpp"
 //#include "osucone.cpp"
 //#include "osutorus.cpp"
-//#include "bmptotexture.cpp"
+#include "bmptotexture.cpp"
 #include "loadobjfile.cpp"
 #include "keytime.cpp"
 #include "glslprogram.cpp"
@@ -268,7 +268,10 @@ MulArray3(float factor, float a, float b, float c )
 
 float NowS_center, NowT_center, NowRadius_s, NowRadius_t; // elipse center and radius
 GLSLProgram Pattern;
-GLSLProgram Water;
+GLSLProgram WaterShader;
+GLSLProgram SkyShader;
+unsigned char* SkyTexture;
+GLuint		  SkyTextureList;
 Keytimes ellipseS_Center, ellipseT_Center;
 
 
@@ -437,6 +440,7 @@ Display()
 	//Pattern.SetUniformVariable( "uRt", NowRadius_t );
 
 
+	Pattern.SetUniformVariable("LightPosition", 0., 5., 5.);
 	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 0.f); // Triforce Color
 	glCallList(TriforceTopList);
 	glCallList(TriforceLeftList);
@@ -452,17 +456,19 @@ Display()
 	Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword 
 	glCallList(SwordList);
 
+	Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
+	glCallList(CastleList);
+
+	//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
 	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 	glCallList(MountainList);
 
 	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); // Hills
 	glCallList(HillsList);
 
-	Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
-	glCallList(CastleList);
 
-	Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
-	glCallList(SkyList);
+	//Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
+	//glCallList(SkyList);
 
 	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
 	glCallList(TerrainList);
@@ -472,11 +478,19 @@ Display()
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
 
+	SkyShader.Use();
+	glActiveTexture(GL_TEXTURE5); // use texture unit #5
+	glBindTexture(GL_TEXTURE_2D, SkyTextureList);
+	SkyShader.SetUniformVariable("uTexUnit", 5);
+		glCallList(SkyList);
+	SkyShader.UnUse();
 
-	Water.Use();
-	Water.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
+
+	WaterShader.Use();
+	WaterShader.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
+	WaterShader.SetUniformVariable("waveTime", Time*5);
 	glCallList(WaterList);
-	Water.UnUse();
+	WaterShader.UnUse();
 
 
 
@@ -772,10 +786,27 @@ InitGraphics()
 		fprintf(stderr, "GLEW initialized OK\n");
 	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 #endif
+	SkyShader.Init();
+	bool valid = SkyShader.Create("sky.vert", "sky.frag");
+	if (!valid)
+		fprintf(stderr, "Could not create the Sky shader!\n");
+	else
+		fprintf(stderr, "Sky shader created!\n");
+	SkyShader.Use();
+	SkyShader.SetUniformVariable("uKambient", 0.1f);
+	SkyShader.SetUniformVariable("uKdiffuse", 0.5f);
+	SkyShader.SetUniformVariable("uKspecular", 0.4f);
+	SkyShader.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
+	SkyShader.SetUniformVariable("uSpecularColor", 0.5f, 0.5f, 1.f); // white
+	SkyShader.SetUniformVariable("uShininess", 1.f); // shine
+	SkyShader.UnUse();
 
+
+
+	
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
 	Pattern.Init();
-	bool valid = Pattern.Create("pattern.vert", "pattern.frag");
+	valid = Pattern.Create("pattern.vert", "pattern.frag");
 	if (!valid)
 		fprintf(stderr, "Could not create the Pattern shader!\n");
 	else
@@ -790,22 +821,38 @@ InitGraphics()
 	Pattern.UnUse();
 
 
-	Water.Init();
+	WaterShader.Init();
 	//bool valid = Water.Create("terrain.vert", "terrain.frag");
-	valid = Water.Create("water.vert", "water.frag");
+	valid = WaterShader.Create("water.vert", "water.frag");
 	if (!valid)
 		fprintf(stderr, "Could not create the Water shader!\n");
 	else
 		fprintf(stderr, "Water shader created!\n");
 	// set the uniform variables that will not change:
-	Water.Use();
-	Water.SetUniformVariable("uKambient", 0.1f);
-	Water.SetUniformVariable("uKdiffuse", 0.5f);
-	Water.SetUniformVariable("uKspecular", 0.4f);
-	Water.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
-	Water.SetUniformVariable("uShininess", 12.f); // shine
-	Water.UnUse();
+	WaterShader.Use();
+	WaterShader.SetUniformVariable("uKambient", 0.1f);
+	WaterShader.SetUniformVariable("uKdiffuse", 0.5f);
+	WaterShader.SetUniformVariable("uKspecular", 0.4f);
+	WaterShader.SetUniformVariable("uColor", 0.f, 0.f, 1.f); // blue
+	WaterShader.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
+	WaterShader.SetUniformVariable("uShininess", 12.f); // shine
+	WaterShader.UnUse();
 
+
+	// Texture Setup
+	glGenTextures(1, &SkyTextureList);
+	int num_s, num_t;
+	SkyTexture = BmpToTexture("..//..//Textures//sky.bmp", &num_s, &num_t);
+	if (SkyTexture == NULL) {
+		fprintf(stderr, "cannot open skytexture");
+	}
+	glBindTexture(GL_TEXTURE_2D, SkyTextureList);
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	//glTexImage2D( GL_TEXTURE_2D, 0, 3, num_s, num_t, 0, 3, GL_RGB, GL_UNSIGNED_BYTE, SkyTexture );
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, num_s, num_t, 0, GL_RGB, GL_UNSIGNED_BYTE, SkyTexture);
 
 
 
@@ -940,8 +987,8 @@ InitLists( )
 	SkyList = glGenLists( 1 );
 	glNewList( SkyList, GL_COMPILE );
 	glPushMatrix();
-		glTranslatef(0, 0, -350);
-		glScalef(20, 20, 1);
+		glTranslatef(0, 150, -350);
+		glScalef(20, 9, 1);
 		LoadObjFile("..//..//OBJs//zelda_2//sky.obj");
 	glPopMatrix();
 	glEndList( );
@@ -1447,7 +1494,7 @@ Unit( float v[3] )
 	}
 	return dist;
 }
-
+ 
 void
 cjh_water( int side_length, int side_vertex_count )
 {
@@ -1525,6 +1572,7 @@ cjh_water( int side_length, int side_vertex_count )
 			t1_v_vector[1] = p3.y - p1.y;
 			t1_v_vector[2] = p3.z - p1.z;
 			Cross(t1_v_vector, t1_u_vector, t1_normal);
+			Unit(t1_normal);
 
 			t2_u_vector[0] = p2.x - p4.x;
 			t2_u_vector[1] = p2.y - p4.y;
@@ -1533,10 +1581,13 @@ cjh_water( int side_length, int side_vertex_count )
 			t2_v_vector[1] = p3.y - p4.y;
 			t2_v_vector[2] = p3.z - p4.z;
 			Cross(t2_u_vector, t2_v_vector, t2_normal);
+			Unit(t2_normal);
 
 
+			float s = (i * d) / (float)side_length;
+			float t = (j * d) / (float)side_length;
 			glBegin( GL_TRIANGLES );
-				//glNormal3f( 0., 1., 0. );
+				glTexCoord2f(s, t);
 				glNormal3f(t1_normal[0], t1_normal[1], t1_normal[2]);
 				glVertex3f(p1.x, p1.y, p1.z);
 				glVertex3f(p2.x, p2.y, p2.z);

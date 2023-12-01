@@ -10,7 +10,7 @@ out  vec2  vST;	  // (s,t) texture coordinates
 
 // where the light is:
 
-const vec3 LightPosition = vec3(  0., 5., 5. );
+uniform vec3 LightPosition;
 
 void
 main( )
