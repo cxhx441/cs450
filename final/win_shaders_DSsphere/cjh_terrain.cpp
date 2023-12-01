@@ -16,54 +16,68 @@
 #define F_PI_2		((float)(F_PI/2.f))
 #endif
 
-void
-cjh_terrain( int size, int vertex_count )
+inlinvoid
+OsuSphere( float radius, int slices, int stacks )
 {
+	// sanity check:
+	radius = (float)fabs(radius);
+	if( slices < 4 )		slices = 4;
+	if( stacks < 4 )		stacks = 4;
+
+
 	glBegin( GL_TRIANGLES );
 
-		int count = vertex_count * vertex_count;
+	// south pole:
+	{
+		int istack = 0;
+		float north = -F_PI_2 + F_PI * (float)(istack + 1) / (float)stacks;
+		float south = -F_PI_2 + F_PI * (float)(istack + 0) / (float)stacks;
+		for (int islice = 0; islice < slices; islice++)
+		{
+			float west = -F_PI + F_2_PI * (float)(islice + 0) / (float)slices;
+			float east = -F_PI + F_2_PI * (float)(islice + 1) / (float)slices;
 
-		//float vertices[count * 3];
-		//float normals[count * 3];
-		//float texture_coords[count * 2];
-
-		//int indices[6*(vertex_count-1) * (vertex_count-1)];
-		//int vertexPointer = 0;
-
-		for(int i=0;i<vertex_count;i++){
-			for(int j=0;j<vertex_count;j++){
-				//vertices[vertexPointer*3] = (float)j/((float)vertex_count - 1) * size;
-				//vertices[vertexPointer*3+1] = 0;
-				//vertices[vertexPointer*3+2] = (float)i/((float)vertex_count - 1) * size;
-				//normals[vertexPointer*3] = 0;
-				//normals[vertexPointer*3+1] = 1;
-				//normals[vertexPointer*3+2] = 0;
-				//textureCoords[vertexPointer*2] = (float)j/((float)vertex_count - 1);
-				//textureCoords[vertexPointer*2+1] = (float)i/((float)vertex_count - 1);
-
-				//vertexPointer++;
-
-				//me
-				glVertex3f((float)j / ((float)vertex_count - 1) * size, 0, (float)i / ((float)vertex_count - 1) * size);
-				glNormal3f(0, 1, 0);
-				glTexCoord2f((float)j / ((float)vertex_count - 1), (float)i / ((float)vertex_count - 1));
-			}
+			_DrawSphLatLng( radius, south, .5f * (east + west));
+			_DrawSphLatLng( radius, north, east);
+			_DrawSphLatLng( radius, north, west);
 		}
-		//int pointer = 0;
-		//for(int gz=0;gz<vertex_count-1;gz++){
-		//	for(int gx=0;gx<vertex_count-1;gx++){
-		//		int topLeft = (gz*vertex_count)+gx;
-		//		int topRight = topLeft + 1;
-		//		int bottomLeft = ((gz+1)*vertex_count)+gx;
-		//		int bottomRight = bottomLeft + 1;
-		//		indices[pointer++] = topLeft;
-		//		indices[pointer++] = bottomLeft;
-		//		indices[pointer++] = topRight;
-		//		indices[pointer++] = topRight;
-		//		indices[pointer++] = bottomLeft;
-		//		indices[pointer++] = bottomRight;
-		//	}
-		//}
+	}
+
+	// north pole:
+	{
+		int istack = stacks - 1;
+		float north = -F_PI_2 + F_PI * (float)(istack + 1) / (float)stacks;
+		float south = -F_PI_2 + F_PI * (float)(istack + 0) / (float)stacks;
+		for (int islice = 0; islice < slices; islice++)
+		{
+			float west = -F_PI + F_2_PI * (float)(islice + 0) / (float)slices;
+			float east = -F_PI + F_2_PI * (float)(islice + 1) / (float)slices;
+
+			_DrawSphLatLng( radius, north, .5f*(east + west) );
+			_DrawSphLatLng( radius, south, west );
+			_DrawSphLatLng( radius, south, east );
+		}
+	}
+
+	// all the bands in between:
+	for (int istack = 1; istack < stacks-1; istack++)
+	{
+		float north = -F_PI_2 + F_PI * (float)(istack + 1) / (float)stacks;
+		float south = -F_PI_2 + F_PI * (float)(istack + 0) / (float)stacks;
+		for (int islice = 0; islice < slices; islice++)
+		{
+			float west = -F_PI + F_2_PI * (float)(islice + 0) / (float)slices;
+			float east = -F_PI + F_2_PI * (float)(islice + 1) / (float)slices;
+
+			_DrawSphLatLng( radius, north, west );
+			_DrawSphLatLng( radius, south, west );
+			_DrawSphLatLng( radius, north, east );
+
+			_DrawSphLatLng( radius, north, east );
+			_DrawSphLatLng( radius, south, west );
+			_DrawSphLatLng( radius, south, east );
+		}
+	}
 
 	glEnd( );
 }

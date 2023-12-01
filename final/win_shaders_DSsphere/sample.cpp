@@ -206,6 +206,7 @@ float	Dot(float [3], float [3]);
 float	Unit(float [3], float [3]);
 float	Unit(float [3]);
 void    cjh_terrain(int, int);
+void    cjh_water(int, int);
 float	gen_noise(int, int);
 float   gen_smoothed_noise(int, int);
 void	set_terrain_seed(int);
@@ -267,6 +268,7 @@ MulArray3(float factor, float a, float b, float c )
 
 float NowS_center, NowT_center, NowRadius_s, NowRadius_t; // elipse center and radius
 GLSLProgram Pattern;
+GLSLProgram Water;
 Keytimes ellipseS_Center, ellipseT_Center;
 
 
@@ -407,32 +409,32 @@ Display()
 	// draw the box object by calling up its display list:
 	Pattern.Use();
 
-	// set the uniform variables that will change over time:
-	if (UseKeytime == true)
-	{
-		NowS_center = ellipseS_Center.GetValue(Time * MS_PER_CYCLE, false);
-		NowT_center = ellipseT_Center.GetValue(Time * MS_PER_CYCLE, false);
-	}
-	else
-	{
-		NowS_center = 0.5;
-		NowT_center = 0.5;
-	}
+	//// set the uniform variables that will change over time:
+	//if (UseKeytime == true)
+	//{
+	//	NowS_center = ellipseS_Center.GetValue(Time * MS_PER_CYCLE, false);
+	//	NowT_center = ellipseT_Center.GetValue(Time * MS_PER_CYCLE, false);
+	//}
+	//else
+	//{
+	//	NowS_center = 0.5;
+	//	NowT_center = 0.5;
+	//}
 
-	if (UseAnimation == true)
-	{
-		NowRadius_s = 0.1*sin(3 * F_2_PI * Time);
-		NowRadius_t = 0.1*cos(F_2_PI * Time);
-	}
-	else
-	{
-		NowRadius_s = 0.05;
-		NowRadius_t = 0.1;
-	}
-	Pattern.SetUniformVariable( "uSc", NowS_center ); 
-	Pattern.SetUniformVariable( "uTc", NowT_center ); 
-	Pattern.SetUniformVariable( "uRs", NowRadius_s );
-	Pattern.SetUniformVariable( "uRt", NowRadius_t );
+	//if (UseAnimation == true)
+	//{
+	//	NowRadius_s = 0.1*sin(3 * F_2_PI * Time);
+	//	NowRadius_t = 0.1*cos(F_2_PI * Time);
+	//}
+	//else
+	//{
+	//	NowRadius_s = 0.05;
+	//	NowRadius_t = 0.1;
+	//}
+	//Pattern.SetUniformVariable( "uSc", NowS_center ); 
+	//Pattern.SetUniformVariable( "uTc", NowT_center ); 
+	//Pattern.SetUniformVariable( "uRs", NowRadius_s );
+	//Pattern.SetUniformVariable( "uRt", NowRadius_t );
 
 
 	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 0.f); // Triforce Color
@@ -460,18 +462,22 @@ Display()
 	glCallList(CastleList);
 
 	Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
-	//glPushMatrix();
-	//	glScalef(2, 1, 2);
-		glCallList(SkyList);
-	//glPopMatrix();
-
-	Pattern.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
-	glCallList(WaterList);
+	glCallList(SkyList);
 
 	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
 	glCallList(TerrainList);
 
+	//Pattern.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
+	//glCallList(WaterList);
+
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
+
+
+	Water.Use();
+	Water.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
+	glCallList(WaterList);
+	Water.UnUse();
+
 
 
 	// draw some gratuitous text that just rotates on top of the scene:
@@ -774,9 +780,7 @@ InitGraphics()
 		fprintf(stderr, "Could not create the Pattern shader!\n");
 	else
 		fprintf(stderr, "Pattern shader created!\n");
-
 	// set the uniform variables that will not change:
-
 	Pattern.Use();
 	Pattern.SetUniformVariable("uKambient", 0.1f);
 	Pattern.SetUniformVariable("uKdiffuse", 0.5f);
@@ -785,8 +789,25 @@ InitGraphics()
 	Pattern.SetUniformVariable("uShininess", 12.f); // shine
 	Pattern.UnUse();
 
-	ellipseS_Center.Init();
-	ellipseT_Center.Init();
+
+	Water.Init();
+	//bool valid = Water.Create("terrain.vert", "terrain.frag");
+	valid = Water.Create("water.vert", "water.frag");
+	if (!valid)
+		fprintf(stderr, "Could not create the Water shader!\n");
+	else
+		fprintf(stderr, "Water shader created!\n");
+	// set the uniform variables that will not change:
+	Water.Use();
+	Water.SetUniformVariable("uKambient", 0.1f);
+	Water.SetUniformVariable("uKdiffuse", 0.5f);
+	Water.SetUniformVariable("uKspecular", 0.4f);
+	Water.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
+	Water.SetUniformVariable("uShininess", 12.f); // shine
+	Water.UnUse();
+
+
+
 
 	struct st_pair {
 		float s;
@@ -927,7 +948,10 @@ InitLists( )
 
 	WaterList = glGenLists( 1 );
 	glNewList( WaterList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda_2//water.obj");
+		//LoadObjFile("..//..//OBJs//zelda_2//water.obj");
+		glScalef(5, 1, 5);
+		glTranslatef(-side_length/2, -2, -side_length*0.9);
+		cjh_water(25, 25);
 	glEndList( );
 
 	TerrainList = glGenLists( 1 );
@@ -1591,6 +1615,114 @@ cjh_terrain( int side_length, int side_vertex_count )
 			//p2.y = get_height(i+1, j  ); 
 			//p3.y = get_height(i  , j+1); 
 			//p4.y = get_height(i+1, j+1); 
+
+			// get vectors for normals
+			t1_u_vector[0] = p2.x - p1.x;
+			t1_u_vector[1] = p2.y - p1.y;
+			t1_u_vector[2] = p2.z - p1.z;
+			t1_v_vector[0] = p3.x - p1.x;
+			t1_v_vector[1] = p3.y - p1.y;
+			t1_v_vector[2] = p3.z - p1.z;
+			Cross(t1_v_vector, t1_u_vector, t1_normal);
+
+			t2_u_vector[0] = p2.x - p4.x;
+			t2_u_vector[1] = p2.y - p4.y;
+			t2_u_vector[2] = p2.z - p4.z;
+			t2_v_vector[0] = p3.x - p4.x;
+			t2_v_vector[1] = p3.y - p4.y;
+			t2_v_vector[2] = p3.z - p4.z;
+			Cross(t2_u_vector, t2_v_vector, t2_normal);
+
+
+			glBegin( GL_TRIANGLES );
+				//glNormal3f( 0., 1., 0. );
+				glNormal3f(t1_normal[0], t1_normal[1], t1_normal[2]);
+				glVertex3f(p1.x, p1.y, p1.z);
+				glVertex3f(p2.x, p2.y, p2.z);
+				glVertex3f(p3.x, p3.y, p3.z);
+			glEnd();
+
+			glBegin( GL_TRIANGLES );
+				//glNormal3f( 0., 1., 0. );
+				glNormal3f(t2_normal[0], t2_normal[1], t2_normal[2]);
+				// 2, 4, 3 for clockwise draw
+				glVertex3f(p2.x, p2.y, p2.z);
+				glVertex3f(p4.x, p4.y, p4.z);
+				glVertex3f(p3.x, p3.y, p3.z);
+			glEnd( );
+		}
+	}
+	glPopMatrix();
+}
+
+void
+cjh_water( int side_length, int side_vertex_count )
+{
+	int x0 = 0;
+	int z0 = 0;
+	float d = side_length / (float) side_vertex_count;
+	
+	struct vertex
+	{
+		float x; 
+		float y; 
+		float z;
+	};
+	
+	vertex p1;
+	vertex p2;
+	vertex p3;
+	vertex p4;
+	
+	float t1_u_vector[3]; 
+	float t1_v_vector[3]; 
+	float t1_normal[3];
+	float t2_u_vector[3]; 
+	float t2_v_vector[3]; 
+	float t2_normal[3];
+
+
+	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
+	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
+	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
+	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
+	//printf("x: 5, z: 5, result: %f\n", get_height(5, 5));
+
+	glPushMatrix();
+	for( int i = 0; i < side_vertex_count; i++ )
+	{
+		for( int j = 0; j < side_vertex_count; j++ )
+		{
+			//   p1    p2
+			//    ------
+			//    |	  /|
+			//    |  / |
+			//    | /  |
+			//    |/   |
+			//    ------
+			//   p3    p4
+
+			// set x's
+			p1.x = x0 + d * (float)(j + 0);
+			p2.x = x0 + d * (float)(j + 1);
+			p3.x = x0 + d * (float)(j + 0);
+			p4.x = x0 + d * (float)(j + 1);
+			// set z's
+			p1.z = z0 + d * (float)(i + 0);
+			p2.z = x0 + d * (float)(i + 0);
+			p3.z = x0 + d * (float)(i + 1);
+			p4.z = x0 + d * (float)(i + 1);
+			// set y's
+			//p1.y = get_height(p1.x, p1.z); 
+			//p2.y = get_height(p2.x, p2.z); 
+			//p3.y = get_height(p3.x, p3.z); 
+			//p4.y = get_height(p4.x, p4.z); 
+
+			p1.y = 0;
+			p2.y = 0;
+			p3.y = 0;
+			p4.y = 0;
+
 
 			// get vectors for normals
 			t1_u_vector[0] = p2.x - p1.x;
