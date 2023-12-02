@@ -510,25 +510,6 @@ Display()
 		glPopMatrix();
 	}
 	
-	//float flashing_alpha = rgb_filter_a.GetValue(AnimationCycleTime, true);
-	//Pattern.SetUniformVariable("uAlpha", .0f);
-	//if (flashing_alpha > 0.f)
-	//{
-	//	printf("we in here %f\n", flashing_alpha);
-	//	float r = rgb_filter_r.GetValue(AnimationCycleTime, true);
-	//	float g = rgb_filter_g.GetValue(AnimationCycleTime, true);
-	//	float b = rgb_filter_b.GetValue(AnimationCycleTime, true);
-	//	Pattern.SetUniformVariable("uAlpha", .2f);
-	//	Pattern.SetUniformVariable("uColor", r, g, b);
-	//	glPushMatrix();
-	//		glTranslatef(0, 0, 1);
-	//		glScalef(20, 20, 20);
-	//		glCallList(RGBFilterList);
-	//	glPopMatrix();
-	//}
-
-	//printf("scenary_alpha = %f\n", scenary_alpha);
-	//if (scenary_alpha > 0.f )
 	if (AnimationCycleTime >= scenary_start_fade_in)
 	{
 		float scenary_alpha = scenary_fade_in_alpha.GetValue(AnimationCycleTime, true);
@@ -568,7 +549,7 @@ Display()
 
 		WaterShader.Use();
 		WaterShader.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
-		WaterShader.SetUniformVariable("waveTime", Time*5);
+		WaterShader.SetUniformVariable("waveTime", Time*3);
 		glCallList(WaterList);
 		WaterShader.UnUse();
 	}
@@ -1122,13 +1103,8 @@ InitLists( )
 			glRotatef(30, 1, 0, 0);
 			glScalef(40, 20, 3);
 			glTranslatef(-side_length/2, -3, -side_length/2);
-			cjh_terrain(side_length, 25);
+			cjh_terrain(side_length, 32);
 		glPopMatrix();
-	glEndList( );
-
-	HillsList = glGenLists( 1 );
-	glNewList( HillsList, GL_COMPILE );
-		//LoadObjFile("..//..//OBJs//zelda_2//hills.obj");
 	glEndList( );
 
 	CastleList = glGenLists( 1 );
@@ -1152,7 +1128,7 @@ InitLists( )
 		//LoadObjFile("..//..//OBJs//zelda_2//water.obj");
 		glScalef(5, 1, 5);
 		glTranslatef(-side_length/2, -2, -side_length*0.9);
-		cjh_water(25, 25);
+		cjh_water(25, 32);
 	glEndList( );
 
 	TerrainList = glGenLists( 1 );
@@ -1163,7 +1139,7 @@ InitLists( )
 			glScalef(5, 1.5, 5);
 			glRotatef(-20, 0, 1, 0);
 			glTranslatef(-side_length/2, -2, -side_length*0.9);
-			cjh_terrain(side_length, 25);
+			cjh_terrain(side_length, 32);
 		glPopMatrix();
 	glEndList( );
 
