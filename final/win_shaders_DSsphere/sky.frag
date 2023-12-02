@@ -7,6 +7,7 @@ uniform vec3    uColor;		 // object color
 uniform vec3    uSpecularColor;	 // light color
 uniform float   uShininess;	 // specular exponent
 uniform sampler2D uTexUnit; // texture unit 
+uniform float	uAlpha;		// alpha
 
 
 // in variables from the vertex shader and interpolated in the rasterizer:
@@ -51,6 +52,6 @@ main( )
 		ss = pow( max( dot(Eye,ref),0. ), uShininess );
 	}
 	vec3 specular = uKspecular * ss * uSpecularColor;
-	gl_FragColor = vec4( ambient + diffuse + specular,  1. );
+	gl_FragColor = vec4( (ambient + diffuse + specular)*uAlpha,  1. );
 }
 

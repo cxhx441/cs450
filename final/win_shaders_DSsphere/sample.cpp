@@ -139,7 +139,8 @@ const float	WHITE[ ] = { 1.,1.,1.,1. };
 
 // for animation:
 
-const int MS_PER_CYCLE = 35000;		// 10000 milliseconds = 10 seconds
+const int MS_PER_CYCLE = 20000;		// 10000 milliseconds = 10 seconds
+//const int MS_PER_CYCLE = 15000;		// 10000 milliseconds = 10 seconds
 
 // non-constant global variables:
 
@@ -155,14 +156,35 @@ bool	UseAnimation;			// use animation bool
 bool	UseKeytime;			// use keytime bool
 float	Scale;					// scaling factor
 float	Time;					// used for animation, this has a value between 0. and 1.
+float	AnimationCycleTime;	    // used for animation, this has a value between 0. and 1.
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 GLdouble fovy, aspect, zNear, zFar; // for perspective
 float	increment;
 int		parity;
 int		TERRAIN_SEED;
+float	TRI_X, TRI_Y; 
 
+// TIMINGS
+float triforce_start_float_in;
+float triforce_finish_float_in;
+float triforce_start_rotation;
+float triforce_finish_rotation ;
+float text_start_fade_in ;
+float text_finish_fade_in ;
+float sword_start_drop ;
+float sword_finish_drop ;
+float flashing_start ;
+float flashing_stop ;
+float scenary_start_fade_in ;
+float scenary_finish_fade_in ;
+float start_sword_shine ;
+float finish_sword_shine ;
+float start_sparkling;
+float sparkle_length ;
+float z_sparkle;
 
+int		TriforcePieceList;
 int		TriforceTopList;
 int		TriforceLeftList;
 int		TriforceRightList;
@@ -176,6 +198,7 @@ int		CastleList;
 int		SkyList;
 int		WaterList;
 int		TerrainList;
+//int		RGBFilterList;
 
 // function prototypes:
 
@@ -272,7 +295,16 @@ GLSLProgram WaterShader;
 GLSLProgram SkyShader;
 unsigned char* SkyTexture;
 GLuint		  SkyTextureList;
-Keytimes ellipseS_Center, ellipseT_Center;
+Keytimes triforce_magnitude;
+Keytimes triforce_y_rotation;
+Keytimes triforce_x_rotation;
+Keytimes text_fade_in_alpha, text_fade_in_z;
+Keytimes sword_y;
+Keytimes scenary_fade_in_alpha;
+Keytimes rgb_filter_r;
+Keytimes rgb_filter_g;
+Keytimes rgb_filter_b;
+Keytimes rgb_filter_a;
 
 
 // main program:
@@ -331,6 +363,7 @@ Animate()
 
 	int ms = glutGet(GLUT_ELAPSED_TIME);
 	ms %= MS_PER_CYCLE;							// makes the value of ms between 0 and MS_PER_CYCLE-1
+	AnimationCycleTime = ms / (float)1000.f;
 	Time = (float)ms / (float)MS_PER_CYCLE;		// makes the value of Time between 0. and slightly less than 1.
 
 	// for example, if you wanted to spin an object in Display( ), you might call: glRotatef( 360.f*Time,   0., 1., 0. );
@@ -411,86 +444,136 @@ Display()
 
 	// draw the box object by calling up its display list:
 	Pattern.Use();
-
-	//// set the uniform variables that will change over time:
-	//if (UseKeytime == true)
-	//{
-	//	NowS_center = ellipseS_Center.GetValue(Time * MS_PER_CYCLE, false);
-	//	NowT_center = ellipseT_Center.GetValue(Time * MS_PER_CYCLE, false);
-	//}
-	//else
-	//{
-	//	NowS_center = 0.5;
-	//	NowT_center = 0.5;
-	//}
-
-	//if (UseAnimation == true)
-	//{
-	//	NowRadius_s = 0.1*sin(3 * F_2_PI * Time);
-	//	NowRadius_t = 0.1*cos(F_2_PI * Time);
-	//}
-	//else
-	//{
-	//	NowRadius_s = 0.05;
-	//	NowRadius_t = 0.1;
-	//}
-	//Pattern.SetUniformVariable( "uSc", NowS_center ); 
-	//Pattern.SetUniformVariable( "uTc", NowT_center ); 
-	//Pattern.SetUniformVariable( "uRs", NowRadius_s );
-	//Pattern.SetUniformVariable( "uRt", NowRadius_t );
-
-
 	Pattern.SetUniformVariable("LightPosition", 0., 5., 5.);
 	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 0.f); // Triforce Color
-	glCallList(TriforceTopList);
-	glCallList(TriforceLeftList);
-	glCallList(TriforceRightList);
+	Pattern.SetUniformVariable("uAlpha", 1.f);
+	float mag = triforce_magnitude.GetValue(AnimationCycleTime, false);
+	float rot_x = triforce_x_rotation.GetValue(AnimationCycleTime, false);
+	float rot_y = triforce_y_rotation.GetValue(AnimationCycleTime, false);
+		glPushMatrix();
+			glTranslatef(0, mag, -mag*.5);
+			glTranslatef(0, 1, 0);
+			glRotatef(rot_x, 1, 0, 0);
+			glRotatef(rot_y, 0, 1, 0);
+			glCallList(TriforcePieceList);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(-mag*0.66, -mag*0.66, -mag*.5);
+			glTranslatef(-.8648, -.5, 0); // 1.5 / cos(30) / 2 for half side length of eq triangle w radius 1. 
+			glRotatef(rot_x, 1, 0, 0);
+			glRotatef(rot_y, 0, 1, 0);
+			//glTranslatef(.87f, 0.66f, 0.f);
+			glCallList(TriforcePieceList);
+		glPopMatrix();
+		glPushMatrix();
+			glTranslatef(mag*0.66, -mag*0.66, -mag*.5);
+			glTranslatef(.8648, -.5, 0); // 1.5 / cos(30) / 2 for half side length of eq triangle w radius 1. 
+			glRotatef(rot_x, 1, 0, 0);
+			glRotatef(-rot_y, 0, 1, 0);
+			glCallList(TriforcePieceList);
+		glPopMatrix();
+	
+	//printf("txt_alpha = %f\n", txt_alpha);
+	if (AnimationCycleTime >= text_start_fade_in)
+	{ 
+		if (AnimationCycleTime >= flashing_start && AnimationCycleTime <= flashing_stop)
+		{
+			float r = rgb_filter_r.GetValue(AnimationCycleTime, true);
+			float g = rgb_filter_g.GetValue(AnimationCycleTime, true);
+			float b = rgb_filter_b.GetValue(AnimationCycleTime, true);
+			Pattern.SetUniformVariable("uLightColor", r, g, b);
+			glClearColor(r*0.25, g*0.25, b*0.25, 0.25);
+		}
+		else 
+			glClearColor(BACKCOLOR[0], BACKCOLOR[1], BACKCOLOR[2], BACKCOLOR[3]);
+			Pattern.SetUniformVariable("uLightColor", 1, 1, 1);
 
-	Pattern.SetUniformVariable("uColor", 1.f, 0.f, 0.f); // Zelda Text Color
-	glCallList(ZeldaTextList);
-
-	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // LTTP Text
-	glCallList(LTTPTextList);
-	glCallList(TheLegendOfTextList);
-
-	Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword 
-	glCallList(SwordList);
-
-	Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
-	glCallList(CastleList);
-
-	//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
-	Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
-	glCallList(MountainList);
-
-	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); // Hills
-	glCallList(HillsList);
 
 
-	//Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
-	//glCallList(SkyList);
+		float txt_alpha = text_fade_in_alpha.GetValue(AnimationCycleTime, true);
+		Pattern.SetUniformVariable("uAlpha", txt_alpha);
+		glPushMatrix();
+			glTranslatef(0., 0., text_fade_in_z.GetValue(AnimationCycleTime, false));
 
-	Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
-	glCallList(TerrainList);
+			Pattern.SetUniformVariable("uColor", 1.f, 0.f, 0.f); // Zelda Text Color
+			glCallList(ZeldaTextList);
 
-	//Pattern.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
-	//glCallList(WaterList);
+			Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // LTTP Text
+			glCallList(LTTPTextList);
+			glCallList(TheLegendOfTextList);
+
+			Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword 
+			glPushMatrix();
+				glTranslatef(0, sword_y.GetValue(AnimationCycleTime, true), 0);
+				glCallList(SwordList);
+			glPopMatrix();
+		glPopMatrix();
+	}
+	
+	//float flashing_alpha = rgb_filter_a.GetValue(AnimationCycleTime, true);
+	//Pattern.SetUniformVariable("uAlpha", .0f);
+	//if (flashing_alpha > 0.f)
+	//{
+	//	printf("we in here %f\n", flashing_alpha);
+	//	float r = rgb_filter_r.GetValue(AnimationCycleTime, true);
+	//	float g = rgb_filter_g.GetValue(AnimationCycleTime, true);
+	//	float b = rgb_filter_b.GetValue(AnimationCycleTime, true);
+	//	Pattern.SetUniformVariable("uAlpha", .2f);
+	//	Pattern.SetUniformVariable("uColor", r, g, b);
+	//	glPushMatrix();
+	//		glTranslatef(0, 0, 1);
+	//		glScalef(20, 20, 20);
+	//		glCallList(RGBFilterList);
+	//	glPopMatrix();
+	//}
+
+	//printf("scenary_alpha = %f\n", scenary_alpha);
+	//if (scenary_alpha > 0.f )
+	if (AnimationCycleTime >= scenary_start_fade_in)
+	{
+		float scenary_alpha = scenary_fade_in_alpha.GetValue(AnimationCycleTime, true);
+		Pattern.SetUniformVariable("uAlpha", scenary_alpha);
+		SkyShader.SetUniformVariable("uAlpha", scenary_alpha);
+		WaterShader.SetUniformVariable("uAlpha", scenary_alpha);
+
+		Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
+		glCallList(CastleList);
+
+		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
+		Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
+		glCallList(MountainList);
+
+		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); // Hills
+		glCallList(HillsList);
+
+
+		//Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
+		//glCallList(SkyList);
+
+		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
+		glCallList(TerrainList);
+
+		//Pattern.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
+		//glCallList(WaterList);
+
+		Pattern.UnUse( );       // Pattern.Use(0);  also works
+
+		SkyShader.Use();
+		glActiveTexture(GL_TEXTURE5); // use texture unit #5
+		glBindTexture(GL_TEXTURE_2D, SkyTextureList);
+		SkyShader.SetUniformVariable("uTexUnit", 5);
+			glCallList(SkyList);
+		SkyShader.UnUse();
+
+
+		WaterShader.Use();
+		WaterShader.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
+		WaterShader.SetUniformVariable("waveTime", Time*5);
+		glCallList(WaterList);
+		WaterShader.UnUse();
+	}
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
-
-	SkyShader.Use();
-	glActiveTexture(GL_TEXTURE5); // use texture unit #5
-	glBindTexture(GL_TEXTURE_2D, SkyTextureList);
-	SkyShader.SetUniformVariable("uTexUnit", 5);
-		glCallList(SkyList);
-	SkyShader.UnUse();
-
-
-	WaterShader.Use();
-	WaterShader.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
-	WaterShader.SetUniformVariable("waveTime", Time*5);
-	glCallList(WaterList);
-	WaterShader.UnUse();
 
 
 
@@ -714,7 +797,7 @@ InitGraphics()
 	// set the initial window configuration:
 
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(INIT_WINDOW_SIZE*16/9, INIT_WINDOW_SIZE);
+	glutInitWindowSize(INIT_WINDOW_SIZE * 16 / 9, INIT_WINDOW_SIZE);
 
 	// open the window and set its title:
 
@@ -803,7 +886,7 @@ InitGraphics()
 
 
 
-	
+
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
 	Pattern.Init();
 	valid = Pattern.Create("pattern.vert", "pattern.frag");
@@ -818,6 +901,8 @@ InitGraphics()
 	Pattern.SetUniformVariable("uKspecular", 0.4f);
 	Pattern.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
 	Pattern.SetUniformVariable("uShininess", 12.f); // shine
+	Pattern.SetUniformVariable("uAlpha", 0.f);
+	Pattern.SetUniformVariable("uLightColor", 1, 1, 1);
 	Pattern.UnUse();
 
 
@@ -847,65 +932,130 @@ InitGraphics()
 		fprintf(stderr, "cannot open skytexture");
 	}
 	glBindTexture(GL_TEXTURE_2D, SkyTextureList);
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//glTexImage2D( GL_TEXTURE_2D, 0, 3, num_s, num_t, 0, 3, GL_RGB, GL_UNSIGNED_BYTE, SkyTexture );
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, num_s, num_t, 0, GL_RGB, GL_UNSIGNED_BYTE, SkyTexture);
 
 
 
-	struct st_pair {
-		float s;
-		float t;
-	};
-	struct st_pair ST_PAIRS[] =
+	triforce_start_float_in = 0.f;
+	triforce_finish_float_in = 5.f; // TODO change back to 5
+	//triforce_finish_float_in = 1.f;
+
+	triforce_start_rotation = 0.f;
+	triforce_finish_rotation = 8.f;
+	//triforce_finish_rotation = 2.f; // TODO change back to 8.f
+
+	text_start_fade_in = triforce_finish_rotation;
+	text_finish_fade_in = text_start_fade_in + 1.5;
+
+	sword_start_drop = text_finish_fade_in + 0.1f;
+	sword_finish_drop = sword_start_drop + 0.1f;
+
+	flashing_start = sword_finish_drop;
+	flashing_stop = flashing_start + .5f; // TODO change back to .5;
+
+	scenary_start_fade_in = flashing_stop;
+	scenary_finish_fade_in = scenary_start_fade_in + 0.5f;
+
+	start_sword_shine = scenary_finish_fade_in;
+	finish_sword_shine = start_sword_shine + 0.75f;
+
+	start_sparkling;
+	sparkle_length = 0.5f;
+	z_sparkle;
+
+	triforce_magnitude.AddTimeValue(0, 15.f);
+	triforce_magnitude.AddTimeValue(triforce_start_float_in, 15.f);
+	triforce_magnitude.AddTimeValue(triforce_finish_float_in, 0.f);
+
+	triforce_y_rotation.AddTimeValue(0, 360.f * 6.f);
+	triforce_y_rotation.AddTimeValue(triforce_start_rotation, 360.f * 6.f);
+	triforce_y_rotation.AddTimeValue(triforce_finish_rotation, 0.f);
+
+	triforce_x_rotation.AddTimeValue(0, 360.f * 3.f);
+	triforce_x_rotation.AddTimeValue(triforce_start_rotation, 360.f * 3.f);
+	triforce_x_rotation.AddTimeValue(triforce_finish_rotation, 0.f);
+
+
+	text_fade_in_alpha.AddTimeValue(0.f, 0.f);
+	text_fade_in_alpha.AddTimeValue(text_start_fade_in, 0.f);
+	text_fade_in_alpha.AddTimeValue(text_finish_fade_in, 1.f);
+	text_fade_in_z.AddTimeValue(0.f, -0.25f);
+	text_fade_in_z.AddTimeValue(text_start_fade_in, -0.25f);
+	text_fade_in_z.AddTimeValue(text_finish_fade_in, 0.f);
+
+	sword_y.AddTimeValue(0, 6.f);
+	sword_y.AddTimeValue(sword_start_drop, 6.f);
+	sword_y.AddTimeValue(sword_finish_drop, 0.f);
+
+	int flash_cycle_count = 4; 
+	float flash_cycle_period = (flashing_stop - flashing_start) / flash_cycle_count;
+	float single_color_flash_period = flash_cycle_period / 4; // four phases r, g, b, black;
+	rgb_filter_a.AddTimeValue(0, 0);
+	rgb_filter_a.AddTimeValue(flashing_start-0.00001, 0);
+	for (int i = 0; i < flash_cycle_count; i++)
 	{
-		{0.5, 0.5},
-		{0.5, 0.5},
-		{0.5, 0.5},
-		{0.5, 0.5},
+		float cycle_time_start = flashing_start + (flash_cycle_period * i);
+		int j = 0;
+		printf("cycle: %f\n", cycle_time_start + single_color_flash_period * j);
+		float alpha = 0.5f;
+		rgb_filter_r.AddTimeValue(cycle_time_start + single_color_flash_period*j, 1.f);
+		rgb_filter_g.AddTimeValue(cycle_time_start + single_color_flash_period*j, 0.f);
+		rgb_filter_b.AddTimeValue(cycle_time_start + single_color_flash_period*j, 0.f);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*j, alpha);
 
-		{0.5+.05f, 0.5},
-		{0.5    , 0.5+.05f},
-		{0.5-.05f, 0.5},
-		{0.5    , 0.5-.05f},
+		rgb_filter_r.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 1.f);
+		rgb_filter_g.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 0.f);
+		rgb_filter_b.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 0.f);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, alpha);
 
-		{0.5+.1f, 0.5},
-		{0.5    , 0.5+.1f},
-		{0.5-.1f, 0.5},
-		{0.5    , 0.5-.1f},
 
-		{0.5+.15f, 0.5},
-		{0.5    , 0.5+.15f},
-		{0.5-.15f, 0.5},
-		{0.5    , 0.5-.15f},
+		j++;
+		printf("cycle: %f\n", cycle_time_start + single_color_flash_period * j);
+		rgb_filter_r.AddTimeValue(cycle_time_start + single_color_flash_period*j, 0.f);
+		rgb_filter_g.AddTimeValue(cycle_time_start + single_color_flash_period*j, 1.f);
+		rgb_filter_b.AddTimeValue(cycle_time_start + single_color_flash_period*j, 0.f);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*j, alpha);
 
-		{0.5+.2f, 0.5},
-		{0.5    , 0.5+.2f},
-		{0.5-.2f, 0.5},
-		{0.5    , 0.5-.2f},
+		rgb_filter_r.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 0.f);
+		rgb_filter_g.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 1.f);
+		rgb_filter_b.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 0.f);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, alpha);
 
-		{0.5+.25f, 0.5},
-		{0.5    , 0.5+.25f},
-		{0.5-.25f, 0.5},
-		{0.5    , 0.5-.25f},
-	};
 
-	int num_pairs = sizeof(ST_PAIRS) / sizeof(st_pair);
-	for (int pair = 0; pair < num_pairs; pair++)
-	{
-		float front_half = (MS_PER_CYCLE / (num_pairs * 2)) * pair;
-		float back_half = MS_PER_CYCLE - front_half; 
-		ellipseS_Center.AddTimeValue(front_half, ST_PAIRS[pair].s);
-		ellipseT_Center.AddTimeValue(front_half, ST_PAIRS[pair].t);
+		j++;
+		printf("cycle: %f\n", cycle_time_start + single_color_flash_period * j);
+		rgb_filter_r.AddTimeValue(cycle_time_start + single_color_flash_period*j, 0.f);
+		rgb_filter_g.AddTimeValue(cycle_time_start + single_color_flash_period*j, 0.f);
+		rgb_filter_b.AddTimeValue(cycle_time_start + single_color_flash_period*j, 1.f);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*j, alpha);
 
-		ellipseS_Center.AddTimeValue(back_half, ST_PAIRS[pair].s);
-		ellipseT_Center.AddTimeValue(back_half, ST_PAIRS[pair].t);
+		rgb_filter_r.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 0.f);
+		rgb_filter_g.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 0.f);
+		rgb_filter_b.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 1.f);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, alpha);
+
+
+		j++;
+		printf("cycle: %f\n\n", cycle_time_start + single_color_flash_period * j);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*j, 0.f);
+		rgb_filter_a.AddTimeValue(cycle_time_start + single_color_flash_period*(j+1) - 0.00001, 0.f);
+
 	}
-}
 
+
+	scenary_fade_in_alpha.AddTimeValue(0.f, 0.f);
+	scenary_fade_in_alpha.AddTimeValue(scenary_start_fade_in, 0.f);
+	scenary_fade_in_alpha.AddTimeValue(scenary_finish_fade_in, 1.f);
+
+	//overall_rgb_filter
+	//sword_y.AddTimeValue();
+
+}
 // initialize the display lists that will not change:
 // (a display list is a way to store opengl commands in
 //  memory so that they can be played back efficiently at a later time
@@ -920,21 +1070,25 @@ InitLists( )
 	glutSetWindow( MainWindow );
 
 	// create the object:
-
-	TriforceTopList = glGenLists( 1 );
-	glNewList( TriforceTopList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda_2//triforce_top.obj");
+	TriforcePieceList = glGenLists( 1 );
+	glNewList( TriforcePieceList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
 	glEndList( );
 
-	TriforceLeftList = glGenLists( 1 );
-	glNewList( TriforceLeftList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda_2//triforce_left.obj");
-	glEndList( );
+	//TriforceTopList = glGenLists( 1 );
+	//glNewList( TriforceTopList, GL_COMPILE );
+	//	LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
+	//glEndList( );
 
-	TriforceRightList = glGenLists( 1 );
-	glNewList( TriforceRightList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda_2//triforce_right.obj");
-	glEndList( );
+	//TriforceLeftList = glGenLists( 1 );
+	//glNewList( TriforceLeftList, GL_COMPILE );
+	//	LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
+	//glEndList( );
+
+	//TriforceRightList = glGenLists( 1 );
+	//glNewList( TriforceRightList, GL_COMPILE );
+	//	LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
+	//glEndList( );
 
 	ZeldaTextList = glGenLists( 1 );
 	glNewList( ZeldaTextList, GL_COMPILE );
@@ -1013,6 +1167,18 @@ InitLists( )
 		glPopMatrix();
 	glEndList( );
 
+	//RGBFilterList = glGenLists( 1 );
+	//glNewList( RGBFilterList, GL_COMPILE );
+	//	glPushMatrix();
+	//		//glNormal3f(0, 0, 1);
+	//		//glVertex3f(-1, 1, 0);
+	//		//glVertex3f(1, 1, 0);
+	//		//glVertex3f(1, -1, 0);
+	//		//glVertex3f(-1, -1, 0);
+	//		LoadObjFile("..//..//OBJs//zelda_2//rgb_filter.obj");
+	//	glPopMatrix();
+	//glEndList( );
+
 	// create the axes:
 
 	AxesList = glGenLists( 1 );
@@ -1034,35 +1200,21 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
-	case 'v':
-		fovy += parity*increment;
-		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
+	case 'd':
+		TRI_X += 0.01;
+		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
 		break;
 	case 'a':
-		aspect -= parity*increment;
-		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
-		break;
-	case 'z':
-		zFar += parity*increment;
-		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
-		break;
-	case 'n':
-		zNear += parity*increment;
-		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
-		break;
-	case 'j':
-		increment /= 10;
-		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
-		break;
-	case 'l':
-		increment *= 10;
-		printf("fovy %f\naspect %f\nzFar %f\nzNear %f\nincrement %f\n\n", fovy, aspect, zFar, zNear, increment);
-		break;
-	case 'r':
-		Reset();
+		TRI_X -= 0.01;
+		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
 		break;
 	case 'w':
-		parity *= -1;
+		TRI_Y += 0.01;
+		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
+		break;
+	case 's':
+		TRI_Y -= 0.01;
+		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
 		break;
 
 	case 'k':
@@ -1226,6 +1378,7 @@ Reset( )
 	zFar = 1000.f;
 	increment = 0.1;
 	parity = 1;
+	TRI_X, TRI_Y = 0;
 }
 
 
