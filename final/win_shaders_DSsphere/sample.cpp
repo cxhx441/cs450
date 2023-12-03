@@ -234,9 +234,15 @@ void    cjh_water_triangle_strip(int, int);
 float	gen_noise(int, int);
 float   gen_smoothed_noise(int, int);
 void	set_terrain_seed(int);
+void    read_compile_link_validate_shader(GLuint, char*, char*);
+void	set_uniform_variable(GLuint, char*, int);
+void	set_uniform_variable(GLuint, char*, float );
+void	set_uniform_variable(GLuint, char*, float, float, float);
+void	set_uniform_variable(GLuint, char*, float);
+void	check_gl_errors(const char*);
+
 
 // utility to create an array from 3 separate values:
-
 float *
 Array3( float a, float b, float c )
 {
@@ -306,6 +312,8 @@ Keytimes rgb_filter_r;
 Keytimes rgb_filter_g;
 Keytimes rgb_filter_b;
 Keytimes rgb_filter_a;
+
+GLuint CustomWaterShaderProgram;
 
 
 // main program:
@@ -516,7 +524,7 @@ Display()
 		float scenary_alpha = scenary_fade_in_alpha.GetValue(AnimationCycleTime, true);
 		Pattern.SetUniformVariable("uAlpha", scenary_alpha);
 		SkyShader.SetUniformVariable("uAlpha", scenary_alpha);
-		WaterShader.SetUniformVariable("uAlpha", scenary_alpha);
+		//WaterShader.SetUniformVariable("uAlpha", scenary_alpha);
 
 		Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
 		glCallList(CastleList);
@@ -548,11 +556,18 @@ Display()
 		SkyShader.UnUse();
 
 
-		WaterShader.Use();
-		WaterShader.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
-		WaterShader.SetUniformVariable("waveTime", Time*3);
+		//WaterShader.Use();
+		//WaterShader.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
+		//WaterShader.SetUniformVariable("waveTime", Time*3);
+		//glCallList(WaterList);
+		//WaterShader.UnUse();
+
+		glUseProgram(CustomWaterShaderProgram);
+		set_uniform_variable(CustomWaterShaderProgram, "uAlpha", scenary_alpha);
+		set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.25f, 0.3f, 0.75f);
+		set_uniform_variable(CustomWaterShaderProgram, "waveTime", Time*3);
 		glCallList(WaterList);
-		WaterShader.UnUse();
+		glUseProgram(0);
 	}
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
@@ -851,6 +866,9 @@ InitGraphics()
 		fprintf(stderr, "GLEW initialized OK\n");
 	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 #endif
+
+
+	// all other setups go here, such as GLSLProgram and KeyTime setups:
 	SkyShader.Init();
 	bool valid = SkyShader.Create("sky.vert", "sky.frag");
 	if (!valid)
@@ -867,9 +885,6 @@ InitGraphics()
 	SkyShader.UnUse();
 
 
-
-
-	// all other setups go here, such as GLSLProgram and KeyTime setups:
 	Pattern.Init();
 	valid = Pattern.Create("pattern.vert", "pattern.frag");
 	if (!valid)
@@ -906,6 +921,22 @@ InitGraphics()
 	WaterShader.UnUse();
 
 
+	CustomWaterShaderProgram = glCreateProgram();
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
+	//glAttachShader(CustomWaterShaderProgram, read_compile_shader("water.geom", "geometry"));
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
+	glUseProgram(CustomWaterShaderProgram);
+	set_uniform_variable(CustomWaterShaderProgram, "uKambient", 0.1f);
+	set_uniform_variable(CustomWaterShaderProgram, "uKdiffuse", 0.5f);
+	set_uniform_variable(CustomWaterShaderProgram, "uKspecular", 0.4f);
+	set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.f, 0.f, 1.f); // blue
+	set_uniform_variable(CustomWaterShaderProgram, "uSpecularColor", 1.f, 1.f, 1.f); // white
+	set_uniform_variable(CustomWaterShaderProgram, "uShininess", 12.f); // shine
+	glUseProgram(0);
+
+
+
+
 	// Texture Setup
 	glGenTextures(1, &SkyTextureList);
 	int num_s, num_t;
@@ -924,12 +955,12 @@ InitGraphics()
 
 
 	triforce_start_float_in = 0.f;
-	triforce_finish_float_in = 5.f; // TODO change back to 5
-	//triforce_finish_float_in = 1.f;
+	//triforce_finish_float_in = 5.f; // TODO change back to 5
+	triforce_finish_float_in = 1.f;
 
 	triforce_start_rotation = 0.f;
-	triforce_finish_rotation = 8.f;
-	//triforce_finish_rotation = 2.f; // TODO change back to 8.f
+	//triforce_finish_rotation = 8.f;
+	triforce_finish_rotation = 2.f; // TODO change back to 8.f
 
 	text_start_fade_in = triforce_finish_rotation;
 	text_finish_fade_in = text_start_fade_in + 1.5;
@@ -1738,7 +1769,7 @@ cjh_water_triangles( int side_length, int side_vertex_count )
 }
 
 void
-cjh_water_triangle_strip( int side_length, int side_vertex_count )
+cjh_water( int side_length, int side_vertex_count )
 {
 	int x0 = 0;
 	int z0 = 0;
@@ -1848,3 +1879,177 @@ cjh_water_triangle_strip( int side_length, int side_vertex_count )
 	}
 	glPopMatrix();
 }
+
+
+void
+read_compile_link_validate_shader(GLuint program, char *filename, char *shader_type)
+{
+	/////////
+	// READ
+	////////
+	FILE* fp = fopen(filename, "r");
+	if( fp == NULL ) 
+	{ 
+		printf("could not load %s shader.\n", shader_type);
+	}
+	fseek( fp, 0, SEEK_END );
+	int numBytes = ftell( fp ); // length of file
+	GLchar * buffer = new GLchar [numBytes+1];
+	rewind( fp ); // same as: “fseek( in, 0, SEEK_SET )”
+	fread( buffer, 1, numBytes, fp );
+	fclose( fp );
+	buffer[numBytes] = '\0';     // the entire file is now in a byte string
+
+	///////////
+	// COMPILE
+	///////////
+	int status;
+	int logLength;
+	GLuint shader;
+
+	if (shader_type == "vertex")
+		shader = glCreateShader( GL_VERTEX_SHADER );
+	else if (shader_type == "geometry")
+		shader = glCreateShader( GL_GEOMETRY_SHADER );
+	else if (shader_type == "tess_control")
+		shader = glCreateShader( GL_TESS_CONTROL_SHADER );
+	else if (shader_type == "tess_evaluation")
+		shader = glCreateShader( GL_TESS_EVALUATION_SHADER );
+	else if (shader_type == "fragment")
+		shader = glCreateShader( GL_FRAGMENT_SHADER );
+	else if (shader_type == "compute")
+		shader = glCreateShader( GL_COMPUTE_SHADER );
+	else
+	{
+		fprintf(stderr, "invalid shader_type: %s\n", shader_type);
+		exit(0);
+	}
+		
+
+	glShaderSource( shader, 1, (const GLchar **)&buffer, NULL );
+	delete [  ] buffer;
+	glCompileShader( shader );
+	check_gl_errors( "___ Shader 1" );
+
+	glGetShaderiv( shader, GL_COMPILE_STATUS, &status );
+	if( status == GL_FALSE )
+	{
+		fprintf( stderr, "%s shader compilation failed.\n", shader_type );
+		glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &logLength );
+		GLchar *log = new GLchar [logLength];
+		glGetShaderInfoLog( shader, logLength, NULL, log );
+		fprintf( stderr, "\n%s\n", log );
+		delete [ ] log;
+		exit( 1 );
+	}
+	check_gl_errors( "___ Shader 2" );
+	
+	fprintf(stderr, "returning custom %s shader!\n", shader_type);
+
+	/////////////////////////////
+	//attaching the shader
+	glAttachShader(program, shader);
+	/////////////////////////////
+
+	/////////
+	// LINK
+	/////////
+	glLinkProgram(program);
+	check_gl_errors( "Shader Program 1" );
+	glGetProgramiv( program, GL_LINK_STATUS, &status );
+	if( status == GL_FALSE )
+	{
+		fprintf( stderr, "Link failed.\n" );
+		glGetProgramiv( program, GL_INFO_LOG_LENGTH, &logLength );
+		GLchar *log = new GLchar [logLength];
+		glGetProgramInfoLog( program, logLength, NULL, log );
+		fprintf( stderr, "\n%s\n", log );
+		delete [ ] log;
+		exit( 1 );
+	}
+	check_gl_errors( "Shader Program 2" );
+
+	///////////
+	// VALIDATE
+	///////////
+	glGetProgramiv( program, GL_VALIDATE_STATUS, &status );
+	fprintf( stderr, "Program is %s.\n", status == GL_FALSE ? "invalid" : "valid" );
+
+}
+
+void
+set_uniform_variable(GLuint program, char* name, int val )
+{
+	GLint loc = glGetUniformLocation(program, name);
+	if (loc < 0)
+	{
+		fprintf(stderr, "cannot find uniform variable %s\n", name);
+	}
+	glUniform1i( loc, val );
+};
+
+void
+set_uniform_variable(GLuint program, char* name, float val )
+{
+	GLint loc = glGetUniformLocation(program, name);
+	if (loc < 0)
+	{
+		fprintf(stderr, "cannot find uniform variable %s\n", name);
+	}
+	glUniform1f( loc, val );
+};
+
+void
+set_uniform_variable(GLuint program, char* name, float val0, float val1, float val2 )
+{
+	GLint loc = glGetUniformLocation(program, name);
+	if (loc < 0)
+	{
+		fprintf(stderr, "cannot find uniform variable %s\n", name);
+	}
+	glUniform3f( loc, val0, val1, val2 );
+};
+
+void
+set_uniform_variable(GLuint program, char* name, float val[3])
+{
+	GLint loc = glGetUniformLocation(program, name);
+	if (loc < 0)
+	{
+		fprintf(stderr, "cannot find uniform variable %s\n", name);
+	}
+	glUniform3fv(loc, 1, val);
+};
+
+void 
+check_gl_errors( const char* caller)
+{
+	unsigned int glerr = glGetError();
+	if( glerr == GL_NO_ERROR )
+		return;
+	fprintf( stderr, "GL Error discovered from caller ‘%s‘: ", caller );
+	switch( glerr )
+	{
+		case GL_INVALID_ENUM:
+		fprintf( stderr, "Invalid enum.\n" );
+		break;
+		case GL_INVALID_VALUE:
+		fprintf( stderr, "Invalid value.\n" );
+		break;
+		case GL_INVALID_OPERATION:
+		fprintf( stderr, "Invalid Operation.\n" );
+		break;
+		case GL_STACK_OVERFLOW:
+		fprintf( stderr, "Stack overflow.\n" );
+		break;
+		case GL_STACK_UNDERFLOW:
+		fprintf(stderr, "Stack underflow.\n" );
+		break;
+		case GL_OUT_OF_MEMORY:
+		fprintf( stderr, "Out of memory.\n" );
+		break;
+		default:
+		fprintf( stderr, "Unknown OpenGL error: %d (0x%0x)\n", glerr, glerr );
+	}
+
+} 
