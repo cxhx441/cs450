@@ -230,7 +230,7 @@ float	Unit(float [3], float [3]);
 float	Unit(float [3]);
 void    cjh_terrain(int, int);
 void    cjh_water_triangles(int, int);
-void    cjh_water_triangle_strip(int, int);
+void    cjh_water_grid(int);
 float	gen_noise(int, int);
 float   gen_smoothed_noise(int, int);
 void	set_terrain_seed(int);
@@ -566,6 +566,7 @@ Display()
 		set_uniform_variable(CustomWaterShaderProgram, "uAlpha", scenary_alpha);
 		set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.25f, 0.3f, 0.75f);
 		set_uniform_variable(CustomWaterShaderProgram, "waveTime", Time*3);
+		//glCallList(WaterList);
 		glCallList(WaterList);
 		glUseProgram(0);
 	}
@@ -922,8 +923,11 @@ InitGraphics()
 
 
 	CustomWaterShaderProgram = glCreateProgram();
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
-	//glAttachShader(CustomWaterShaderProgram, read_compile_shader("water.geom", "geometry"));
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.geom", "geometry");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
 	glUseProgram(CustomWaterShaderProgram);
 	set_uniform_variable(CustomWaterShaderProgram, "uKambient", 0.1f);
@@ -1161,6 +1165,7 @@ InitLists( )
 		glScalef(5, 1, 5);
 		glTranslatef(-side_length/2, -2, -side_length*0.9);
 		cjh_water_triangles(25, 32);
+		//cjh_water_grid(25);
 	glEndList( );
 
 	TerrainList = glGenLists( 1 );
@@ -1769,20 +1774,27 @@ cjh_water_triangles( int side_length, int side_vertex_count )
 }
 
 void
-cjh_water_grid( int side_length, int side_vertex_count )
+cjh_water_grid(int side_vertex_count )
 {
-	float d = side_length / (float) side_vertex_count;
+	float x_d = 1;
+	float z_d = x_d * tan(2 * F_PI / 6); //60 deg
+
+	//float d = side_length / (float) side_vertex_count;
 	glPushMatrix();
 		glNormal3f(0, 1, 0);
 		for( int i = 0; i < side_vertex_count; i++ )
 		{
 			for( int j = 0; j < side_vertex_count; j++ )
 			{
-				float s = (j * d) / (float)side_length;
-				float t = (i * d) / (float)side_length;
+				float x = j * x_d;
+				float z = i * z_d;
+				//float s = x / (float)side_length;
+				//float t = y / (float)side_length;
+				float s = x / (float)(side_vertex_count * x_d);
+				float t = z / (float)(side_vertex_count * z_d);
 				glBegin( GL_POINT );
 					glTexCoord2f(s, t);
-					glVertex3f(j*d, 0, i*d);
+					glVertex3f(x, 0, z);
 				glEnd();
 			}
 		}
