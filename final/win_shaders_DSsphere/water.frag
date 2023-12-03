@@ -14,17 +14,17 @@ uniform float   uSc, uTc, uRt, uRs;
 
 // in variables from the vertex shader and interpolated in the rasterizer:
 
-in  vec3  vNormal;		   // normal vector
-in  vec3  vPointToLight;		   // vector from point to light
-in  vec3  vPointToEye;		   // vector from point to eye
-in  vec2  vST;		   // (s,t) texture coordinates
+in  vec3  gNormal;		   // normal vector
+in  vec3  gPointToLight;		   // vector from point to light
+in  vec3  gPointToEye;		   // vector from point to eye
+in  vec2  gST;		   // (s,t) texture coordinates
 
 
 void
 main( )
 {
-	float s = vST.s;
-	float t = vST.t;
+	float s = gST.s;
+	float t = gST.t;
 
 	// determine the color using the square-boundary equations:
 
@@ -36,9 +36,9 @@ main( )
 
 	// apply the per-fragmewnt lighting to myColor:
 
-	vec3 Normal = normalize(vNormal);
-	vec3 Light  = normalize(vPointToLight);
-	vec3 Eye    = normalize(vPointToEye);
+	vec3 Normal = normalize(gNormal);
+	vec3 Light  = normalize(gPointToLight);
+	vec3 Eye    = normalize(gPointToEye);
 
 	vec3 ambient = uKambient * myColor;
 
