@@ -1154,10 +1154,9 @@ InitLists( )
 
 	WaterList = glGenLists( 1 );
 	glNewList( WaterList, GL_COMPILE );
-		//LoadObjFile("..//..//OBJs//zelda_2//water.obj");
-		glScalef(5, 1, 5);
+		side_length = 125;
 		glTranslatef(-side_length/2, -2, -side_length*0.9);
-		cjh_water_triangles(25, 256);
+		cjh_water_triangles(side_length, 256);
 	    //cjh_water_grid(25);
 	glEndList( );
 
@@ -1749,8 +1748,8 @@ cjh_water_triangles( int side_length, int side_vertex_count )
 				glTexCoord2f(s, t);
 				glNormal3f(t1_normal[0], t1_normal[1], t1_normal[2]);
 				glVertex3f(p1.x, p1.y, p1.z);
-				glVertex3f(p2.x, p2.y, p2.z);
 				glVertex3f(p3.x, p3.y, p3.z);
+				glVertex3f(p2.x, p2.y, p2.z);
 			glEnd();
 
 			glBegin( GL_TRIANGLES );
