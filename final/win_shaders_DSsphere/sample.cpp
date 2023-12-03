@@ -524,7 +524,6 @@ Display()
 		float scenary_alpha = scenary_fade_in_alpha.GetValue(AnimationCycleTime, true);
 		Pattern.SetUniformVariable("uAlpha", scenary_alpha);
 		SkyShader.SetUniformVariable("uAlpha", scenary_alpha);
-		//WaterShader.SetUniformVariable("uAlpha", scenary_alpha);
 
 		Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
 		glCallList(CastleList);
@@ -532,6 +531,7 @@ Display()
 		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
 		Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 		glCallList(MountainList);
+
 
 
 		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
@@ -914,12 +914,12 @@ InitGraphics()
 
 
 	CustomWaterShaderProgram = glCreateProgram();
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.geom", "geometry");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
 	glUseProgram(CustomWaterShaderProgram);
 	set_uniform_variable(CustomWaterShaderProgram, "uKambient", 0.1f);
 	set_uniform_variable(CustomWaterShaderProgram, "uKdiffuse", 0.5f);
