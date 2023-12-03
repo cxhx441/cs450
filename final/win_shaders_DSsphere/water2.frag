@@ -15,14 +15,14 @@ uniform float	uAlpha;		// alpha
 in  vec3  gNormal;		   // normal vector
 in  vec3  gPointToLight;		   // vector from point to light
 in  vec3  gPointToEye;		   // vector from point to eye
-//in  vec2  gST;		   // (s,t) texture coordinates
+in  vec2  gST;		   // (s,t) texture coordinates
 
 
 void
 main( )
 {
-	//float s = gST.s;
-	//float t = gST.t;
+	float s = gST.s;
+	float t = gST.t;
 
 	vec3 myColor = uColor;
 	// apply the per-fragmewnt lighting to myColor:

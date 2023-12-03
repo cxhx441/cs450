@@ -533,18 +533,9 @@ Display()
 		Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 		glCallList(MountainList);
 
-		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); // Hills
-		glCallList(HillsList);
-
-
-		//Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
-		//glCallList(SkyList);
 
 		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
 		glCallList(TerrainList);
-
-		//Pattern.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
-		//glCallList(WaterList);
 
 		Pattern.UnUse( );       // Pattern.Use(0);  also works
 
@@ -566,12 +557,12 @@ Display()
 		set_uniform_variable(CustomWaterShaderProgram, "uAlpha", scenary_alpha);
 		set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.25f, 0.3f, 0.75f);
 		set_uniform_variable(CustomWaterShaderProgram, "waveTime", Time*3);
-		//glCallList(WaterList);
 		glCallList(WaterList);
 		glUseProgram(0);
 	}
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
+	//glCallList(WaterList);
 
 
 
@@ -967,13 +958,15 @@ InitGraphics()
 	triforce_finish_rotation = 2.f; // TODO change back to 8.f
 
 	text_start_fade_in = triforce_finish_rotation;
-	text_finish_fade_in = text_start_fade_in + 1.5;
+	//text_finish_fade_in = text_start_fade_in + 1.5fj;
+	text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
 
 	sword_start_drop = text_finish_fade_in + 0.1f;
 	sword_finish_drop = sword_start_drop + 0.1f;
 
 	flashing_start = sword_finish_drop;
-	flashing_stop = flashing_start + .5f; // TODO change back to .5;
+	//flashing_stop = flashing_start + .5f; 
+	flashing_stop = flashing_start + .1f; // TODO change back to .5;
 
 	scenary_start_fade_in = flashing_stop;
 	scenary_finish_fade_in = scenary_start_fade_in + 0.5f;
@@ -1781,23 +1774,24 @@ cjh_water_grid(int side_vertex_count )
 
 	//float d = side_length / (float) side_vertex_count;
 	glPushMatrix();
-		glNormal3f(0, 1, 0);
-		for( int i = 0; i < side_vertex_count; i++ )
-		{
-			for( int j = 0; j < side_vertex_count; j++ )
+		glBegin( GL_POINTS );
+			glNormal3f(0, 1, 0);
+			glColor3f(1, 0, 0);
+			for( int i = 0; i < side_vertex_count; i++ )
 			{
-				float x = j * x_d;
-				float z = i * z_d;
-				//float s = x / (float)side_length;
-				//float t = y / (float)side_length;
-				float s = x / (float)(side_vertex_count * x_d);
-				float t = z / (float)(side_vertex_count * z_d);
-				glBegin( GL_POINT );
+				for( int j = 0; j < side_vertex_count; j++ )
+				{
+					float x = j * x_d;
+					float z = i * z_d;
+					//float s = x / (float)side_length;
+					//float t = y / (float)side_length;
+					float s = x / (float)(side_vertex_count * x_d);
+					float t = z / (float)(side_vertex_count * z_d);
 					glTexCoord2f(s, t);
 					glVertex3f(x, 0, z);
-				glEnd();
+				}
 			}
-		}
+		glEnd();
 	glPopMatrix();
 }
 
