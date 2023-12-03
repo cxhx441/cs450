@@ -914,12 +914,12 @@ InitGraphics()
 
 
 	CustomWaterShaderProgram = glCreateProgram();
-	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
-	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.geom", "geometry");
-	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.geom", "geometry");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
 	glUseProgram(CustomWaterShaderProgram);
 	set_uniform_variable(CustomWaterShaderProgram, "uKambient", 0.1f);
 	set_uniform_variable(CustomWaterShaderProgram, "uKdiffuse", 0.5f);
@@ -1157,8 +1157,8 @@ InitLists( )
 		//LoadObjFile("..//..//OBJs//zelda_2//water.obj");
 		glScalef(5, 1, 5);
 		glTranslatef(-side_length/2, -2, -side_length*0.9);
-		cjh_water_triangles(25, 32);
-		//cjh_water_grid(25);
+		cjh_water_triangles(25, 256);
+	    //cjh_water_grid(25);
 	glEndList( );
 
 	TerrainList = glGenLists( 1 );

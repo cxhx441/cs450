@@ -3,7 +3,7 @@
 #extension GL_EXT_gpu_shader4: enable
 #extension GL_EXT_geometry_shader4: enable
 layout ( triangles ) in;
-layout ( triangle_strip, max_vertices=1000) out;
+layout ( triangle_strip, max_vertices=2000) out;
 
 // out variables to be interpolated in the rasterizer and sent to each fragment shader:
 
@@ -22,25 +22,32 @@ uniform float waveTime;
 void
 main( )
 {
+	float x = gl_in[0].gl_Position.x;
+	float y = gl_in[0].gl_Position.y;
+	float z = gl_in[0].gl_Position.z;
+
 	gNormal = vNormal[0];
+	gNormal = normalize( gl_NormalMatrix * gNormal );  // normal vector
 	gPointToLight = vPointToLight[0];
 	gPointToEye = vPointToEye[0];
 	gST = vST[0];
-	gl_Position = gl_in[0].gl_Position;
+	gl_Position = gl_ModelViewProjectionMatrix * vec4 (x+1, y, z, 1);
 	EmitVertex();
 
-	gNormal = vNormal[1];
-	gPointToLight = vPointToLight[1];
-	gPointToEye = vPointToEye[1];
-	gST = vST[1];
-	gl_Position = gl_in[1].gl_Position;
+	gNormal = vNormal[0];
+	gNormal = normalize( gl_NormalMatrix * gNormal );  // normal vector
+	gPointToLight = vPointToLight[0];
+	gPointToEye = vPointToEye[0];
+	gST = vST[0];
+	gl_Position = gl_ModelViewProjectionMatrix * vec4 (x-1, y, z, 1);
 	EmitVertex();
 
-	gNormal = vNormal[2];
-	gPointToLight = vPointToLight[2];
-	gPointToEye = vPointToEye[2];
-	gST = vST[2];
-	gl_Position = gl_in[2].gl_Position;
+	gNormal = vNormal[0];
+	gNormal = normalize( gl_NormalMatrix * gNormal );  // normal vector
+	gPointToLight = vPointToLight[0];
+	gPointToEye = vPointToEye[0];
+	gST = vST[0];
+	gl_Position = gl_ModelViewProjectionMatrix * vec4 (x, y, z+1, 1);
 	EmitVertex();
 	EndPrimitive();
 }

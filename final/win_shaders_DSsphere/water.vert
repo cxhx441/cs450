@@ -44,10 +44,8 @@ main( )
 	//vNormal = normalize( gl_NormalMatrix * gl_Normal );  // normal vector
 	vec4 ECposition = gl_ModelViewMatrix * vec4(cur_vertex, 1.0);
 	vNormal = normalize( gl_NormalMatrix * gl_Normal );  // normal vector
-	vPointToLight = LightPosition - ECposition.xyz;	    // vector from the point
-							// to the light position
-	vPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point
-							// to the eye position
+	vPointToLight = LightPosition - ECposition.xyz;	    // vector from the point to the light position
+	vPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point to the eye position
 	//gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-	gl_Position = gl_ModelViewProjectionMatrix * vec4(cur_vertex, 1.0);
+	gl_Position = gl_ModelViewMatrix * vec4(cur_vertex, 1.0);
 }

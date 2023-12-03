@@ -52,6 +52,6 @@ main( )
 		ss = pow( max( dot(Eye,ref),0. ), uShininess );
 	}
 	vec3 specular = uKspecular * ss * uSpecularColor;
-	gl_FragColor = vec4( (ambient + diffuse + specular)*uAlpha,  1. );
+	gl_FragColor = vec4( 1, 0, 0,  1. );
 }
 

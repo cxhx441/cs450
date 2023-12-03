@@ -1,13 +1,15 @@
 #version 330 compatibility
 #extension GL_EXT_gpu_shader4: enable
 #extension GL_EXT_geometry_shader4: enable
-layout ( points ) in;
+layout ( triangles ) in;
 layout ( triangle_strip, max_vertices=3) out;
 
 
-in  vec3  vNormal[1];		   // normal vector
-in	vec2  vST[1];
-in  int   vParity[1];
+in	vec3  vNormal[3];
+in  vec3  vPointToLight[3];	  // vector from point to light
+in  vec3  vPointToEye[3];	  // vector from point to eye
+in  vec2  vST[3];	  // (s,t) texture coordinates
+in	vec3  Triangle[3];
 
 out  vec3  gNormal;
 out  vec3  gPointToLight;	  // vector from point to light
@@ -24,8 +26,7 @@ const float PI = 3.14159265359;
 float generateOffset(float x, float z)
 {
 	float waveLength = 2.f;
-	float waveAmplitude = 1.f;
-	float PI = 3.14159265359; 
+	float waveAmplitude = 0.5f;
 	float radiansX = (x / waveLength + waveTime) * 2.0 * PI;
 	float radiansZ = (z / waveLength + waveTime) * 2.0 * PI;
 	return waveAmplitude * 0.5 * (sin(radiansZ) + cos(radiansX));
@@ -42,68 +43,45 @@ vec3 applyDistortion(vec3 vertex)
 void
 main( )
 {
-	//gST = vST;
+	vec3 v0 = gl_in[0].gl_Position.xyz;
+	vec3 v1 = gl_in[1].gl_Position.xyz;
+	vec3 v2 = gl_in[2].gl_Position.xyz;
 
-	float x_d = 0.5;
-	float z_d = x_d * tan(2 * PI / 6); //60 deg
+	v0 = applyDistortion(v0);
+	v1 = applyDistortion(v1);
+	v2 = applyDistortion(v2);
 
-	vec3 cur_vertex;
-	vec3 left_vertex;
-	vec3 right_vertex;
-	vec3 central_point;
-	float central_point_shift = z_d * (2.f/3.f);
-
-	float x = gl_in[0].gl_Position.x;
-	//float y = gl_in[0].gl_Position.y;
-	float z = gl_in[0].gl_Position.z;
-
-	if (vParity[0] == 0) //draw_up (upside down)
-	{
-		cur_vertex = vec3(x, 0, z);
-		central_point = vec3(x, 0, z + central_point_shift);
-		// up_left and up_right
-		left_vertex = vec3 (cur_vertex.x - x_d, cur_vertex.y, cur_vertex.z + z_d);
-		right_vertex = vec3 (cur_vertex.x + x_d, cur_vertex.y, cur_vertex.z + z_d);
-	}
-	else if (vParity[0] == 1) // draw down (rightside up)
-	{
-		cur_vertex = vec3(x + x_d, 0, z);
-		central_point = vec3(x, 0, z - central_point_shift);
-		// down_left and down_right
-		left_vertex = vec3 (cur_vertex.x - x_d, cur_vertex.y, cur_vertex.z - z_d);
-		right_vertex = vec3 (cur_vertex.x + x_d, cur_vertex.y, cur_vertex.z - z_d);
-	}
-
-	gNormal = cross(left_vertex, right_vertex); 
+	gNormal = cross(v0, v1); 
 	gNormal = normalize( gl_NormalMatrix * gNormal );  // normal vector
+	if (gNormal.y < 0)
+		gNormal = gNormal * vec3 (-1, -1, -1);
 
-	cur_vertex = applyDistortion(cur_vertex);
-	left_vertex = applyDistortion(left_vertex);
-	right_vertex = applyDistortion(right_vertex);
 
-	vec4 ECposition = gl_ModelViewMatrix * vec4(central_point, 1.0);
-	gNormal = normalize( gl_NormalMatrix * gNormal );  // normal vector
-	gPointToLight = LightPosition - ECposition.xyz;	    // vector from the point
-							// to the light position
-	gPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point
-							// to the eye position
-
-	ECposition = gl_ModelViewMatrix * vec4(cur_vertex, 1.0);
+	vec4 ECposition = gl_ModelViewMatrix * vec4(v0, 1.0);
 	gPointToLight = LightPosition - ECposition.xyz;	    // vector from the point to the light position
 	gPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point to the eye position
-	gl_Position = gl_ModelViewProjectionMatrix * vec4(cur_vertex, 1.0);
+	//gPointToLight = vPointToLight[0];
+	//gPointToEye = vPointToEye[0];
+	gST = vST[0];
+	gl_Position = gl_ModelViewProjectionMatrix * vec4(v0, 1.0);
 	EmitVertex();
 
-	ECposition = gl_ModelViewMatrix * vec4(left_vertex, 1.0);
+	ECposition = gl_ModelViewMatrix * vec4(v1, 1.0);
 	gPointToLight = LightPosition - ECposition.xyz;	    // vector from the point to the light position
 	gPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point to the eye position
-	gl_Position = gl_ModelViewProjectionMatrix * vec4(left_vertex, 1.0);
+	//gPointToLight = vPointToLight[1];
+	//gPointToEye = vPointToEye[1];
+	gST = vST[1];
+	gl_Position = gl_ModelViewProjectionMatrix * vec4(v1, 1.0);
 	EmitVertex();
 
-	ECposition = gl_ModelViewMatrix * vec4(right_vertex, 1.0);
+	ECposition = gl_ModelViewMatrix * vec4(v1, 1.0);
 	gPointToLight = LightPosition - ECposition.xyz;	    // vector from the point to the light position
 	gPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point to the eye position
-	gl_Position = gl_ModelViewProjectionMatrix * vec4(right_vertex, 1.0);
+	//gPointToLight = vPointToLight[2];
+	//gPointToEye = vPointToEye[2];
+	gST = vST[2];
+	gl_Position = gl_ModelViewProjectionMatrix * vec4(v2, 1.0);
 	EmitVertex();
 	EndPrimitive(); 
 }
