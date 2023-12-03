@@ -1769,114 +1769,23 @@ cjh_water_triangles( int side_length, int side_vertex_count )
 }
 
 void
-cjh_water( int side_length, int side_vertex_count )
+cjh_water_grid( int side_length, int side_vertex_count )
 {
-	int x0 = 0;
-	int z0 = 0;
 	float d = side_length / (float) side_vertex_count;
-	
-	struct vertex
-	{
-		float x; 
-		float y; 
-		float z;
-	};
-	
-	vertex p1;
-	vertex p2;
-	vertex p3;
-	vertex p4;
-	
-	float t1_u_vector[3]; 
-	float t1_v_vector[3]; 
-	float t1_normal[3];
-	float t2_u_vector[3]; 
-	float t2_v_vector[3]; 
-	float t2_normal[3];
-
-
-	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
-	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
-	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
-	//printf("x: 4, z: 5, result: %f\n", get_height(4, 5));
-	//printf("x: 5, z: 5, result: %f\n", get_height(5, 5));
-
 	glPushMatrix();
-	for( int i = 0; i < side_vertex_count; i++ )
-	{
-		for( int j = 0; j < side_vertex_count; j++ )
+		glNormal3f(0, 1, 0);
+		for( int i = 0; i < side_vertex_count; i++ )
 		{
-			//   p1    p2
-			//    ------
-			//    |	  /|
-			//    |  / |
-			//    | /  |
-			//    |/   |
-			//    ------
-			//   p3    p4
-
-			// set x's
-			p1.x = x0 + d * (float)(j + 0);
-			p2.x = x0 + d * (float)(j + 1);
-			p3.x = x0 + d * (float)(j + 0);
-			p4.x = x0 + d * (float)(j + 1);
-			// set z's
-			p1.z = z0 + d * (float)(i + 0);
-			p2.z = x0 + d * (float)(i + 0);
-			p3.z = x0 + d * (float)(i + 1);
-			p4.z = x0 + d * (float)(i + 1);
-			// set y's
-			//p1.y = get_height(p1.x, p1.z); 
-			//p2.y = get_height(p2.x, p2.z); 
-			//p3.y = get_height(p3.x, p3.z); 
-			//p4.y = get_height(p4.x, p4.z); 
-
-			p1.y = 0;
-			p2.y = 0;
-			p3.y = 0;
-			p4.y = 0;
-
-
-			// get vectors for normals
-			t1_u_vector[0] = p2.x - p1.x;
-			t1_u_vector[1] = p2.y - p1.y;
-			t1_u_vector[2] = p2.z - p1.z;
-			t1_v_vector[0] = p3.x - p1.x;
-			t1_v_vector[1] = p3.y - p1.y;
-			t1_v_vector[2] = p3.z - p1.z;
-			Cross(t1_v_vector, t1_u_vector, t1_normal);
-			Unit(t1_normal);
-
-			t2_u_vector[0] = p2.x - p4.x;
-			t2_u_vector[1] = p2.y - p4.y;
-			t2_u_vector[2] = p2.z - p4.z;
-			t2_v_vector[0] = p3.x - p4.x;
-			t2_v_vector[1] = p3.y - p4.y;
-			t2_v_vector[2] = p3.z - p4.z;
-			Cross(t2_u_vector, t2_v_vector, t2_normal);
-			Unit(t2_normal);
-
-
-			float s = (i * d) / (float)side_length;
-			float t = (j * d) / (float)side_length;
-			glBegin( GL_TRIANGLES );
-				glTexCoord2f(s, t);
-				glNormal3f(t1_normal[0], t1_normal[1], t1_normal[2]);
-				glVertex3f(p1.x, p1.y, p1.z);
-				glVertex3f(p2.x, p2.y, p2.z);
-				glVertex3f(p3.x, p3.y, p3.z);
-			glEnd();
-
-			glBegin( GL_TRIANGLES );
-				//glNormal3f( 0., 1., 0. );
-				glNormal3f(t2_normal[0], t2_normal[1], t2_normal[2]);
-				// 2, 4, 3 for clockwise draw
-				glVertex3f(p2.x, p2.y, p2.z);
-				glVertex3f(p4.x, p4.y, p4.z);
-				glVertex3f(p3.x, p3.y, p3.z);
-			glEnd( );
+			for( int j = 0; j < side_vertex_count; j++ )
+			{
+				float s = (j * d) / (float)side_length;
+				float t = (i * d) / (float)side_length;
+				glBegin( GL_POINT );
+					glTexCoord2f(s, t);
+					glVertex3f(j*d, 0, i*d);
+				glEnd();
+			}
 		}
-	}
 	glPopMatrix();
 }
 
