@@ -164,7 +164,10 @@ float	increment;
 int		parity;
 int		TERRAIN_SEED;
 float	TRI_X, TRI_Y; 
-
+float fps_buff[60]; 
+int	fps_i = 0;
+float fps_sum = 0.f;
+float fps_avg = 0.f;
 // TIMINGS
 float triforce_start_float_in;
 float triforce_finish_float_in;
@@ -198,6 +201,8 @@ int		CastleList;
 int		SkyList;
 int		WaterList;
 int		TerrainList;
+int		cur_time = 0;
+int		last_time = 0;
 //int		RGBFilterList;
 
 // function prototypes:
@@ -522,6 +527,7 @@ Display()
 	
 	if (AnimationCycleTime >= scenary_start_fade_in)
 	{
+		glPushMatrix();
 		float scenary_alpha = scenary_fade_in_alpha.GetValue(AnimationCycleTime, true);
 		Pattern.SetUniformVariable("uAlpha", scenary_alpha);
 		SkyShader.SetUniformVariable("uAlpha", scenary_alpha);
@@ -532,8 +538,6 @@ Display()
 		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
 		Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 		glCallList(MountainList);
-
-
 
 		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
 		glCallList(TerrainList);
@@ -548,18 +552,13 @@ Display()
 		SkyShader.UnUse();
 
 
-		//WaterShader.Use();
-		//WaterShader.SetUniformVariable("uColor", 0.25f, 0.3f, 0.75f); //  Water
-		//WaterShader.SetUniformVariable("waveTime", Time*3);
+		//glUseProgram(CustomWaterShaderProgram);
+		//set_uniform_variable(CustomWaterShaderProgram, "uAlpha", scenary_alpha);
+		//set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.25f, 0.3f, 0.75f);
+		//set_uniform_variable(CustomWaterShaderProgram, "waveTime", Time*3);
 		//glCallList(WaterList);
-		//WaterShader.UnUse();
-
-		glUseProgram(CustomWaterShaderProgram);
-		set_uniform_variable(CustomWaterShaderProgram, "uAlpha", scenary_alpha);
-		set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.25f, 0.3f, 0.75f);
-		set_uniform_variable(CustomWaterShaderProgram, "waveTime", Time*3);
-		glCallList(WaterList);
-		glUseProgram(0);
+		//glUseProgram(0);
+		//glPopMatrix();
 	}
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
@@ -572,9 +571,9 @@ Display()
 	// a good use for thefirst one might be to have your name on the screen
 	// a good use for the second one might be to have vertex numbers on the screen alongside each vertex
 
-	//glDisable( GL_DEPTH_TEST );
-	//glColor3f( 0.f, 1.f, 1.f );
-	//DoRasterString( 0.f, 1.f, 0.f, (char *)"Text That Moves" );
+	glDisable( GL_DEPTH_TEST );
+	glColor3f( 0.f, 1.f, 1.f );
+	DoRasterString( 0.f, 1.f, 0.f, (char *)"Text That Moves" );
 
 
 	// draw some gratuitous text that is fixed on the screen:
@@ -587,17 +586,26 @@ Display()
 	// the modelview matrix is reset to identity as we don't
 	// want to transform these coordinates
 
-	//glDisable( GL_DEPTH_TEST );
-	//glMatrixMode( GL_PROJECTION );
-	//glLoadIdentity( );
-	//gluOrtho2D( 0.f, 100.f,     0.f, 100.f );
-	//glMatrixMode( GL_MODELVIEW );
-	//glLoadIdentity( );
-	//glColor3f( 1.f, 1.f, 1.f );
-	//DoRasterString( 5.f, 5.f, 0.f, (char *)"Text That Doesn't" );
+	glDisable( GL_DEPTH_TEST );
+	glMatrixMode( GL_PROJECTION ); 
+	glLoadIdentity( );
+	gluOrtho2D( 0.f, 100.f,     0.f, 100.f );
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity( );
+	glColor3f( 1.f, 1.f, 1.f );
+	cur_time = glutGet(GLUT_ELAPSED_TIME);
+	float fps = 1 / (float)((cur_time - last_time) / (float)1000);
+	last_time = cur_time;
+	fps_buff[fps_i] = fps; 
+	fps_sum += fps_buff[fps_i];
+	fps_i += 1;
+	fps_i %= 60; 
+	fps_sum -= fps_buff[fps_i];
+	char fps_str[15];
+	sprintf(fps_str, "fps: %d", (int) (fps_sum/60.f));
+	DoRasterString( 50.f, 50.f, 0.f, fps_str );
 
 	// swap the double-buffered framebuffers:
-
 	glutSwapBuffers( );
 
 	// be sure the graphics buffer has been sent:
