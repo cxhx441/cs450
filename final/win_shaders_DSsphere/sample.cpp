@@ -552,13 +552,13 @@ Display()
 		SkyShader.UnUse();
 
 
-		//glUseProgram(CustomWaterShaderProgram);
-		//set_uniform_variable(CustomWaterShaderProgram, "uAlpha", scenary_alpha);
-		//set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.25f, 0.3f, 0.75f);
-		//set_uniform_variable(CustomWaterShaderProgram, "waveTime", Time*3);
-		//glCallList(WaterList);
-		//glUseProgram(0);
-		//glPopMatrix();
+		glUseProgram(CustomWaterShaderProgram);
+		set_uniform_variable(CustomWaterShaderProgram, "uAlpha", scenary_alpha);
+		set_uniform_variable(CustomWaterShaderProgram, "uColor", 0.25f, 0.3f, 0.75f);
+		set_uniform_variable(CustomWaterShaderProgram, "waveTime", Time*3);
+		glCallList(WaterList);
+		glUseProgram(0);
+		glPopMatrix();
 	}
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
@@ -601,7 +601,7 @@ Display()
 	fps_i += 1;
 	fps_i %= 60; 
 	fps_sum -= fps_buff[fps_i];
-	char fps_str[15];
+	char fps_str[25];
 	sprintf(fps_str, "fps: %d", (int) (fps_sum/60.f));
 	DoRasterString( 50.f, 50.f, 0.f, fps_str );
 
