@@ -38,15 +38,38 @@ vec3 applyDistortion(vec3 vertex)
 void
 main( )
 {
-	vec3 v0 = gl_in[0].gl_Position.xyz;
-	vec3 v1 = gl_in[1].gl_Position.xyz;
-	vec3 v2 = gl_in[2].gl_Position.xyz;
+// ts i made up but vs are from docs
+//          v3
+//         /\
+//        /  \
+//	     /    \
+//      /  t2  \
+//   v2 -------- v4
+//     /\      /\
+//    /  \ t4 /  \
+//   / t1 \  /    \
+//  /      \/  t3  \
+//  ----------------- 
+//  v1      v0       v5
 
+	vec3 v0 = gl_in[0].gl_Position.xyz; 
+	vec3 v1 = gl_in[1].gl_Position.xyz; 
+	vec3 v2 = gl_in[2].gl_Position.xyz; 
+	//vec3 v3 = gl_in[3].gl_Position.xyz; 
+	//vec3 v4 = gl_in[4].gl_Position.xyz; 
+	//vec3 v5 = gl_in[5].gl_Position.xyz; 
+										
 	v0 = applyDistortion(v0);
 	v1 = applyDistortion(v1);
 	v2 = applyDistortion(v2);
+	//v3 = applyDistortion(v3);
+	//v4 = applyDistortion(v4);
+	//v5 = applyDistortion(v5);
+	vec3 v0_to_v1 = vec3 (v1.x - v0.x, v1.y - v0.y, v1.z - v0.z);
+	vec3 v0_to_v2 = vec3 (v2.x - v0.x, v2.y - v0.y, v2.z - v0.z);
+	gNormal = cross(v0_to_v1, v0_to_v2);
 
-	gNormal = cross(v1, v0); 
+
 	//if (gNormal.y < 0)
 	//	gNormal = gNormal * vec3 (-1, -1, -1);
 	gNormal = normalize( gl_NormalMatrix * gNormal );  // normal vector

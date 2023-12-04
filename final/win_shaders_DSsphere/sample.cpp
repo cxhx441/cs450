@@ -230,6 +230,7 @@ float	Unit(float [3], float [3]);
 float	Unit(float [3]);
 void    cjh_terrain(int, int);
 void    cjh_water_triangles(int, int);
+void    cjh_water_triangle_strip(int, int);
 void    cjh_water_grid(int);
 float	gen_noise(int, int);
 float   gen_smoothed_noise(int, int);
@@ -1156,7 +1157,8 @@ InitLists( )
 	glNewList( WaterList, GL_COMPILE );
 		side_length = 125;
 		glTranslatef(-side_length/2, -2, -side_length*0.9);
-		cjh_water_triangles(side_length, 256);
+		//cjh_water_triangles(side_length, 256);
+		cjh_water_triangle_strip(side_length, 256);
 	    //cjh_water_grid(25);
 	glEndList( );
 
@@ -1707,9 +1709,9 @@ cjh_water_triangles( int side_length, int side_vertex_count )
 			p4.x = x0 + d * (float)(j + 1);
 			// set z's
 			p1.z = z0 + d * (float)(i + 0);
-			p2.z = x0 + d * (float)(i + 0);
-			p3.z = x0 + d * (float)(i + 1);
-			p4.z = x0 + d * (float)(i + 1);
+			p2.z = z0 + d * (float)(i + 0);
+			p3.z = z0 + d * (float)(i + 1);
+			p4.z = z0 + d * (float)(i + 1);
 			// set y's
 			//p1.y = get_height(p1.x, p1.z); 
 			//p2.y = get_height(p2.x, p2.z); 
@@ -1762,6 +1764,57 @@ cjh_water_triangles( int side_length, int side_vertex_count )
 			glEnd( );
 		}
 	}
+	glPopMatrix();
+}
+
+void
+cjh_water_triangle_strip( int side_length, int side_vertex_count )
+{
+	int x0 = 0;
+	int z0 = 0;
+	float d = side_length / (float) side_vertex_count;
+	
+	struct vertex
+	{
+		float x; 
+		float y; 
+		float z;
+	};
+	
+	vertex p1;
+	vertex p2;
+	
+	glPushMatrix();
+		for (int i = 0; i < side_vertex_count; i++)
+		{
+			glBegin( GL_TRIANGLE_STRIP );
+			for (int j = 0; j < side_vertex_count; j++)
+			{
+				//   p2
+				//    -
+				//    |
+				//    |
+				//    |
+				//    |
+				//    -
+				//   p1
+				p1.x = x0 + d * (float)(j);
+				p1.y = 0;
+				p1.z = z0 + d * (float)(i);
+
+				p2.x = p1.x;
+				p2.y = 0;
+				p2.z = p1.z + d;
+
+				float s = (i * d) / (float)side_length;
+				float t = (j * d) / (float)side_length;
+				glTexCoord2f(s, t);
+				glNormal3f(0.f, 1.f, 0.f);
+				glVertex3f(p1.x, p1.y, p1.z);
+				glVertex3f(p2.x, p2.y, p2.z);
+			}
+			glEnd();
+		}
 	glPopMatrix();
 }
 
