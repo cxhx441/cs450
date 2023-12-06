@@ -236,6 +236,7 @@ float	Unit(float [3]);
 void    cjh_terrain(int, int);
 void    cjh_water_triangles(int, int);
 void    cjh_water_triangle_strip(int, int);
+void    cjh_water_triangle_strip_equilateral(int, int);
 void    cjh_water_grid(int);
 float	gen_noise(int, int);
 float   gen_smoothed_noise(int, int);
@@ -1166,7 +1167,8 @@ InitLists( )
 		side_length = 125;
 		glTranslatef(-side_length/2, -2, -side_length*0.9);
 		//cjh_water_triangles(side_length, 256);
-		cjh_water_triangle_strip(side_length, 256);
+		//cjh_water_triangle_strip(side_length, 256);
+		cjh_water_triangle_strip_equilateral(side_length, 256);
 	    //cjh_water_grid(25);
 	glEndList( );
 
@@ -1772,6 +1774,73 @@ cjh_water_triangles( int side_length, int side_vertex_count )
 			glEnd( );
 		}
 	}
+	glPopMatrix();
+}
+
+void    
+cjh_water_triangle_strip_equilateral(int width, int width_vertex_count)
+{
+	int x0 = 0;
+	int z0 = 0;
+	float eq_tri_leg_len = width / (float) width_vertex_count;
+	float eq_tri_height_factor = sin(2 * F_PI / 6); // sin(60) = 0.866025404
+	float eq_tri_height = eq_tri_leg_len * eq_tri_height_factor;
+	int height_vertex_count = width_vertex_count * (1 / eq_tri_height_factor); // 1 / 0.866 = 1.155
+	 
+	struct vertex
+	{
+		float x; 
+		float y; 
+		float z;
+	};
+	
+	vertex p1;
+	vertex p2;
+
+	
+	glPushMatrix();
+		for (int i = 0; i < height_vertex_count; i++)
+		{
+			glBegin( GL_TRIANGLE_STRIP );
+			for (int j = 0; j < width_vertex_count; j++)
+			{
+				
+
+					
+				p1.x = x0 + (eq_tri_leg_len * (float)(j)) - (eq_tri_leg_len/ (float) 2);
+				p2.x = x0 + eq_tri_leg_len * (float)(j);
+
+				p1.y = 0;
+				p2.y = 0;
+
+				// if you're odd row, start by going up
+				// if you're even row, start by going down
+				//if (i % 2 == 0)
+				//{
+					p1.z = eq_tri_height * (float)(i);
+					p2.z = eq_tri_height * (float)(i + 1);
+				//}
+				//else
+				//{
+				//p1.z = eq_tri_height * (float)(i + 1);
+				//p2.z = eq_tri_height * (float)(i);
+				//}
+				if (i % 2 == 0)
+				{
+					p1.x += eq_tri_leg_len / (float)2;
+					p2.x += eq_tri_leg_len / (float)2;
+				}
+
+
+				//float s = (
+				//float t = (j * d) / (float)side_length;
+				//glTexCoord2f(s, t);
+				//glNormal3f(0.f, 1.f, 0.f);
+				glVertex3f(p1.x, p1.y, p1.z);
+				glVertex3f(p2.x, p2.y, p2.z);
+			}
+			glEnd();
+		}
 	glPopMatrix();
 }
 
