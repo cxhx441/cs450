@@ -927,9 +927,12 @@ InitGraphics()
 	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
 	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.geom", "geometry");
 	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
-	read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
-	read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
-	read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
+	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.vert", "vertex");
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.geom", "geometry");
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.frag", "fragment");
 	glUseProgram(CustomWaterShaderProgram);
 	set_uniform_variable(CustomWaterShaderProgram, "uKambient", 0.1f);
 	set_uniform_variable(CustomWaterShaderProgram, "uKdiffuse", 0.5f);
@@ -1783,7 +1786,7 @@ cjh_water_triangle_strip_equilateral(int width, int width_vertex_count)
 	int x0 = 0;
 	int z0 = 0;
 	float eq_tri_leg_len = width / (float) width_vertex_count;
-	float eq_tri_height_factor = sin(2 * F_PI / 6); // sin(60) = 0.866025404
+	float eq_tri_height_factor = sin(2 * F_PI / (float) 6); // sin(60) = 0.866025404
 	float eq_tri_height = eq_tri_leg_len * eq_tri_height_factor;
 	int height_vertex_count = width_vertex_count * (1 / eq_tri_height_factor); // 1 / 0.866 = 1.155
 	 
