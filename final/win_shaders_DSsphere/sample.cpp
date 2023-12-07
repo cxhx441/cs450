@@ -923,6 +923,7 @@ InitGraphics()
 	WaterShader.UnUse();
 
 
+	fprintf(stderr, "hi\n");
 	CustomWaterShaderProgram = glCreateProgram();
 	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
 	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.geom", "geometry");

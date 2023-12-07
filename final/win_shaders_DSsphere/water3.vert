@@ -10,6 +10,8 @@ out	 vec2  vST;
 
 uniform int SideVertexCount;
 
+const vec3 LightPosition = vec3(  0., 5., 5. );
+
 void
 main( )
 {
