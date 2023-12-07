@@ -37,6 +37,32 @@ vec3 applyDistortion(vec3 vertex)
 	return vertex + vec3(xDistortion, yDistortion, zDistortion);
 }
 
+float generateOctaveOffset(float x, float z, float waveLength, float waveAmplitude)
+{
+	float radiansX = (x / waveLength + waveTime) * 2.0 * PI;
+	float radiansZ = (z / waveLength + waveTime) * 2.0 * PI;
+	return waveAmplitude * (sin(radiansZ) + cos(radiansX));
+}
+
+vec3 applyOctaveDistortion(vec3 vertex)
+{
+	float waveLength = 8.f;
+	float waveAmplitude = 0.25f;
+	float totalx = generateOctaveOffset(vertex.x, vertex.z, waveLength, waveAmplitude);
+    totalx += generateOctaveOffset(vertex.x, vertex.z, waveLength/2, waveAmplitude/3.f);
+	totalx += generateOctaveOffset(vertex.x, vertex.z, waveLength/4, waveAmplitude/6.f);
+
+	float totaly = generateOctaveOffset(vertex.x, vertex.z, waveLength, waveAmplitude);
+    totaly += generateOctaveOffset(vertex.x, vertex.z, waveLength/2, waveAmplitude/3.f);
+	totaly += generateOctaveOffset(vertex.x, vertex.z, waveLength/4, waveAmplitude/6.f);
+
+	float totalz = generateOctaveOffset(vertex.x, vertex.z, waveLength, waveAmplitude);
+    totalz += generateOctaveOffset(vertex.x, vertex.z, waveLength/2, waveAmplitude/3.f);
+	totalz += generateOctaveOffset(vertex.x, vertex.z, waveLength/4, waveAmplitude/6.f);
+
+	return vertex + vec3(totalx, totaly, totalz);
+}
+
 
 vec3 get_up_right(vec3 v)
 {
@@ -141,6 +167,14 @@ vec3 get_avg_normal(vec3 v0)
 	v4 = applyDistortion(v4);
 	v5 = applyDistortion(v5);
 	v6 = applyDistortion(v6);
+
+	v0 = applyOctaveDistortion(v0);
+	v1 = applyOctaveDistortion(v1);
+	v2 = applyOctaveDistortion(v2);
+	v3 = applyOctaveDistortion(v3);
+	v4 = applyOctaveDistortion(v4);
+	v5 = applyOctaveDistortion(v5);
+	v6 = applyOctaveDistortion(v6);
 	
 	vec3 t0N = cross(v2-v0, v1-v0);
 	vec3 t1N = cross(v3-v0, v2-v0);
@@ -186,6 +220,10 @@ main( )
 	v0 = applyDistortion(v0);
 	v1 = applyDistortion(v1);
 	v2 = applyDistortion(v2);
+
+	v0 = applyOctaveDistortion(v0);
+	v1 = applyOctaveDistortion(v1);
+	v2 = applyOctaveDistortion(v2);
 
 	vec4 ECposition;
 	
