@@ -408,12 +408,7 @@ Display()
 
 	glEnable(GL_DEPTH_TEST);
 
-	// specify shading to be flat:
-
-	glShadeModel(GL_FLAT);
-
-	// set the viewport to be a square centered in the window:
-
+	// set the viewport to be a 16:9 centered in the window:
 	GLsizei vx = glutGet(GLUT_WINDOW_WIDTH);
 	GLsizei vy = glutGet(GLUT_WINDOW_HEIGHT);
 	GLsizei v = vx < vy ? vx : vy;			// minimum dimension
@@ -563,9 +558,6 @@ Display()
 	}
 
 	Pattern.UnUse( );       // Pattern.Use(0);  also works
-	//glCallList(WaterList);
-
-
 
 	// draw some gratuitous text that just rotates on top of the scene:
 	// i commented out the actual text-drawing calls -- put them back in if you have a use for them
@@ -905,22 +897,22 @@ InitGraphics()
 	Pattern.UnUse();
 
 
-	WaterShader.Init();
-	//bool valid = Water.Create("terrain.vert", "terrain.frag");
-	valid = WaterShader.Create("water.vert", "water.frag");
-	if (!valid)
-		fprintf(stderr, "Could not create the Water shader!\n");
-	else
-		fprintf(stderr, "Water shader created!\n");
-	// set the uniform variables that will not change:
-	WaterShader.Use();
-	WaterShader.SetUniformVariable("uKambient", 0.1f);
-	WaterShader.SetUniformVariable("uKdiffuse", 0.5f);
-	WaterShader.SetUniformVariable("uKspecular", 0.4f);
-	WaterShader.SetUniformVariable("uColor", 0.f, 0.f, 1.f); // blue
-	WaterShader.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
-	WaterShader.SetUniformVariable("uShininess", 12.f); // shine
-	WaterShader.UnUse();
+	//WaterShader.Init();
+	////bool valid = Water.Create("terrain.vert", "terrain.frag");
+	//valid = WaterShader.Create("water.vert", "water.frag");
+	//if (!valid)
+	//	fprintf(stderr, "Could not create the Water shader!\n");
+	//else
+	//	fprintf(stderr, "Water shader created!\n");
+	//// set the uniform variables that will not change:
+	//WaterShader.Use();
+	//WaterShader.SetUniformVariable("uKambient", 0.1f);
+	//WaterShader.SetUniformVariable("uKdiffuse", 0.5f);
+	//WaterShader.SetUniformVariable("uKspecular", 0.4f);
+	//WaterShader.SetUniformVariable("uColor", 0.f, 0.f, 1.f); // blue
+	//WaterShader.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
+	//WaterShader.SetUniformVariable("uShininess", 12.f); // shine
+	//WaterShader.UnUse();
 
 
 	CustomWaterShaderProgram = glCreateProgram();
@@ -1097,21 +1089,6 @@ InitLists( )
 	glNewList( TriforcePieceList, GL_COMPILE );
 		LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
 	glEndList( );
-
-	//TriforceTopList = glGenLists( 1 );
-	//glNewList( TriforceTopList, GL_COMPILE );
-	//	LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
-	//glEndList( );
-
-	//TriforceLeftList = glGenLists( 1 );
-	//glNewList( TriforceLeftList, GL_COMPILE );
-	//	LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
-	//glEndList( );
-
-	//TriforceRightList = glGenLists( 1 );
-	//glNewList( TriforceRightList, GL_COMPILE );
-	//	LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
-	//glEndList( );
 
 	ZeldaTextList = glGenLists( 1 );
 	glNewList( ZeldaTextList, GL_COMPILE );
