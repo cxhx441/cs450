@@ -186,6 +186,11 @@ float finish_sword_shine ;
 float start_sparkling;
 float sparkle_length ;
 float z_sparkle;
+float light_x = -244;
+float light_y = 207;
+float light_z = -39;
+float mult = 1;
+
 
 int		TriforcePieceList;
 int		TriforceTopList;
@@ -201,6 +206,7 @@ int		CastleList;
 int		SkyList;
 int		WaterList;
 int		TerrainList;
+int		LightList;
 int		cur_time = 0;
 int		last_time = 0;
 //int		RGBFilterList;
@@ -301,7 +307,8 @@ MulArray3(float factor, float a, float b, float c )
 #include "loadobjfile.cpp"
 #include "keytime.cpp"
 #include "glslprogram.cpp"
-#include "cjh_terrain.cpp""
+//#include "cjh_terrain.cpp"
+#include "cjh_terrain_2.cpp"
 
 float NowS_center, NowT_center, NowRadius_s, NowRadius_t; // elipse center and radius
 GLSLProgram Pattern;
@@ -532,9 +539,15 @@ Display()
 		glCallList(CastleList);
 
 		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
+		glPushMatrix();
+			glTranslatef(light_x, light_y, light_z);
+			glCallList(LightList);
+		glPopMatrix();
+		Pattern.SetUniformVariable("LightPosition", light_x, light_y, light_z);
 		Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 		glCallList(MountainList);
 
+		Pattern.SetUniformVariable("LightPosition", light_x, light_y, light_z);
 		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
 		glCallList(TerrainList);
 
@@ -1164,6 +1177,13 @@ InitLists( )
 		glPopMatrix();
 	glEndList( );
 
+	LightList = glGenLists( 1 );
+	glNewList( LightList, GL_COMPILE );
+		glPushMatrix();
+			OsuSphere(1, 32, 32);
+		glPopMatrix();
+	glEndList( );
+
 	//RGBFilterList = glGenLists( 1 );
 	//glNewList( RGBFilterList, GL_COMPILE );
 	//	glPushMatrix();
@@ -1197,21 +1217,37 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+	case 'c':
+		mult *= 10;
+		printf("mult %f\n", mult);
+		break;
+	case 'z':
+		mult /= 10;
+		printf("mult %f\n", mult);
+		break;
 	case 'd':
-		TRI_X += 0.01;
-		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
+		light_x += 1.;
+		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
 		break;
 	case 'a':
-		TRI_X -= 0.01;
-		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
+		light_x -= 1.;
+		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
 		break;
 	case 'w':
-		TRI_Y += 0.01;
-		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
+		light_y += 1.;
+		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
 		break;
 	case 's':
-		TRI_Y -= 0.01;
-		printf("TRI_X %f, TRI_Y %f", TRI_X, TRI_Y);
+		light_y -= 1.;
+		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		break;
+	case 'q':
+		light_z += 1.;
+		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		break;
+	case 'e':
+		light_z -= 1.;
+		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
 		break;
 
 	case 'k':
@@ -1241,7 +1277,7 @@ Keyboard( unsigned char c, int x, int y )
 		NowProjection = PERSP;
 		break;
 
-	case 'q':
+	//case 'q':
 	case 'Q':
 	case ESCAPE:
 		DoMainMenu( QUIT );	// will not return here
