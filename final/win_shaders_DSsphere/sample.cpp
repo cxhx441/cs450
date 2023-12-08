@@ -186,10 +186,10 @@ float finish_sword_shine ;
 float start_sparkling;
 float sparkle_length ;
 float z_sparkle;
-float light_x = -244;
-float light_y = 207;
-float light_z = -39;
-float mult = 1;
+float debug_var_x;
+float debug_var_y;
+float debug_var_z;
+float debug_var_mult;
 
 
 int		TriforcePieceList;
@@ -206,7 +206,7 @@ int		CastleList;
 int		SkyList;
 int		WaterList;
 int		TerrainList;
-int		LightList;
+int		debugVarList;
 int		cur_time = 0;
 int		last_time = 0;
 //int		RGBFilterList;
@@ -540,14 +540,14 @@ Display()
 
 		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
 		glPushMatrix();
-			glTranslatef(light_x, light_y, light_z);
-			glCallList(LightList);
+			glTranslatef(debug_var_x, debug_var_y, debug_var_z);
+			glCallList(debugVarList);
 		glPopMatrix();
-		Pattern.SetUniformVariable("LightPosition", light_x, light_y, light_z);
+		Pattern.SetUniformVariable("LightPosition", -244, 207, -39);
 		Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 		glCallList(MountainList);
 
-		Pattern.SetUniformVariable("LightPosition", light_x, light_y, light_z);
+		Pattern.SetUniformVariable("LightPosition", -244, 207, -39);
 		Pattern.SetUniformVariable("uColor", 0.f, 1.f, 0.f); //  Terrain
 		glCallList(TerrainList);
 
@@ -1177,8 +1177,8 @@ InitLists( )
 		glPopMatrix();
 	glEndList( );
 
-	LightList = glGenLists( 1 );
-	glNewList( LightList, GL_COMPILE );
+	debugVarList = glGenLists( 1 );
+	glNewList( debugVarList, GL_COMPILE );
 		glPushMatrix();
 			OsuSphere(1, 32, 32);
 		glPopMatrix();
@@ -1218,36 +1218,36 @@ Keyboard( unsigned char c, int x, int y )
 	switch( c )
 	{
 	case 'c':
-		mult *= 10;
-		printf("mult %f\n", mult);
+		debug_var_mult *= 10;
+		printf("debug_var_mult %f\n", debug_var_mult);
 		break;
 	case 'z':
-		mult /= 10;
-		printf("mult %f\n", mult);
+		debug_var_mult /= 10;
+		printf("debug_var_mult %f\n", debug_var_mult);
 		break;
 	case 'd':
-		light_x += 1.;
-		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		debug_var_x += 1. * (float) debug_var_mult;
+		printf("debug_var_x %f, debug_var_y %f, debug_var_z %f\n", debug_var_x, debug_var_y, debug_var_z);
 		break;
 	case 'a':
-		light_x -= 1.;
-		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		debug_var_x -= 1. * (float) debug_var_mult;
+		printf("debug_var_x %f, debug_var_y %f, debug_var_z %f\n", debug_var_x, debug_var_y, debug_var_z);
 		break;
 	case 'w':
-		light_y += 1.;
-		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		debug_var_y += 1. * (float) debug_var_mult;
+		printf("debug_var_x %f, debug_var_y %f, debug_var_z %f\n", debug_var_x, debug_var_y, debug_var_z);
 		break;
 	case 's':
-		light_y -= 1.;
-		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		debug_var_y -= 1. * (float) debug_var_mult;
+		printf("debug_var_x %f, debug_var_y %f, debug_var_z %f\n", debug_var_x, debug_var_y, debug_var_z);
 		break;
 	case 'q':
-		light_z += 1.;
-		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		debug_var_z += 1. * (float) debug_var_mult;
+		printf("debug_var_x %f, debug_var_y %f, debug_var_z %f\n", debug_var_x, debug_var_y, debug_var_z);
 		break;
 	case 'e':
-		light_z -= 1.;
-		printf("light_x %f, light_y %f, light_z %f\n", light_x, light_y, light_z);
+		debug_var_z -= 1. * (float) debug_var_mult;
+		printf("debug_var_x %f, debug_var_y %f, debug_var_z %f\n", debug_var_x, debug_var_y, debug_var_z);
 		break;
 
 	case 'k':
@@ -1275,6 +1275,10 @@ Keyboard( unsigned char c, int x, int y )
 	case 'p':
 	case 'P':
 		NowProjection = PERSP;
+		break;
+	case 'r':
+	case 'R':
+		Reset();
 		break;
 
 	//case 'q':
@@ -1411,7 +1415,10 @@ Reset( )
 	zFar = 1000.f;
 	increment = 0.1;
 	parity = 1;
-	TRI_X, TRI_Y = 0;
+	debug_var_x = 0.;
+	debug_var_y = 0.;
+	debug_var_z = 0.;
+	debug_var_mult = 1.;
 }
 
 
