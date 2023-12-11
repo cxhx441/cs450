@@ -910,31 +910,7 @@ InitGraphics()
 	Pattern.UnUse();
 
 
-	//WaterShader.Init();
-	////bool valid = Water.Create("terrain.vert", "terrain.frag");
-	//valid = WaterShader.Create("water.vert", "water.frag");
-	//if (!valid)
-	//	fprintf(stderr, "Could not create the Water shader!\n");
-	//else
-	//	fprintf(stderr, "Water shader created!\n");
-	//// set the uniform variables that will not change:
-	//WaterShader.Use();
-	//WaterShader.SetUniformVariable("uKambient", 0.1f);
-	//WaterShader.SetUniformVariable("uKdiffuse", 0.5f);
-	//WaterShader.SetUniformVariable("uKspecular", 0.4f);
-	//WaterShader.SetUniformVariable("uColor", 0.f, 0.f, 1.f); // blue
-	//WaterShader.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
-	//WaterShader.SetUniformVariable("uShininess", 12.f); // shine
-	//WaterShader.UnUse();
-
-
 	CustomWaterShaderProgram = glCreateProgram();
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.vert", "vertex");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.geom", "geometry");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.vert", "vertex");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.geom", "geometry");
-	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.vert", "vertex");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.geom", "geometry");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
