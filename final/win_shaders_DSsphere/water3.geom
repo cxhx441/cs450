@@ -20,22 +20,22 @@ const float PI = 3.14159265359;
 float tri_leg_len; 
 float tri_height; 
 
-float generateOffset(float x, float z)
-{
-	float waveLength = 8.f;
-	float waveAmplitude = 0.30f;
-	float radiansX = (x / waveLength + waveTime) * 2.0 * PI;
-	float radiansZ = (z / waveLength + waveTime) * 2.0 * PI;
-	return waveAmplitude * 0.5 * (sin(radiansZ) + cos(radiansX));
-}
+//float generateOffset(float x, float z)
+//{
+//	float waveLength = 8.f;
+//	float waveAmplitude = 0.30f;
+//	float radiansX = (x / waveLength + waveTime) * 2.0 * PI;
+//	float radiansZ = (z / waveLength + waveTime) * 2.0 * PI;
+//	return waveAmplitude * 0.5 * (sin(radiansZ) + cos(radiansX));
+//}
 
-vec3 applyDistortion(vec3 vertex)
-{
-	float xDistortion = generateOffset(vertex.x, vertex.z); 
-	float yDistortion = generateOffset(vertex.x, vertex.z); 
-	float zDistortion = generateOffset(vertex.x, vertex.z); 
-	return vertex + vec3(xDistortion, yDistortion, zDistortion);
-}
+//vec3 applyDistortion(vec3 vertex)
+//{
+//	float xDistortion = generateOffset(vertex.x, vertex.z); 
+//	float yDistortion = generateOffset(vertex.x, vertex.z); 
+//	float zDistortion = generateOffset(vertex.x, vertex.z); 
+//	return vertex + vec3(xDistortion, yDistortion, zDistortion);
+//}
 
 float generateOctaveOffset(float x, float z, float waveLength, float waveAmplitude)
 {
@@ -47,7 +47,7 @@ float generateOctaveOffset(float x, float z, float waveLength, float waveAmplitu
 vec3 applyOctaveDistortion(vec3 vertex)
 {
 	float waveLength = 8.f;
-	float waveAmplitude = 0.25f;
+	float waveAmplitude = 0.15f;
 	float totalx = generateOctaveOffset(vertex.x, vertex.z, waveLength, waveAmplitude);
     totalx += generateOctaveOffset(vertex.x, vertex.z, waveLength/2, waveAmplitude/3.f);
 	totalx += generateOctaveOffset(vertex.x, vertex.z, waveLength/4, waveAmplitude/6.f);
@@ -160,13 +160,13 @@ vec3 get_avg_normal(vec3 v0)
 	vec3 v5 = get_left(v0);
 	vec3 v6 = get_down_left(v0);
 
-	v0 = applyDistortion(v0);
-	v1 = applyDistortion(v1);
-	v2 = applyDistortion(v2);
-	v3 = applyDistortion(v3);
-	v4 = applyDistortion(v4);
-	v5 = applyDistortion(v5);
-	v6 = applyDistortion(v6);
+//	v0 = applyDistortion(v0);
+//	v1 = applyDistortion(v1);
+//	v2 = applyDistortion(v2);
+//	v3 = applyDistortion(v3);
+//	v4 = applyDistortion(v4);
+//	v5 = applyDistortion(v5);
+//	v6 = applyDistortion(v6);
 
 	v0 = applyOctaveDistortion(v0);
 	v1 = applyOctaveDistortion(v1);
@@ -217,9 +217,9 @@ main( )
 	vec3 v2Normal = get_avg_normal(v2);
 
 	// apply distortion
-	v0 = applyDistortion(v0);
-	v1 = applyDistortion(v1);
-	v2 = applyDistortion(v2);
+//	v0 = applyDistortion(v0);
+//	v1 = applyDistortion(v1);
+//	v2 = applyDistortion(v2);
 
 	v0 = applyOctaveDistortion(v0);
 	v1 = applyOctaveDistortion(v1);
