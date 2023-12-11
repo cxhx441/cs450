@@ -29,11 +29,6 @@ main( )
 	// determine the color using the square-boundary equations:
 
 	vec3 myColor = uColor;
-	if( pow( (s-uSc)/uRs , 2) + pow( (t-uTc)/uRt ,2) <= 1 ) // elipse equation.. is cur vertex within? 
-	{
-		//myColor = vec3( 1., 0., 1. );;
-	}
-
 	// apply the per-fragmewnt lighting to myColor:
 
 	vec3 Normal = normalize(gNormal);
@@ -52,6 +47,6 @@ main( )
 		ss = pow( max( dot(Eye,ref),0. ), uShininess );
 	}
 	vec3 specular = uKspecular * ss * uSpecularColor;
-	gl_FragColor = vec4( 1, 0, 0,  1. );
+	gl_FragColor = vec4( (ambient + diffuse + specular)*uAlpha,  1. );
 }
 

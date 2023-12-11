@@ -937,7 +937,7 @@ InitGraphics()
 	//read_compile_link_validate_shader(CustomWaterShaderProgram, "water2.frag", "fragment");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.vert", "vertex");
 	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.geom", "geometry");
-	read_compile_link_validate_shader(CustomWaterShaderProgram, "water3.frag", "fragment");
+	read_compile_link_validate_shader(CustomWaterShaderProgram, "water.frag", "fragment");
 	glUseProgram(CustomWaterShaderProgram);
 	set_uniform_variable(CustomWaterShaderProgram, "uKambient", 0.1f);
 	set_uniform_variable(CustomWaterShaderProgram, "uKdiffuse", 0.5f);
