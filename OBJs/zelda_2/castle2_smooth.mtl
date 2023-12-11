@@ -1,7 +1,7 @@
 # Blender 3.6.4 MTL File: 'Zelda_ALTTP.blend'
 # www.blender.org
 
-newmtl "Zelda"_text.002
+newmtl castle
 Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000

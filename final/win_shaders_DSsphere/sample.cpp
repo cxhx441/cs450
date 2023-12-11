@@ -199,7 +199,10 @@ int		TriforceRightList;
 int		ZeldaTextList;
 int		TheLegendOfTextList;
 int		LTTPTextList;
-int		SwordList;
+int		SwordBladeList;
+int		SwordCrestList;
+int		SwordHandleList;
+int		SwordHandleDetailList;
 int		MountainList;
 int		HillsList;
 int		CastleList;
@@ -429,7 +432,7 @@ Display()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	if (NowProjection == ORTHO)
-		glOrtho(-2.f, 2.f, -2.f, 2.f, 0.1f, 1000.f);
+		glOrtho(-8.f, 8.f, -4.5f, 4.5f, 0.1f, 1000.f);
 	else
 		//gluPerspective(70.f, 1.f, 0.1f, 1000.f);
 		gluPerspective(fovy, aspect, zNear, zFar);
@@ -520,10 +523,19 @@ Display()
 			glCallList(LTTPTextList);
 			glCallList(TheLegendOfTextList);
 
-			Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword 
 			glPushMatrix();
 				glTranslatef(0, sword_y.GetValue(AnimationCycleTime, true), 0);
-				glCallList(SwordList);
+				Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword Blade
+				Pattern.SetUniformVariable("uShininess", 128.f); // shine
+				glCallList(SwordBladeList);
+				Pattern.SetUniformVariable("uColor", 1.f, 0.7f, 0.f); // Sword Crest	
+				glCallList(SwordCrestList);
+				Pattern.SetUniformVariable("uShininess", 64.f); // shine
+				Pattern.SetUniformVariable("uColor", 0.18f, 0.2f, 0.5f); // Sword Handle 
+				glCallList(SwordHandleList);
+				Pattern.SetUniformVariable("uShininess", 32.f); // shine
+				Pattern.SetUniformVariable("uColor", .1f, 0.4f, 0.2f); // Sword Handle Detail
+				glCallList(SwordHandleDetailList);
 			glPopMatrix();
 		glPopMatrix();
 	}
@@ -535,8 +547,10 @@ Display()
 		Pattern.SetUniformVariable("uAlpha", scenary_alpha);
 		SkyShader.SetUniformVariable("uAlpha", scenary_alpha);
 
+		Pattern.SetUniformVariable("uShininess", 128.f); // shine
 		Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
 		glCallList(CastleList);
+		Pattern.SetUniformVariable("uShininess", 64.f); // shine
 
 		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
 		glPushMatrix();
@@ -944,23 +958,23 @@ InitGraphics()
 
 
 	triforce_start_float_in = 0.f;
-	//triforce_finish_float_in = 5.f; // TODO change back to 5
-	triforce_finish_float_in = 1.f;
+	triforce_finish_float_in = 5.f; // TODO change back to 5
+	//triforce_finish_float_in = 1.f;
 
 	triforce_start_rotation = 0.f;
-	//triforce_finish_rotation = 8.f;
-	triforce_finish_rotation = 2.f; // TODO change back to 8.f
+	triforce_finish_rotation = 8.f;
+	//triforce_finish_rotation = 2.f; // TODO change back to 8.f
 
 	text_start_fade_in = triforce_finish_rotation;
-	//text_finish_fade_in = text_start_fade_in + 1.5fj;
-	text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
+	text_finish_fade_in = text_start_fade_in + 1.5f;
+	//text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
 
 	sword_start_drop = text_finish_fade_in + 0.1f;
 	sword_finish_drop = sword_start_drop + 0.1f;
 
 	flashing_start = sword_finish_drop;
-	//flashing_stop = flashing_start + .5f; 
-	flashing_stop = flashing_start + .1f; // TODO change back to .5;
+	flashing_stop = flashing_start + .5f; 
+	//flashing_stop = flashing_start + .1f; // TODO change back to .5;
 
 	scenary_start_fade_in = flashing_stop;
 	scenary_finish_fade_in = scenary_start_fade_in + 0.5f;
@@ -994,7 +1008,8 @@ InitGraphics()
 
 	sword_y.AddTimeValue(0, 6.f);
 	sword_y.AddTimeValue(sword_start_drop, 6.f);
-	sword_y.AddTimeValue(sword_finish_drop, 0.f);
+	sword_y.AddTimeValue(sword_finish_drop, 0.f); // for hilt to sit nicely atop the Z
+	//sword_y.AddTimeValue(sword_finish_drop, -0.28f); // for hilt to sit nicely atop the Z
 
 	int flash_cycle_count = 4; 
 	float flash_cycle_period = (flashing_stop - flashing_start) / flash_cycle_count;
@@ -1076,7 +1091,7 @@ InitLists( )
 	// create the object:
 	TriforcePieceList = glGenLists( 1 );
 	glNewList( TriforcePieceList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda_2//triforce_piece.obj");
+		LoadObjFile("..//..//OBJs//zelda_2//triforce_piece_beveled.obj");
 	glEndList( );
 
 	ZeldaTextList = glGenLists( 1 );
@@ -1094,9 +1109,21 @@ InitLists( )
 		LoadObjFile("..//..//OBJs//zelda_2//lttp_text.obj");
 	glEndList( );
 
-	SwordList = glGenLists( 1 );
-	glNewList( SwordList, GL_COMPILE );
-		LoadObjFile("..//..//OBJs//zelda_2//sword.obj");
+	SwordBladeList = glGenLists( 1 );
+	glNewList( SwordBladeList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda_2//sword_blade.obj");
+	glEndList( );
+	SwordCrestList = glGenLists( 1 );
+	glNewList( SwordCrestList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda_2//sword_crest.obj");
+	glEndList( );
+	SwordHandleList = glGenLists( 1 );
+	glNewList( SwordHandleList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda_2//sword_handle.obj");
+	glEndList( );
+	SwordHandleDetailList = glGenLists( 1 );
+	glNewList( SwordHandleDetailList, GL_COMPILE );
+		LoadObjFile("..//..//OBJs//zelda_2//sword_handle_detail.obj");
 	glEndList( );
 
 	MountainList = glGenLists( 1 );
@@ -1119,6 +1146,7 @@ InitLists( )
 	glNewList( CastleList, GL_COMPILE );
 		glPushMatrix();
 			LoadObjFile("..//..//OBJs//zelda_2//castle2.obj");
+			//LoadObjFile("..//..//OBJs//zelda_2//castle2_smooth.obj");
 		glPopMatrix();
 	glEndList( );
 
