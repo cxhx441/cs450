@@ -1050,7 +1050,7 @@ InitGraphics()
 	scenary_finish_fade_in = scenary_start_fade_in + 0.5f;
 
 	start_sword_shine = scenary_finish_fade_in;
-	finish_sword_shine = start_sword_shine + 0.6f;
+	finish_sword_shine = start_sword_shine + 0.75f;
 
 	sword_shine_y.Init();
 
@@ -1505,7 +1505,7 @@ void
 Reset( )
 {
 	ActiveButton = 0;
-	AxesOn = 1;
+	AxesOn = 0;
 	DebugOn = 0;
 	Freeze = false;
 	Scale  = 1.0;
