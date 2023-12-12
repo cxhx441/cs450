@@ -194,6 +194,7 @@ float debug_var_x;
 float debug_var_y;
 float debug_var_z;
 float debug_var_mult;
+int	  terrain_vertex_count = 32;
 
 
 int		TriforcePieceList;
@@ -331,6 +332,7 @@ Keytimes triforce_y_rotation;
 Keytimes triforce_x_rotation;
 Keytimes text_fade_in_alpha, text_fade_in_z;
 Keytimes sword_y;
+Keytimes sword_shine_y;
 Keytimes scenary_fade_in_alpha;
 Keytimes rgb_filter_r;
 Keytimes rgb_filter_g;
@@ -533,7 +535,7 @@ Display()
 
 			Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Sparkle
 			Pattern.SetUniformVariable("uShininess", 128); // Sparkle
-			float sparkle_amp = 0.3 * sparkle_size.GetValue(AnimationCycleTime);
+			float sparkle_amp = 0.4 * sparkle_size.GetValue(AnimationCycleTime);
 			sparkle_num_for_animation = (int)(AnimationCycleTime / (float)sparkle_sub_sequence_length) % sparkle_count;
 			glPushMatrix();
 			switch (sparkle_num_for_animation)
@@ -562,6 +564,10 @@ Display()
 			glPopMatrix();
 
 			glPushMatrix();
+				
+				Pattern.SetUniformVariable("SwordLightPosition", -4.7, sword_shine_y.GetValue(AnimationCycleTime), 1.6);
+				Pattern.SetUniformVariable("uSwordBool", true);
+				//Pattern.SetUniformVariable("LightPosition", 0., 5., 5.);
 				glTranslatef(0, sword_y.GetValue(AnimationCycleTime, true), 0);
 				Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword Blade
 				Pattern.SetUniformVariable("uShininess", 128.f); // shine
@@ -574,6 +580,7 @@ Display()
 				Pattern.SetUniformVariable("uShininess", 32.f); // shine
 				Pattern.SetUniformVariable("uColor", .1f, 0.4f, 0.2f); // Sword Handle Detail
 				glCallList(SwordHandleDetailList);
+				Pattern.SetUniformVariable("uSwordBool", false);
 			glPopMatrix();
 		glPopMatrix();
 	}
@@ -596,7 +603,9 @@ Display()
 
 		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
 		//glPushMatrix();
+		//	glScalef(0.25, 0.25, 0.25);
 		//	glTranslatef(debug_var_x, debug_var_y, debug_var_z);
+		//	//glTranslatef(-4.7, sword_shine_y.GetValue(AnimationCycleTime), 1.6);
 		//	glCallList(debugVarList);
 		//glPopMatrix();
 		Pattern.Use();
@@ -616,7 +625,10 @@ Display()
 		glActiveTexture(GL_TEXTURE5); // use texture unit #5
 		glBindTexture(GL_TEXTURE_2D, SkyTextureList);
 		SkyCastleShader.SetUniformVariable("uTexUnit", 5);
+		glPushMatrix();
+			glTranslatef(Time*80, 0, 0);
 			glCallList(SkyList);
+		glPopMatrix();
 		SkyCastleShader.UnUse();
 
 
@@ -636,9 +648,9 @@ Display()
 	// a good use for thefirst one might be to have your name on the screen
 	// a good use for the second one might be to have vertex numbers on the screen alongside each vertex
 
-	glDisable( GL_DEPTH_TEST );
-	glColor3f( 0.f, 1.f, 1.f );
-	DoRasterString( 0.f, 1.f, 0.f, (char *)"Text That Moves" );
+	//glDisable( GL_DEPTH_TEST );
+	//glColor3f( 0.f, 1.f, 1.f );
+	//DoRasterString( 0.f, 1.f, 0.f, (char *)"Text That Moves" );
 
 
 	// draw some gratuitous text that is fixed on the screen:
@@ -651,24 +663,24 @@ Display()
 	// the modelview matrix is reset to identity as we don't
 	// want to transform these coordinates
 
-	glDisable( GL_DEPTH_TEST );
-	glMatrixMode( GL_PROJECTION ); 
-	glLoadIdentity( );
-	gluOrtho2D( 0.f, 100.f,     0.f, 100.f );
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
-	glColor3f( 1.f, 1.f, 1.f );
-	cur_time = glutGet(GLUT_ELAPSED_TIME);
-	float fps = 1 / (float)((cur_time - last_time) / (float)1000);
-	last_time = cur_time;
-	fps_buff[fps_i] = fps; 
-	fps_sum += fps_buff[fps_i];
-	fps_i += 1;
-	fps_i %= 60; 
-	fps_sum -= fps_buff[fps_i];
-	char fps_str[25];
-	sprintf(fps_str, "fps: %d", (int) (fps_sum/60.f));
-	DoRasterString( 50.f, 50.f, 0.f, fps_str );
+	//glDisable( GL_DEPTH_TEST );
+	//glMatrixMode( GL_PROJECTION ); 
+	//glLoadIdentity( );
+	//gluOrtho2D( 0.f, 100.f,     0.f, 100.f );
+	//glMatrixMode( GL_MODELVIEW );
+	//glLoadIdentity( );
+	//glColor3f( 1.f, 1.f, 1.f );
+	//cur_time = glutGet(GLUT_ELAPSED_TIME);
+	//float fps = 1 / (float)((cur_time - last_time) / (float)1000);
+	//last_time = cur_time;
+	//fps_buff[fps_i] = fps; 
+	//fps_sum += fps_buff[fps_i];
+	//fps_i += 1;
+	//fps_i %= 60; 
+	//fps_sum -= fps_buff[fps_i];
+	//char fps_str[25];
+	//sprintf(fps_str, "fps: %d", (int) (fps_sum/60.f));
+	//DoRasterString( 50.f, 50.f, 0.f, fps_str );
 
 	// swap the double-buffered framebuffers:
 	glutSwapBuffers( );
@@ -959,8 +971,10 @@ InitGraphics()
 	// set the uniform variables that will not change:
 	Pattern.Use();
 	Pattern.SetUniformVariable("uKambient", 0.1f);
-	Pattern.SetUniformVariable("uKdiffuse", 0.5f);
-	Pattern.SetUniformVariable("uKspecular", 0.4f);
+	//Pattern.SetUniformVariable("uKdiffuse", 0.5f);
+	//Pattern.SetUniformVariable("uKspecular", 0.4f);
+	Pattern.SetUniformVariable("uKdiffuse", 0.7f);
+	Pattern.SetUniformVariable("uKspecular", 0.2f);
 	Pattern.SetUniformVariable("uSpecularColor", 1.f, 1.f, 1.f); // white
 	Pattern.SetUniformVariable("uShininess", 12.f); // shine
 	Pattern.SetUniformVariable("uAlpha", 0.f);
@@ -1014,30 +1028,37 @@ InitGraphics()
 
 
 	triforce_start_float_in = 0.f;
-	//triforce_finish_float_in = 5.f; // TODO change back to 5
-	triforce_finish_float_in = 1.f;
+	triforce_finish_float_in = 5.f; // TODO change back to 5
+	//triforce_finish_float_in = 1.f;
 
 	triforce_start_rotation = 0.f;
-	//triforce_finish_rotation = 8.f;
-	triforce_finish_rotation = 2.f; // TODO change back to 8.f
+	triforce_finish_rotation = 8.f;
+	//triforce_finish_rotation = 2.f; // TODO change back to 8.f
 
 	text_start_fade_in = triforce_finish_rotation;
-	//text_finish_fade_in = text_start_fade_in + 1.5f;
-	text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
+	text_finish_fade_in = text_start_fade_in + 1.5f;
+	//text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
 
 	sword_start_drop = text_finish_fade_in + 0.1f;
 	sword_finish_drop = sword_start_drop + 0.1f;
 
 	flashing_start = sword_finish_drop;
-	//jflashing_stop = flashing_start + .5f; 
-	flashing_stop = flashing_start + .1f; // TODO change back to .5;
+	flashing_stop = flashing_start + .5f; 
+	//flashing_stop = flashing_start + .1f; // TODO change back to .5;
 
 	scenary_start_fade_in = flashing_stop;
 	scenary_finish_fade_in = scenary_start_fade_in + 0.5f;
 
 	start_sword_shine = scenary_finish_fade_in;
-	finish_sword_shine = start_sword_shine + 0.75f;
+	finish_sword_shine = start_sword_shine + 0.6f;
 
+	sword_shine_y.Init();
+
+	sword_shine_y.AddTimeValue(0, 13.f);
+	sword_shine_y.AddTimeValue(start_sword_shine-0.01, 13);
+	sword_shine_y.AddTimeValue(start_sword_shine, 13);
+	sword_shine_y.AddTimeValue(finish_sword_shine, -9);
+	sword_shine_y.AddTimeValue(finish_sword_shine+0.01, -9);
 
 
 	triforce_magnitude.AddTimeValue(0, 15.f);
@@ -1209,7 +1230,7 @@ InitLists( )
 			glRotatef(30, 1, 0, 0);
 			glScalef(40, 20, 3);
 			glTranslatef(-side_length/2, -3, -side_length/2);
-			cjh_terrain(side_length, 32);
+			cjh_terrain(side_length, terrain_vertex_count);
 		glPopMatrix();
 	glEndList( );
 
@@ -1249,7 +1270,7 @@ InitLists( )
 			glScalef(5, 1.5, 5);
 			glRotatef(-20, 0, 1, 0);
 			glTranslatef(-side_length/2, -2, -side_length*0.9);
-			cjh_terrain(side_length, 32);
+			cjh_terrain(side_length, terrain_vertex_count);
 		glPopMatrix();
 	glEndList( );
 

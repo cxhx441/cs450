@@ -6,11 +6,14 @@
 out  vec3  vNormal;	  // normal vector
 out  vec3  vPointToLight;	  // vector from point to light
 out  vec3  vPointToEye;	  // vector from point to eye
+out  vec3  vSwordPointToLight;	  // vector from point to light
+out  vec3  vSwordPointToEye;	  // vector from point to eye
 out  vec2  vST;	  // (s,t) texture coordinates
 
 // where the light is:
 
 uniform vec3 LightPosition;
+uniform vec3 SwordLightPosition;
 
 void
 main( )
@@ -18,9 +21,9 @@ main( )
 	vST = gl_MultiTexCoord0.st;
 	vec4 ECposition = gl_ModelViewMatrix * gl_Vertex;
 	vNormal = normalize( gl_NormalMatrix * gl_Normal );  // normal vector
-	vPointToLight = LightPosition - ECposition.xyz;	    // vector from the point
-							// to the light position
-	vPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point
-							// to the eye position
+	vPointToLight = LightPosition - ECposition.xyz;	    // vector from the point to the light position
+	vPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point to the eye position
+	vSwordPointToLight = SwordLightPosition - ECposition.xyz;	    // vector from the point to the light position
+	vSwordPointToEye = vec3( 0., 0., 0. ) - ECposition.xyz;       // vector from the point to the eye position
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }
