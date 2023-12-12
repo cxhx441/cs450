@@ -194,7 +194,7 @@ float debug_var_x;
 float debug_var_y;
 float debug_var_z;
 float debug_var_mult;
-int	  terrain_vertex_count = 32;
+int	  terrain_vertex_count = 128;
 
 
 int		TriforcePieceList;
