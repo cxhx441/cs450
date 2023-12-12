@@ -1,0 +1,3 @@
+
+0(21) : error C1503: undefined variable "uLightPosition"
+
