@@ -156,7 +156,7 @@ bool	UseAnimation;			// use animation bool
 bool	UseKeytime;			// use keytime bool
 float	Scale;					// scaling factor
 float	Time;					// used for animation, this has a value between 0. and 1.
-float	AnimationCycleTime;	    // used for animation, this has a value between 0. and 1.
+float	AnimationCycleTime;	    
 int		Xmouse, Ymouse;			// mouse values
 float	Xrot, Yrot;				// rotation angles in degrees
 GLdouble fovy, aspect, zNear, zFar; // for perspective
@@ -184,8 +184,12 @@ float scenary_finish_fade_in ;
 float start_sword_shine ;
 float finish_sword_shine ;
 float start_sparkling;
-float sparkle_length ;
-float z_sparkle;
+//float sparkle_length ;
+int	  sparkle_count;
+int   sparkle_sequence_count;
+float sparkle_sequence_length;
+float sparkle_sub_sequence_length;
+int   sparkle_num_for_animation;
 float debug_var_x;
 float debug_var_y;
 float debug_var_z;
@@ -209,6 +213,7 @@ int		CastleList;
 int		SkyList;
 int		WaterList;
 int		TerrainList;
+int		SparkleList;
 int		debugVarList;
 int		cur_time = 0;
 int		last_time = 0;
@@ -316,9 +321,11 @@ MulArray3(float factor, float a, float b, float c )
 float NowS_center, NowT_center, NowRadius_s, NowRadius_t; // elipse center and radius
 GLSLProgram Pattern;
 GLSLProgram WaterShader;
-GLSLProgram SkyShader;
+GLSLProgram SkyCastleShader;
 unsigned char* SkyTexture;
 GLuint		  SkyTextureList;
+unsigned char* CastleTexture;
+GLuint		  CastleTextureList;
 Keytimes triforce_magnitude;
 Keytimes triforce_y_rotation;
 Keytimes triforce_x_rotation;
@@ -329,6 +336,7 @@ Keytimes rgb_filter_r;
 Keytimes rgb_filter_g;
 Keytimes rgb_filter_b;
 Keytimes rgb_filter_a;
+Keytimes sparkle_size;
 
 GLuint CustomWaterShaderProgram;
 
@@ -523,6 +531,36 @@ Display()
 			glCallList(LTTPTextList);
 			glCallList(TheLegendOfTextList);
 
+			Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Sparkle
+			Pattern.SetUniformVariable("uShininess", 128); // Sparkle
+			float sparkle_amp = 0.3 * sparkle_size.GetValue(AnimationCycleTime);
+			sparkle_num_for_animation = (int)(AnimationCycleTime / (float)sparkle_sub_sequence_length) % sparkle_count;
+			glPushMatrix();
+			switch (sparkle_num_for_animation)
+			{
+				case 0:
+					//Pattern.SetUniformVariable("uLightPosition", 2.68f, -0.66f, 0.5f);
+					glTranslatef(2.68f, -0.66f, 0.4f); //A
+					break;
+				case 1:
+					//Pattern.SetUniformVariable("uLightPosition", 1.12f, 0.85f, 0.5f);
+					glTranslatef(1.12f, 0.85f, 0.4f); //D
+					break;
+				case 2:
+					//Pattern.SetUniformVariable("uLightPosition", -0.56f, 0.69f, 0.5f);
+					glTranslatef(-0.56f, -0.69f, 0.4f); //E
+					break;
+				case 3:
+					//Pattern.SetUniformVariable("uLightPosition", -3.26f, 0.55f, 0.5f);
+					glTranslatef(-3.26f, 0.55f, 0.4f); //Z
+					break;
+			}
+				//glScalef(0.25f, 0.25f, 0.25f);
+				glScalef(sparkle_amp, sparkle_amp, sparkle_amp);
+				glRotatef(360 * Time * 25, 0, 0, 1);
+				glCallList(SparkleList);
+			glPopMatrix();
+
 			glPushMatrix();
 				glTranslatef(0, sword_y.GetValue(AnimationCycleTime, true), 0);
 				Pattern.SetUniformVariable("uColor", 0.5f, 0.5f, 0.5f); // Sword Blade
@@ -545,18 +583,23 @@ Display()
 		glPushMatrix();
 		float scenary_alpha = scenary_fade_in_alpha.GetValue(AnimationCycleTime, true);
 		Pattern.SetUniformVariable("uAlpha", scenary_alpha);
-		SkyShader.SetUniformVariable("uAlpha", scenary_alpha);
+		SkyCastleShader.SetUniformVariable("uAlpha", scenary_alpha);
 
-		Pattern.SetUniformVariable("uShininess", 128.f); // shine
-		Pattern.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
+		SkyCastleShader.Use();
+		SkyCastleShader.SetUniformVariable("uColor", 0.25f, 0.1f, 0.f); // Castle
+		SkyCastleShader.SetUniformVariable("uSpecularColor", 0.25f, 0.1f, 0.f); // Castle
+		glActiveTexture(GL_TEXTURE5); // use texture unit #5
+		glBindTexture(GL_TEXTURE_2D, CastleTextureList);
+		//SkyCastleShader.SetUniformVariable("uTexUnit", 5);
 		glCallList(CastleList);
-		Pattern.SetUniformVariable("uShininess", 64.f); // shine
+		SkyCastleShader.UnUse();
 
 		//Pattern.SetUniformVariable("LightPosition", 0., 15., -100.);
-		glPushMatrix();
-			glTranslatef(debug_var_x, debug_var_y, debug_var_z);
-			glCallList(debugVarList);
-		glPopMatrix();
+		//glPushMatrix();
+		//	glTranslatef(debug_var_x, debug_var_y, debug_var_z);
+		//	glCallList(debugVarList);
+		//glPopMatrix();
+		Pattern.Use();
 		Pattern.SetUniformVariable("LightPosition", -244, 207, -39);
 		Pattern.SetUniformVariable("uColor", 1.f, 1.f, 1.f); // Mountain
 		glCallList(MountainList);
@@ -567,12 +610,14 @@ Display()
 
 		Pattern.UnUse( );       // Pattern.Use(0);  also works
 
-		SkyShader.Use();
+		SkyCastleShader.Use();
+		SkyCastleShader.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
+		SkyCastleShader.SetUniformVariable("uSpecularColor", 0.5f, 0.5f, 1.f); // Blue
 		glActiveTexture(GL_TEXTURE5); // use texture unit #5
 		glBindTexture(GL_TEXTURE_2D, SkyTextureList);
-		SkyShader.SetUniformVariable("uTexUnit", 5);
+		SkyCastleShader.SetUniformVariable("uTexUnit", 5);
 			glCallList(SkyList);
-		SkyShader.UnUse();
+		SkyCastleShader.UnUse();
 
 
 		glUseProgram(CustomWaterShaderProgram);
@@ -890,20 +935,19 @@ InitGraphics()
 
 
 	// all other setups go here, such as GLSLProgram and KeyTime setups:
-	SkyShader.Init();
-	bool valid = SkyShader.Create("sky.vert", "sky.frag");
+	SkyCastleShader.Init();
+	bool valid = SkyCastleShader.Create("sky_castle.vert", "sky_castle.frag");
 	if (!valid)
 		fprintf(stderr, "Could not create the Sky shader!\n");
 	else
 		fprintf(stderr, "Sky shader created!\n");
-	SkyShader.Use();
-	SkyShader.SetUniformVariable("uKambient", 0.1f);
-	SkyShader.SetUniformVariable("uKdiffuse", 0.5f);
-	SkyShader.SetUniformVariable("uKspecular", 0.4f);
-	SkyShader.SetUniformVariable("uColor", 0.5f, 0.5f, 1.f); //  Sky
-	SkyShader.SetUniformVariable("uSpecularColor", 0.5f, 0.5f, 1.f); // white
-	SkyShader.SetUniformVariable("uShininess", 1.f); // shine
-	SkyShader.UnUse();
+	SkyCastleShader.Use();
+	SkyCastleShader.SetUniformVariable("uKambient", 0.1f);
+	SkyCastleShader.SetUniformVariable("uKdiffuse", 0.5f);
+	SkyCastleShader.SetUniformVariable("uKspecular", 0.4f);
+	SkyCastleShader.SetUniformVariable("uShininess", 1.f); // shine
+	SkyCastleShader.SetUniformVariable("uLightPosition", 0.f, 8.f, -6.f);
+	SkyCastleShader.UnUse();
 
 
 	Pattern.Init();
@@ -952,29 +996,41 @@ InitGraphics()
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//glTexImage2D( GL_TEXTURE_2D, 0, 3, num_s, num_t, 0, 3, GL_RGB, GL_UNSIGNED_BYTE, SkyTexture );
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, num_s, num_t, 0, GL_RGB, GL_UNSIGNED_BYTE, SkyTexture);
+
+	glGenTextures(1, &CastleTextureList);
+	num_s, num_t;
+	CastleTexture = BmpToTexture("..//..//Textures//castle_brick.bmp", &num_s, &num_t);
+	if (CastleTexture == NULL) {
+		fprintf(stderr, "cannot open castle texture");
+	}
+	glBindTexture(GL_TEXTURE_2D, CastleTextureList);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, num_s, num_t, 0, GL_RGB, GL_UNSIGNED_BYTE, CastleTexture);
 
 
 
 	triforce_start_float_in = 0.f;
-	triforce_finish_float_in = 5.f; // TODO change back to 5
-	//triforce_finish_float_in = 1.f;
+	//triforce_finish_float_in = 5.f; // TODO change back to 5
+	triforce_finish_float_in = 1.f;
 
 	triforce_start_rotation = 0.f;
-	triforce_finish_rotation = 8.f;
-	//triforce_finish_rotation = 2.f; // TODO change back to 8.f
+	//triforce_finish_rotation = 8.f;
+	triforce_finish_rotation = 2.f; // TODO change back to 8.f
 
 	text_start_fade_in = triforce_finish_rotation;
-	text_finish_fade_in = text_start_fade_in + 1.5f;
-	//text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
+	//text_finish_fade_in = text_start_fade_in + 1.5f;
+	text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
 
 	sword_start_drop = text_finish_fade_in + 0.1f;
 	sword_finish_drop = sword_start_drop + 0.1f;
 
 	flashing_start = sword_finish_drop;
-	flashing_stop = flashing_start + .5f; 
-	//flashing_stop = flashing_start + .1f; // TODO change back to .5;
+	//jflashing_stop = flashing_start + .5f; 
+	flashing_stop = flashing_start + .1f; // TODO change back to .5;
 
 	scenary_start_fade_in = flashing_stop;
 	scenary_finish_fade_in = scenary_start_fade_in + 0.5f;
@@ -982,9 +1038,7 @@ InitGraphics()
 	start_sword_shine = scenary_finish_fade_in;
 	finish_sword_shine = start_sword_shine + 0.75f;
 
-	start_sparkling;
-	sparkle_length = 0.5f;
-	z_sparkle;
+
 
 	triforce_magnitude.AddTimeValue(0, 15.f);
 	triforce_magnitude.AddTimeValue(triforce_start_float_in, 15.f);
@@ -1010,6 +1064,23 @@ InitGraphics()
 	sword_y.AddTimeValue(sword_start_drop, 6.f);
 	sword_y.AddTimeValue(sword_finish_drop, 0.f); // for hilt to sit nicely atop the Z
 	//sword_y.AddTimeValue(sword_finish_drop, -0.28f); // for hilt to sit nicely atop the Z
+
+	start_sparkling = triforce_finish_rotation;
+	sparkle_count = 4; 
+	sparkle_sequence_count = 6;
+	sparkle_sequence_length = ((MS_PER_CYCLE/1000) - start_sparkling) / (float)sparkle_sequence_count; // (20 - 8)/6 = 12 / 6 = 2
+	sparkle_sub_sequence_length = sparkle_sequence_length/(float)sparkle_count; // 2 / 4 = 0.5
+	sparkle_size.Init();
+	float this_time = 0.f;
+	while (this_time <= MS_PER_CYCLE / 1000.f)
+	{
+		sparkle_size.AddTimeValue(this_time, 0);
+		sparkle_size.AddTimeValue(this_time + sparkle_sub_sequence_length/(float)2.f, 1);
+		sparkle_size.AddTimeValue(this_time + sparkle_sub_sequence_length, 0);
+		this_time += sparkle_sub_sequence_length;
+	}
+	
+
 
 	int flash_cycle_count = 4; 
 	float flash_cycle_period = (flashing_stop - flashing_start) / flash_cycle_count;
@@ -1145,7 +1216,8 @@ InitLists( )
 	CastleList = glGenLists( 1 );
 	glNewList( CastleList, GL_COMPILE );
 		glPushMatrix();
-			LoadObjFile("..//..//OBJs//zelda_2//castle2.obj");
+			glTranslatef(1.5f, 0, 0);
+			LoadObjFile("..//..//OBJs//zelda_2//castle3.obj");
 			//LoadObjFile("..//..//OBJs//zelda_2//castle2_smooth.obj");
 		glPopMatrix();
 	glEndList( );
@@ -1178,6 +1250,14 @@ InitLists( )
 			glRotatef(-20, 0, 1, 0);
 			glTranslatef(-side_length/2, -2, -side_length*0.9);
 			cjh_terrain(side_length, 32);
+		glPopMatrix();
+	glEndList( );
+
+	SparkleList = glGenLists( 1 );
+	glNewList( SparkleList, GL_COMPILE );
+		glPushMatrix();
+			LoadObjFile("..//..//OBJs//zelda_2//sparkle.obj");
+			//LoadObjFile("..//..//OBJs//zelda_2//triforce_piece_beveled.obj");
 		glPopMatrix();
 	glEndList( );
 
