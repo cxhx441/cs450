@@ -1035,7 +1035,7 @@ InitGraphics()
 	triforce_finish_rotation = 8.f;
 	//triforce_finish_rotation = 2.f; // TODO change back to 8.f
 
-	text_start_fade_in = triforce_finish_rotation;
+	text_start_fade_in = triforce_finish_rotation + 1.f;
 	text_finish_fade_in = text_start_fade_in + 1.5f;
 	//text_finish_fade_in = text_start_fade_in + .5f; // TODO change back to 1.5
 
