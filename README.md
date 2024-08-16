@@ -5,6 +5,8 @@ This is my working repo used throughout my CS450 term. The class mainly taught t
 ## [Final Project](https://github.com/cxhx441/cs450/tree/main/final_turn_in)
 My final project was a recreation of the opening title of the 1991 video game *The Legend of Zelda: A Link to the Past*. The main folder can be found [here](https://github.com/cxhx441/cs450/tree/main/final_turn_in)
 
+<a href="https://www.youtube.com/watch?v=-wlZx1zSGcs"><img src="zelda_alttp.gif" height="200"></a>
+
 The project is primarly written in C++ and OpenGL and utilizes template files written by the professor.
 
 - The triforce pieces, text, sky, and sparkles are all modeled from scratch in Blender.
